@@ -9,8 +9,9 @@ shipcheck audit .
 shipcheck diff .
 shipcheck task <task-file>
 
-Current status: bootstrap / pre-alpha. Only a target/readiness smoke-test CLI
-exists. These workflows and AI review are not implemented yet.
+Current status: pre-alpha, with P1 repository inspection available as a local
+TypeScript/JavaScript API. The CLI still prints its target/readiness smoke test.
+These command workflows, findings, and AI review are not implemented yet.
 
 ## Core promise
 

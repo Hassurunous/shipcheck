@@ -3,3 +3,5 @@ export function formatStatus(args: readonly string[] = []): string {
   const target = args[0] ?? ".";
   return `Shipcheck v0.1\n\nTarget: ${target}\nStatus: ready`;
 }
+export { inspectRepository, MAX_FILE_BYTES } from "./inspect-repository.js";
+export { repositoryProfileSchema, type RepositoryProfile } from "./repository-profile.js";

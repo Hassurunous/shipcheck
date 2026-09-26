@@ -1,8 +1,9 @@
 # Shipcheck
 
 Shipcheck is an independent review layer for AI-assisted software development.
-Current status: **bootstrap / pre-alpha**. The CLI prints a target and readiness
-message only. Repository analysis and AI review are planned but not implemented.
+Current status: **pre-alpha / P1 repository inspection**. The CLI prints a target
+and readiness message. Repository facts are available through the inspection
+API; findings, command workflows, and AI review are not implemented yet.
 
 ## Local development
 
@@ -33,3 +34,22 @@ and is private to prevent accidental publication.
 
 See [product scope](docs/PRODUCT.md), [architecture](docs/ARCHITECTURE.md),
 [decisions](docs/DECISIONS.md), and [backlog](tasks/backlog.md).
+
+## Inspect a repository (API)
+
+After `npm run build`, import the inspector from JavaScript:
+
+```js
+import { inspectRepository } from "./dist/src/index.js";
+
+const profile = await inspectRepository(".");
+console.log(JSON.stringify(profile, null, 2));
+```
+
+The validated profile includes files, languages, manifests, README/test
+indicators, package scripts, TODO/FIXME locations, and inspection warnings.
+Inspection is read-only and never executes package scripts. It skips `.git`,
+`node_modules`, and symlinks, and reads at most 1 MiB per file. Binary or non-UTF-8
+content is skipped. `.gitignore` and build-output exclusions are not supported
+yet. Detection is heuristic; marker matches and test indicators are facts, not
+quality findings. See the architecture document for boundaries and limitations.

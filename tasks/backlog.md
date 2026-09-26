@@ -8,16 +8,16 @@
 - [x] Documentation
 
 ## P1 — Repository inspection
-- [ ] Recursive file enumeration
-- [ ] Ignore `.git`
-- [ ] Ignore `node_modules`
-- [ ] Classify files/languages
-- [ ] Detect manifests
-- [ ] Detect README
-- [ ] Detect tests
-- [ ] Inspect package scripts
-- [ ] Scan TODO/FIXME
-- [ ] Produce structured repository profile
+- [x] Recursive file enumeration
+- [x] Ignore `.git`
+- [x] Ignore `node_modules`
+- [x] Classify files/languages
+- [x] Detect manifests
+- [x] Detect README
+- [x] Detect tests
+- [x] Inspect package scripts
+- [x] Scan TODO/FIXME
+- [x] Produce structured repository profile
 
 ## P2 — Findings
 - [ ] Define Finding schema
