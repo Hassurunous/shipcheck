@@ -20,10 +20,10 @@
 - [x] Produce structured repository profile
 
 ## P2 — Findings
-- [ ] Define Finding schema
-- [ ] Support deterministic findings
-- [ ] Console renderer
-- [ ] JSON renderer
+- [x] Define Finding schema
+- [x] Support deterministic findings
+- [x] Console renderer
+- [x] JSON renderer
 
 ## P3 — AI review
 - [ ] API client

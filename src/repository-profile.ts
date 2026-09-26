@@ -2,6 +2,12 @@ import { z } from "zod";
 
 const relativePath = z.string().min(1);
 
+export const packageIssueSchema = z.object({
+  path: relativePath,
+  code: z.enum(["invalid-json", "invalid-package", "invalid-scripts"]),
+  observation: z.string().min(1),
+});
+
 export const repositoryProfileSchema = z.object({
   root: z.string().min(1),
   files: z.array(z.object({
@@ -16,6 +22,8 @@ export const repositoryProfileSchema = z.object({
     path: relativePath,
     scripts: z.record(z.string(), z.string()),
   })),
+  // Default keeps profiles produced before P2 readable, without inferring missing diagnostics.
+  packageIssues: z.array(packageIssueSchema).default([]),
   markers: z.array(z.object({
     path: relativePath,
     line: z.number().int().positive(),

@@ -1,9 +1,10 @@
 # Shipcheck
 
 Shipcheck is an independent review layer for AI-assisted software development.
-Current status: **pre-alpha / P1 repository inspection**. The CLI prints a target
-and readiness message. Repository facts are available through the inspection
-API; findings, command workflows, and AI review are not implemented yet.
+Current status: **pre-alpha / P2 deterministic findings**. Repository inspection,
+three package-manifest rules, and console/JSON reports are available through the
+API. The CLI still prints a readiness message. Command workflows and AI review
+are not implemented yet.
 
 ## Local development
 
@@ -53,3 +54,22 @@ Inspection is read-only and never executes package scripts. It skips `.git`,
 content is skipped. `.gitignore` and build-output exclusions are not supported
 yet. Detection is heuristic; marker matches and test indicators are facts, not
 quality findings. See the architecture document for boundaries and limitations.
+
+## Generate a report (API)
+
+After building, run this from the repository root (PowerShell or a typical shell):
+
+```sh
+node --input-type=module -e "import { inspectRepository, createReport, renderConsoleReport } from './dist/src/index.js'; console.log(renderConsoleReport(createReport(await inspectRepository('.'))));"
+```
+
+For JSON output, replace both occurrences of `renderConsoleReport` with
+`renderJsonReport`. These functions return strings; callers choose where to
+print or save them. No files are written by the report functions.
+
+P2 checks invalid package JSON, non-object manifests, and invalid `scripts`
+structures. Findings include rule IDs, severity, explanation, file-level
+evidence, and suggested actions. Inspection warnings are listed separately.
+Zero findings means these limited checks found nothing; it is not a general
+quality assessment. Missing README/tests and TODO/FIXME matches do not produce
+findings. See [the rule catalog](docs/RULES.md) for exact triggers and limitations.

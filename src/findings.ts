@@ -1,0 +1,69 @@
+import { z } from "zod";
+import { repositoryProfileSchema, type RepositoryProfile } from "./repository-profile.js";
+
+export const findingSchema = z.object({
+  id: z.string().min(1),
+  ruleId: z.string().min(1),
+  severity: z.enum(["error", "warning", "info"]),
+  title: z.string().min(1),
+  explanation: z.string().min(1),
+  evidence: z.array(z.object({
+    path: z.string().min(1),
+    observation: z.string().min(1),
+  })).min(1),
+  suggestedAction: z.string().min(1),
+});
+export type Finding = z.infer<typeof findingSchema>;
+
+export const reportSchema = z.object({
+  schemaVersion: z.literal(1),
+  root: z.string().min(1),
+  findings: z.array(findingSchema),
+  inspectionWarnings: repositoryProfileSchema.shape.warnings,
+});
+export type Report = z.infer<typeof reportSchema>;
+
+const rules = {
+  "invalid-json": {
+    ruleId: "package/invalid-json",
+    title: "Package manifest is not valid JSON",
+    explanation: "Tools that consume package.json cannot parse this manifest as JSON.",
+    suggestedAction: "Correct the JSON syntax in this package.json file.",
+  },
+  "invalid-package": {
+    ruleId: "package/invalid-object",
+    title: "Package manifest is not an object",
+    explanation: "A package manifest must contain a JSON object; an array, primitive, or null cannot describe its fields.",
+    suggestedAction: "Replace the top-level value with a JSON object containing the intended package fields.",
+  },
+  "invalid-scripts": {
+    ruleId: "package/invalid-scripts",
+    title: "Package scripts have an invalid structure",
+    explanation: "The scripts field must map script names to command strings when present.",
+    suggestedAction: "Use an object with string command values, or omit scripts if none are needed.",
+  },
+} satisfies Record<RepositoryProfile["packageIssues"][number]["code"],
+  Pick<Finding, "ruleId" | "title" | "explanation" | "suggestedAction">>;
+
+/** Evaluate captured facts only. Does not read files or execute repository code. */
+export function createReport(input: RepositoryProfile): Report {
+  const profile = repositoryProfileSchema.parse(input);
+  const findings = profile.packageIssues.map(issue => {
+    const rule = rules[issue.code];
+    return findingSchema.parse({
+      ...rule,
+      id: `${rule.ruleId}:${encodeURIComponent(issue.path)}`,
+      severity: "error",
+      evidence: [{ path: issue.path, observation: issue.observation }],
+    });
+  }).sort((a, b) => a.id < b.id ? -1 : a.id > b.id ? 1 : 0);
+  const diagnosedPaths = new Set(profile.packageIssues.map(issue => issue.path));
+  const inspectionWarnings = profile.warnings.filter(warning =>
+    warning.code !== "invalid-manifest" || !diagnosedPaths.has(warning.path))
+    .sort((a, b) => {
+      const left = JSON.stringify([a.path, a.code, a.message]);
+      const right = JSON.stringify([b.path, b.code, b.message]);
+      return left < right ? -1 : left > right ? 1 : 0;
+    });
+  return reportSchema.parse({ schemaVersion: 1, root: profile.root, findings, inspectionWarnings });
+}

@@ -22,3 +22,10 @@ P1 decisions — 2026-09-26
 15. **Bounded content reads:** cap reads at 1 MiB per file and skip binary/non-UTF-8 content. Record child inspection failures as warnings; invalid or unreadable roots reject.
 16. **Predictable traversal:** skip `.git` and `node_modules`, do not follow links, sort paths and maps, and avoid timestamps. Gitignore support and configurable exclusions are deferred.
 17. **Focused manifest support:** recognize common ecosystem filenames, but parse only Node package scripts. No additional dependencies are needed.
+
+P2 decisions — 2026-09-26
+
+18. **Conservative initial rules:** report invalid package JSON, non-object manifests, and invalid scripts structure. Missing README/tests and text markers remain observations.
+19. **Typed diagnostics:** capture package issues during inspection instead of parsing warning prose or rereading files in rules. Preserve the original warning in profiles, but avoid duplicating diagnosed issues in reports.
+20. **File-level evidence:** include the manifest path and observed failure. Do not invent parser line numbers or excerpts. Evidence verification remains P4.
+21. **Pure reporting API:** version the JSON report contract, validate it with Zod, and return console/JSON strings. Leave CLI workflows and exit-code policy to P5. No new dependencies or AI integration.

@@ -1,13 +1,15 @@
 # Architecture
 
-## Current implementation (P1)
+## Current implementation (P2)
 
 `src/cli.ts` is the executable entry point. It passes command-line arguments to
 the pure `formatStatus` function in `src/index.ts` and prints its result.
 `test/cli.test.ts` verifies default and explicit targets without external state.
 The CLI smoke-test output remains unchanged. The exported `inspectRepository`
-API now performs repository inspection; findings, evidence verification, and AI
-review are not implemented yet.
+API performs repository inspection. `createReport` evaluates captured facts and
+returns deterministic findings with separate inspection warnings.
+`renderConsoleReport` and `renderJsonReport` return report strings without I/O.
+Evidence verification and AI review are not implemented yet.
 
 `src/inspect-repository.ts` enumerates the tree and reads content sequentially.
 `src/classify.ts` contains filename/extension heuristics. The Zod schema and
@@ -47,6 +49,33 @@ One configuration checks source and tests and emits them under `dist/`; the
 executable is `dist/src/cli.js`. The package file list includes only `dist/src`
 and the README, so compiled tests are not part of the planned package contents.
 
+## Findings and reporting
+
+`src/inspect-package.ts` captures typed `packageIssues` during content inspection,
+separating JSON syntax, top-level object, and scripts structure failures. The
+original `invalid-manifest` warning is retained in repository profiles for
+compatibility. Older profiles default to an empty `packageIssues` array; a fresh
+inspection is needed to obtain detailed diagnoses.
+
+`src/findings.ts` owns the Zod `Finding` and version-1 `Report` contracts and the
+pure rule evaluation function. Findings have stable IDs derived from rule ID
+and encoded relative path, severity, title, explanation, nonempty file-level
+evidence, and suggested action. No line numbers or excerpts are invented for
+parser failures. Findings are sorted by ID; inspection warnings are sorted by
+path/code/message. Report creation validates and copies the input profile.
+
+An invalid-manifest warning is removed from the report's inspection warnings
+only when a detailed package finding covers the same path. All other warnings
+remain visible, including legacy invalid-manifest warnings without diagnostics.
+Missing documentation/tests and marker counts do not generate findings.
+
+`src/reporters.ts` validates reports and formats console text or pretty JSON.
+Console output escapes control characters in repository-controlled text and
+states the limited rule scope. JSON preserves the report contract and evidence.
+Neither renderer executes code, writes files, sets exit status, nor calls AI.
+Evidence is captured during inspection; it is not reverified against disk at
+report time. P4 will address evidence verification. See `docs/RULES.md` for rules.
+
 ## Near-term direction
 
 ```text
@@ -65,7 +94,8 @@ Evidence verification
 Reporters
 ```
 
-This flow is a roadmap, not implemented functionality. Introduce small modules
+Inspection, deterministic findings, and console/JSON reporters are implemented;
+AI reviewers and evidence verification remain planned. Introduce small modules
 only as their milestones require them. Prefer deterministic analysis before AI
 analysis, structured data contracts, and evidence-backed findings. Execution is
 local-first with minimal persistent state and no server requirement for v0.1.

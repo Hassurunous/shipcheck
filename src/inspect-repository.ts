@@ -1,12 +1,11 @@
 import fs from "node:fs/promises";
 import { join, resolve } from "node:path";
-import { z } from "zod";
 import { classifyFile } from "./classify.js";
+import { inspectPackage } from "./inspect-package.js";
 import { repositoryProfileSchema, type RepositoryProfile } from "./repository-profile.js";
 
 export const MAX_FILE_BYTES = 1024 * 1024;
 const ignoredNames = new Set([".git", "node_modules"]);
-const packageSchema = z.object({ scripts: z.record(z.string(), z.string()).optional() });
 const compare = (a: string, b: string) => a < b ? -1 : a > b ? 1 : 0;
 
 /** Read local repository facts. Never executes scripts or writes to the target. */
@@ -19,7 +18,7 @@ export async function inspectRepository(target = "."): Promise<RepositoryProfile
   }
   const profile: RepositoryProfile = {
     root, files: [], languages: {}, manifests: [], readmes: [], tests: [],
-    packageScripts: [], markers: [], warnings: [],
+    packageScripts: [], packageIssues: [], markers: [], warnings: [],
   };
   const warn = (path: string, code: RepositoryProfile["warnings"][number]["code"], message: string) => {
     profile.warnings.push({ path, code, message });
@@ -77,12 +76,12 @@ export async function inspectRepository(target = "."): Promise<RepositoryProfile
     }
 
     if (path.split("/").at(-1) === "package.json") {
-      try {
-        const parsed = packageSchema.parse(JSON.parse(content));
-        const scripts = Object.fromEntries(Object.entries(parsed.scripts ?? {}).sort(([a], [b]) => compare(a, b)));
-        profile.packageScripts.push({ path, scripts });
-      } catch {
+      const result = inspectPackage(path, content);
+      if (result.issue) {
+        profile.packageIssues.push(result.issue);
         warn(path, "invalid-manifest", "package.json must be a JSON object with optional string-valued scripts.");
+      } else {
+        profile.packageScripts.push({ path, scripts: result.scripts });
       }
     }
     content.split(/\r\n|\n|\r/).forEach((excerpt, index) => {
@@ -120,6 +119,7 @@ export async function inspectRepository(target = "."): Promise<RepositoryProfile
   profile.readmes.sort(compare);
   profile.tests.sort(compare);
   profile.packageScripts.sort((a, b) => compare(a.path, b.path));
+  profile.packageIssues.sort((a, b) => compare(a.path, b.path) || compare(a.code, b.code));
   profile.markers.sort((a, b) => compare(a.path, b.path) || a.line - b.line);
   profile.warnings.sort((a, b) => compare(a.path, b.path) || compare(a.code, b.code));
   profile.languages = Object.fromEntries(Object.entries(profile.languages).sort(([a], [b]) => compare(a, b)));

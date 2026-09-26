@@ -9,9 +9,11 @@ shipcheck audit .
 shipcheck diff .
 shipcheck task <task-file>
 
-Current status: pre-alpha, with P1 repository inspection available as a local
-TypeScript/JavaScript API. The CLI still prints its target/readiness smoke test.
-These command workflows, findings, and AI review are not implemented yet.
+Current status: pre-alpha, with repository inspection, deterministic package
+findings, and console/JSON reporting available as a local TypeScript/JavaScript
+API. The CLI still prints its target/readiness smoke test. These command
+workflows and AI review are not implemented yet. P2 rules validate package JSON,
+the top-level object, and script structure; they do not assess overall quality.
 
 ## Core promise
 
