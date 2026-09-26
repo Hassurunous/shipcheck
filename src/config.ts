@@ -1,4 +1,4 @@
-import fs from "node:fs/promises";
+import { readBoundedConfig, validateRoot } from "./filesystem-policy.js";
 import { join } from "node:path";
 import { z } from "zod";
 
@@ -64,12 +64,9 @@ export function ruleLevel(config: Config, rule: RuleId, path: string) {
 }
 
 export async function loadConfig(root: string): Promise<Config> {
-  let content: string;
-  try { content = await fs.readFile(join(root, "shipcheck.config.json"), "utf8"); }
-  catch (error) {
-    if ((error as NodeJS.ErrnoException).code === "ENOENT") return configSchema.parse({});
-    throw error;
-  }
+  const validatedRoot = await validateRoot(root);
+  const content = await readBoundedConfig(join(validatedRoot, "shipcheck.config.json"));
+  if (content === undefined) return configSchema.parse({});
   try { return configSchema.parse(JSON.parse(content)); }
   catch (error) { throw new Error(`Invalid shipcheck.config.json: ${String(error)}`); }
 }

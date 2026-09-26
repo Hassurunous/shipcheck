@@ -30,6 +30,7 @@ export function additionalFindings(profile: RepositoryProfile, config: Config): 
   }
 
   for (const reference of profile.packageReferences) {
+    if (reference.existence !== "missing") continue;
     if (!files.has(reference.path)) continue;
     // Skip protocols, expansion, encoded paths, Windows paths and absolute/out-of-root references.
     if (!reference.target || /[:\\%$*?{}~]/.test(reference.target) || posix.isAbsolute(reference.target)) continue;

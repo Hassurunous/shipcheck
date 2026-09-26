@@ -1,24 +1,21 @@
 import fs from "node:fs/promises";
-import { join, resolve } from "node:path";
+import { join } from "node:path";
+import { MAX_FILE_BYTES, validateRoot } from "./filesystem-policy.js";
+import { referenceExistence } from "./reference-existence.js";
 import { classifyFile } from "./classify.js";
 import { inspectPackage } from "./inspect-package.js";
 import { packageReferences } from "./package-references.js";
 import { configSchema, isExcluded } from "./config.js";
 import { repositoryProfileSchema, type RepositoryProfile } from "./repository-profile.js";
 
-export const MAX_FILE_BYTES = 1024 * 1024;
+export { MAX_FILE_BYTES } from "./filesystem-policy.js";
 const ignoredNames = new Set([".git", "node_modules"]);
 const compare = (a: string, b: string) => a < b ? -1 : a > b ? 1 : 0;
 
 /** Read local repository facts. Never executes scripts or writes to the target. */
 export async function inspectRepository(target = ".", options: { exclude?: string[] } = {}): Promise<RepositoryProfile> {
   const { exclude } = configSchema.parse({ exclude: options.exclude ?? [] });
-  const root = resolve(target);
-  // Reject root links too: inspection must not silently switch to another target.
-  const rootStat = await fs.lstat(root);
-  if (!rootStat.isDirectory() || rootStat.isSymbolicLink()) {
-    throw new Error(`Repository target must be a directory, not a file or symlink: ${root}`);
-  }
+  const root = await validateRoot(target);
   const profile: RepositoryProfile = {
     root, directories: [], excluded: exclude, packageReferences: [], files: [], languages: {}, manifests: [], readmes: [], tests: [],
     packageScripts: [], packageIssues: [], markers: [], warnings: [],
@@ -119,6 +116,9 @@ export async function inspectRepository(target = ".", options: { exclude?: strin
     }
   }
 
+  for (const reference of profile.packageReferences) {
+    reference.existence = await referenceExistence(root, reference, exclude);
+  }
   profile.files.sort((a, b) => compare(a.path, b.path));
   profile.directories.sort(compare);
   profile.packageReferences.sort((a, b) => compare(a.path, b.path) || compare(a.field, b.field));

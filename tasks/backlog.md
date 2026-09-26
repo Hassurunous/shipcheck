@@ -24,15 +24,26 @@
 - [x] Support deterministic findings
 - [x] Console renderer
 - [x] JSON renderer
+
+## P2.5 — Configurable rules and CLI convenience
 - [x] Configurable levels, exclusions, and path overrides
 - [x] Lockfile, local dependency, and simple script-target rules
 - [x] Opt-in entry-point, README, test-detection, and FIXME policies
+- [x] Review command with optional target and JSON output
+- [x] Help and version commands
+- [x] npm shortcuts and optional local executable linking instructions
+- [x] Exit codes and command tests
+- [x] Follow-up: avoid false missing-target findings caused by filesystem case differences
+- [x] Follow-up: bound configuration reads and align config symlink handling with inspection
 
 ## P3 — AI review
 - [ ] API client
 - [ ] First QA/reliability reviewer
 - [ ] Structured output validation
 - [ ] Error handling
+- [ ] Explicit opt-in and bounded source-context selection with sensitive-file exclusions
+- [ ] AI finding provenance and unverified-evidence status
+- [ ] Offline mocked integration tests and optional live smoke test
 
 ## P4 — Verification
 - [ ] Validate evidence files
@@ -51,9 +62,3 @@
 - [ ] Demo fixture
 - [ ] Markdown reports
 - [ ] Release checklist
-
-## P2.5 — CLI convenience
-- [x] Review command with optional target and JSON output
-- [x] Help and version commands
-- [x] npm shortcuts and optional local executable linking instructions
-- [x] Exit codes and command tests

@@ -1,6 +1,6 @@
 # Architecture
 
-## Current implementation (P2)
+## Current implementation (P2.5)
 
 `src/cli.ts` is the executable entry point, with command dispatch in
 `src/cli-command.ts`. `review` performs configured review; help/version explain
@@ -136,3 +136,17 @@ alone do not fail the command. The no-argument and explicit-path readiness
 entry points remain for bootstrap compatibility; named targets should be passed
 to `review`. This is a deterministic review command, not the planned AI audit,
 Git diff, or task workflow.
+
+## P2.5 audit follow-up implementation
+
+`src/filesystem-policy.ts` shares the root validation and 1 MiB byte limit.
+Config loading validates the root before opening config, rejects links and
+non-regular files, and bounds reads even if the file grows. Absent config alone
+uses defaults; read failures are operational errors.
+
+`src/reference-existence.ts` records exists/missing/unknown for local references
+by checking path components with the filesystem's native case behavior. It
+stops at links and special entries, and honors exclusions using canonical
+casing as well as the declared path. Rules require explicit missing evidence;
+old profiles without those facts do not infer absence. Referenced content is
+never read and pure report generation still performs no filesystem I/O.

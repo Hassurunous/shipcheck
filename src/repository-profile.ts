@@ -15,6 +15,7 @@ export const repositoryProfileSchema = z.object({
   packageReferences: z.array(z.object({
     path: relativePath, field: z.string(), target: z.string(),
     kind: z.enum(["dependency", "script", "entry"]),
+    existence: z.enum(["exists", "missing", "unknown"]).optional(),
   })).default([]),
   files: z.array(z.object({
     path: relativePath,

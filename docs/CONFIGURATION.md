@@ -5,6 +5,13 @@ then inspects and reports with that configuration. No config file means defaults
 Malformed JSON, unknown keys/rule IDs, unsupported patterns, and invalid
 severities fail clearly. Config is data only; no JavaScript is executed.
 
+The root must be a real directory, not a symlink. A missing config uses defaults;
+linked, non-regular, unreadable, oversized, or invalid UTF-8 config files fail.
+Config content is capped at 1 MiB, including growth during reading; UTF-8 BOMs
+are accepted. Root and size policy are shared with inspection. As with the
+inspector, this assumes a stable local tree rather than adversarial concurrent
+path replacement.
+
 ```json
 {
   "version": 1,

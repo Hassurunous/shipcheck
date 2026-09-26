@@ -1,7 +1,7 @@
 # Shipcheck
 
 Shipcheck is an independent review layer for AI-assisted software development.
-Current status: **pre-alpha / P2 deterministic findings**. Repository inspection,
+Current status: **pre-alpha / P2.5 configurable review CLI**. Repository inspection,
 configurable deterministic rules, and console/JSON reports are available through the
 API and the `review` command. Help and JSON output are available. Audit, diff,
 task workflows and AI review are not implemented yet.

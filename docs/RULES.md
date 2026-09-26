@@ -39,6 +39,12 @@ these rules did not identify a defect in the content they could inspect.
 | `repository/missing-tests` | off | No included file matches test conventions. It does not prove tests are absent. |
 | `source/fixme` | off | A source file under root `src/` has a line beginning with `//`, `#`, `/*`, or `*`, then FIXME. Known test files are excluded. Line/excerpt evidence is included, once per line. This is lexical, not AST-based; multiline strings may match. |
 
+Reference existence is captured during inspection using filesystem lookups,
+preserving the actual volume's case sensitivity. A missing-target finding
+requires an explicit `missing` observation; older profiles without existence
+facts must be reinspected. Links and inaccessible paths produce `unknown`,
+not a missing-target finding. No referenced file contents are read.
+
 All missing-target checks skip paths outside the root, protocols/encoded paths,
 excluded paths, `.git`/`node_modules`, and paths at or below skipped links,
 special files, or unreadable directories. Files and directories are treated as

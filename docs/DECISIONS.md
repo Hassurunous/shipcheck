@@ -35,3 +35,10 @@ P2 decisions — 2026-09-26
 24. **Policy defaults:** lockfile conflicts and missing simple script targets warn; missing local dependencies error. Entry-point, README, test-detection, and source FIXME checks are disabled by default.
 
 25. **P2.5 command shortcuts:** expose review/help/version using plain argument parsing and npm scripts. Keep reports on stdout and failures on stderr; use exit codes 0 (completed), 1 (error findings), and 2 (operational/usage failure). Global linking remains optional.
+
+P2.5 scope clarification — pre-P3 audit
+
+26. **Approved intermediate milestone:** decisions 22–25 belong to P2.5. This supersedes the earlier blanket deferral of CLI conveniences and exit-code policy to P5; audit/diff/task remain P5 work. The expansion was explicitly requested and does not authorize additional infrastructure or automatic modification.
+27. **P3 credential convention:** use the user-provided environment variable name `OPENAI_PROJECTDEV_API_KEY` when AI integration is implemented. No current code reads it, and no key value is stored in project files.
+
+28. **P2.5 audit fixes:** capture filesystem-aware reference existence instead of inferring absence from exact-case inventory sets. Treat skipped/inaccessible references as unknown. Share root validation and byte limits with config loading, rejecting linked/non-regular config files and propagating read failures.
