@@ -24,6 +24,9 @@
 - [x] Support deterministic findings
 - [x] Console renderer
 - [x] JSON renderer
+- [x] Configurable levels, exclusions, and path overrides
+- [x] Lockfile, local dependency, and simple script-target rules
+- [x] Opt-in entry-point, README, test-detection, and FIXME policies
 
 ## P3 — AI review
 - [ ] API client
@@ -48,3 +51,9 @@
 - [ ] Demo fixture
 - [ ] Markdown reports
 - [ ] Release checklist
+
+## P2.5 — CLI convenience
+- [x] Review command with optional target and JSON output
+- [x] Help and version commands
+- [x] npm shortcuts and optional local executable linking instructions
+- [x] Exit codes and command tests

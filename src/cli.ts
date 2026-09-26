@@ -1,4 +1,7 @@
 #!/usr/bin/env node
-import { formatStatus } from "./index.js";
+import { runCli } from "./cli-command.js";
 
-console.log(formatStatus(process.argv.slice(2)));
+const result = await runCli(process.argv.slice(2));
+if (result.stdout) console.log(result.stdout);
+if (result.stderr) console.error(result.stderr);
+process.exitCode = result.exitCode;

@@ -29,3 +29,9 @@ P2 decisions — 2026-09-26
 19. **Typed diagnostics:** capture package issues during inspection instead of parsing warning prose or rereading files in rules. Preserve the original warning in profiles, but avoid duplicating diagnosed issues in reports.
 20. **File-level evidence:** include the manifest path and observed failure. Do not invent parser line numbers or excerpts. Evidence verification remains P4.
 21. **Pure reporting API:** version the JSON report contract, validate it with Zod, and return console/JSON strings. Leave CLI workflows and exit-code policy to P5. No new dependencies or AI integration.
+
+22. **Configurable rule follow-up:** use strict version-1 JSON configuration with severity/off settings, ordered path overrides with reasons, and a small documented glob subset. Unknown settings fail clearly; no new dependencies.
+23. **Conservative local references:** inspect literal local dependency/script/entry paths without executing commands or resolving general module syntax. Avoid missing-path findings for excluded or uncertain locations.
+24. **Policy defaults:** lockfile conflicts and missing simple script targets warn; missing local dependencies error. Entry-point, README, test-detection, and source FIXME checks are disabled by default.
+
+25. **P2.5 command shortcuts:** expose review/help/version using plain argument parsing and npm scripts. Keep reports on stdout and failures on stderr; use exit codes 0 (completed), 1 (error findings), and 2 (operational/usage failure). Global linking remains optional.

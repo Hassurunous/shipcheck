@@ -1,5 +1,7 @@
 import { z } from "zod";
 import { repositoryProfileSchema, type RepositoryProfile } from "./repository-profile.js";
+import { configSchema, isExcluded, ruleLevel, type ConfigInput, type RuleId } from "./config.js";
+import { additionalFindings } from "./additional-rules.js";
 
 export const findingSchema = z.object({
   id: z.string().min(1),
@@ -10,6 +12,8 @@ export const findingSchema = z.object({
   evidence: z.array(z.object({
     path: z.string().min(1),
     observation: z.string().min(1),
+    line: z.number().int().positive().optional(),
+    excerpt: z.string().optional(),
   })).min(1),
   suggestedAction: z.string().min(1),
 });
@@ -46,9 +50,10 @@ const rules = {
   Pick<Finding, "ruleId" | "title" | "explanation" | "suggestedAction">>;
 
 /** Evaluate captured facts only. Does not read files or execute repository code. */
-export function createReport(input: RepositoryProfile): Report {
+export function createReport(input: RepositoryProfile, options: ConfigInput = {}): Report {
+  const config = configSchema.parse(options);
   const profile = repositoryProfileSchema.parse(input);
-  const findings = profile.packageIssues.map(issue => {
+  const candidates = profile.packageIssues.map(issue => {
     const rule = rules[issue.code];
     return findingSchema.parse({
       ...rule,
@@ -56,6 +61,12 @@ export function createReport(input: RepositoryProfile): Report {
       severity: "error",
       evidence: [{ path: issue.path, observation: issue.observation }],
     });
+  }).concat(additionalFindings(profile, config));
+  const findings = candidates.flatMap(finding => {
+    const path = finding.evidence[0]!.path;
+    if (isExcluded(path, [...profile.excluded, ...config.exclude])) return [];
+    const severity = ruleLevel(config, finding.ruleId as RuleId, path);
+    return severity === "off" ? [] : [{ ...finding, severity }];
   }).sort((a, b) => a.id < b.id ? -1 : a.id > b.id ? 1 : 0);
   const diagnosedPaths = new Set(profile.packageIssues.map(issue => issue.path));
   const inspectionWarnings = profile.warnings.filter(warning =>

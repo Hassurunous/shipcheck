@@ -7,3 +7,5 @@ export { inspectRepository, MAX_FILE_BYTES } from "./inspect-repository.js";
 export { repositoryProfileSchema, type RepositoryProfile } from "./repository-profile.js";
 export { createReport, findingSchema, reportSchema, type Finding, type Report } from "./findings.js";
 export { renderConsoleReport, renderJsonReport } from "./reporters.js";
+export { configSchema, loadConfig, ruleDefaults, type Config, type ConfigInput, type RuleId } from "./config.js";
+export { reviewRepository } from "./review-repository.js";

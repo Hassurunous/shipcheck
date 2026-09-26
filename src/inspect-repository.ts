@@ -2,6 +2,8 @@ import fs from "node:fs/promises";
 import { join, resolve } from "node:path";
 import { classifyFile } from "./classify.js";
 import { inspectPackage } from "./inspect-package.js";
+import { packageReferences } from "./package-references.js";
+import { configSchema, isExcluded } from "./config.js";
 import { repositoryProfileSchema, type RepositoryProfile } from "./repository-profile.js";
 
 export const MAX_FILE_BYTES = 1024 * 1024;
@@ -9,7 +11,8 @@ const ignoredNames = new Set([".git", "node_modules"]);
 const compare = (a: string, b: string) => a < b ? -1 : a > b ? 1 : 0;
 
 /** Read local repository facts. Never executes scripts or writes to the target. */
-export async function inspectRepository(target = "."): Promise<RepositoryProfile> {
+export async function inspectRepository(target = ".", options: { exclude?: string[] } = {}): Promise<RepositoryProfile> {
+  const { exclude } = configSchema.parse({ exclude: options.exclude ?? [] });
   const root = resolve(target);
   // Reject root links too: inspection must not silently switch to another target.
   const rootStat = await fs.lstat(root);
@@ -17,7 +20,7 @@ export async function inspectRepository(target = "."): Promise<RepositoryProfile
     throw new Error(`Repository target must be a directory, not a file or symlink: ${root}`);
   }
   const profile: RepositoryProfile = {
-    root, files: [], languages: {}, manifests: [], readmes: [], tests: [],
+    root, directories: [], excluded: exclude, packageReferences: [], files: [], languages: {}, manifests: [], readmes: [], tests: [],
     packageScripts: [], packageIssues: [], markers: [], warnings: [],
   };
   const warn = (path: string, code: RepositoryProfile["warnings"][number]["code"], message: string) => {
@@ -76,6 +79,7 @@ export async function inspectRepository(target = "."): Promise<RepositoryProfile
     }
 
     if (path.split("/").at(-1) === "package.json") {
+      profile.packageReferences.push(...packageReferences(path, content));
       const result = inspectPackage(path, content);
       if (result.issue) {
         profile.packageIssues.push(result.issue);
@@ -107,14 +111,17 @@ export async function inspectRepository(target = "."): Promise<RepositoryProfile
     for (const entry of entries) {
       if (ignoredNames.has(entry.name)) continue;
       const path = directory ? `${directory}/${entry.name}` : entry.name;
+      if (isExcluded(path, exclude)) continue;
       if (entry.isSymbolicLink()) warn(path, "symlink-skipped", "Symbolic links are not followed.");
-      else if (entry.isDirectory()) pending.push(path);
+      else if (entry.isDirectory()) { profile.directories.push(path); pending.push(path); }
       else if (entry.isFile()) await inspectFile(path);
       else warn(path, "special-file-skipped", "Only regular files and directories are inspected.");
     }
   }
 
   profile.files.sort((a, b) => compare(a.path, b.path));
+  profile.directories.sort(compare);
+  profile.packageReferences.sort((a, b) => compare(a.path, b.path) || compare(a.field, b.field));
   profile.manifests.sort((a, b) => compare(a.path, b.path));
   profile.readmes.sort(compare);
   profile.tests.sort(compare);

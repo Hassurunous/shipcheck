@@ -10,6 +10,12 @@ export const packageIssueSchema = z.object({
 
 export const repositoryProfileSchema = z.object({
   root: z.string().min(1),
+  directories: z.array(relativePath).default([]),
+  excluded: z.array(z.string()).default([]),
+  packageReferences: z.array(z.object({
+    path: relativePath, field: z.string(), target: z.string(),
+    kind: z.enum(["dependency", "script", "entry"]),
+  })).default([]),
   files: z.array(z.object({
     path: relativePath,
     language: z.string().nullable(),

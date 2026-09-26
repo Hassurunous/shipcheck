@@ -17,7 +17,8 @@ export function renderConsoleReport(input: Report): string {
     lines.push("", `[${finding.severity.toUpperCase()}] ${text(finding.ruleId)} — ${text(finding.title)}`,
       `  ${text(finding.explanation)}`);
     for (const evidence of finding.evidence) {
-      lines.push(`  Evidence: ${text(evidence.path)} — ${text(evidence.observation)}`);
+      lines.push(`  Evidence: ${text(evidence.path)}${evidence.line ? `:${evidence.line}` : ""} — ${text(evidence.observation)}`);
+      if (evidence.excerpt !== undefined) lines.push(`    ${text(evidence.excerpt)}`);
     }
     lines.push(`  Suggested action: ${text(finding.suggestedAction)}`);
   }
@@ -28,7 +29,7 @@ export function renderConsoleReport(input: Report): string {
       lines.push(`  ${text(warning.path)} [${warning.code}]: ${text(warning.message)}`);
     }
   }
-  lines.push("", "Scope: package JSON, top-level object, and scripts structure only. No scripts or tests were executed.");
+  lines.push("", "Scope: configured deterministic repository rules only. No scripts or tests were executed.");
   return lines.join("\n");
 }
 

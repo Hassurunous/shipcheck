@@ -2,10 +2,10 @@
 
 ## Current implementation (P2)
 
-`src/cli.ts` is the executable entry point. It passes command-line arguments to
-the pure `formatStatus` function in `src/index.ts` and prints its result.
-`test/cli.test.ts` verifies default and explicit targets without external state.
-The CLI smoke-test output remains unchanged. The exported `inspectRepository`
+`src/cli.ts` is the executable entry point, with command dispatch in
+`src/cli-command.ts`. `review` performs configured review; help/version explain
+usage without inspecting files. The no-argument and `.` smoke-test output
+remains unchanged. The exported `inspectRepository`
 API performs repository inspection. `createReport` evaluates captured facts and
 returns deterministic findings with separate inspection warnings.
 `renderConsoleReport` and `renderJsonReport` return report strings without I/O.
@@ -39,7 +39,9 @@ scanning recognizes uppercase whole-word TODO/FIXME in any readable text,
 including documentation and strings; markers are observations, not findings.
 
 Limitations: `.gitignore` is not interpreted; build output, hidden files, and
-other dependencies are included unless named above. Inspection does not create
+other dependencies are included unless named above or explicitly excluded in
+inspection options. `reviewRepository` loads root configuration and passes its
+exclusions into inspection. Inspection does not create
 a filesystem snapshot or protect against concurrent malicious path replacement;
 use a stable local tree. Read limits are per file, not a total tree budget.
 No files are written and no network calls are made.
@@ -67,7 +69,8 @@ path/code/message. Report creation validates and copies the input profile.
 An invalid-manifest warning is removed from the report's inspection warnings
 only when a detailed package finding covers the same path. All other warnings
 remain visible, including legacy invalid-manifest warnings without diagnostics.
-Missing documentation/tests and marker counts do not generate findings.
+Missing documentation/tests and FIXME comments generate findings only when
+their optional policies are enabled; raw marker counts are never findings.
 
 `src/reporters.ts` validates reports and formats console text or pretty JSON.
 Console output escapes control characters in repository-controlled text and
@@ -75,6 +78,25 @@ states the limited rule scope. JSON preserves the report contract and evidence.
 Neither renderer executes code, writes files, sets exit status, nor calls AI.
 Evidence is captured during inspection; it is not reverified against disk at
 report time. P4 will address evidence verification. See `docs/RULES.md` for rules.
+
+## Configurable rules
+
+`src/config.ts` validates JSON configuration, supplies rule defaults, matches a
+small glob subset, and applies ordered overrides. `review-repository.ts` loads
+configuration and composes inspection with reporting; lower-level functions
+remain explicit and do not auto-load files.
+
+`src/package-references.ts` collects literal `file:` dependencies, narrowly
+recognized Node/tsx commands, and main/module/types/typings/bin declarations.
+Directory inventory and exclusions are included in profiles. Additional rules
+in `src/additional-rules.ts` evaluate lockfile conflicts, missing references,
+and opt-in repository policies. Missing-reference checks stay within the root
+and avoid excluded or uncertain filesystem locations. No shell parsing,
+dependency resolution, build execution, or general module resolution occurs.
+
+Evidence may include an optional one-based line and excerpt for the heuristic
+FIXME comment rule. No language AST is parsed; multiline strings can resemble
+comments. See `docs/CONFIGURATION.md` for configuration precedence and patterns.
 
 ## Near-term direction
 
@@ -99,3 +121,18 @@ AI reviewers and evidence verification remain planned. Introduce small modules
 only as their milestones require them. Prefer deterministic analysis before AI
 analysis, structured data contracts, and evidence-backed findings. Execution is
 local-first with minimal persistent state and no server requirement for v0.1.
+
+## P2.5 command interface
+
+`src/cli-command.ts` parses commands and returns stdout, stderr, and exit code;
+`src/cli.ts` handles process I/O. `review [target] [--json]` composes configured
+inspection and reporting. Help/version do not inspect files. Local npm scripts
+expose `review` and `shipcheck`; the existing bin mapping supports optional npm
+link after building. No CLI framework was added.
+
+Exit codes are 0 for completed reviews without error-level findings, 1 for
+error-level findings, and 2 for usage/configuration/inspection failures. Warnings
+alone do not fail the command. The no-argument and explicit-path readiness
+entry points remain for bootstrap compatibility; named targets should be passed
+to `review`. This is a deterministic review command, not the planned AI audit,
+Git diff, or task workflow.

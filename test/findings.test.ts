@@ -114,7 +114,7 @@ describe("report contracts and rendering", () => {
   it("limits the meaning of a zero-finding report", () => {
     const rendered = renderConsoleReport(reportFor("{}"));
     expect(rendered).toContain("No findings from the implemented rules.");
-    expect(rendered).toContain("Scope: package JSON, top-level object, and scripts structure only.");
+    expect(rendered).toContain("Scope: configured deterministic repository rules only.");
     expect(rendered).not.toContain("Inspection warnings (some content was not analyzed):");
   });
 

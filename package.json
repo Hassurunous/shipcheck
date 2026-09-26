@@ -10,6 +10,8 @@
   "engines": { "node": ">=22" },
   "scripts": {
     "dev": "tsx src/cli.ts",
+    "shipcheck": "tsx src/cli.ts",
+    "review": "tsx src/cli.ts review",
     "build": "tsc",
     "test": "vitest run",
     "test:watch": "vitest",
