@@ -3,11 +3,14 @@
 Shipcheck is an independent review layer for
 AI-assisted software development.
 
-## v0.1 workflows
+## Planned v0.1 workflows
 
 shipcheck audit .
 shipcheck diff .
 shipcheck task <task-file>
+
+Current status: bootstrap / pre-alpha. Only a target/readiness smoke-test CLI
+exists. These workflows and AI review are not implemented yet.
 
 ## Core promise
 

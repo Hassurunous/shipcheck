@@ -1,13 +1,19 @@
 {
   "name": "shipcheck",
-  "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
-  "directories": {
-    "doc": "docs"
-  },
+  "version": "0.1.0",
+  "description": "Independent review layer for AI-assisted software development (pre-alpha).",
+  "private": true,
+  "type": "module",
+  "main": "./dist/src/index.js",
+  "bin": { "shipcheck": "./dist/src/cli.js" },
+  "files": ["dist/src", "README.md"],
+  "engines": { "node": ">=22" },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev": "tsx src/cli.ts",
+    "build": "tsc",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "typecheck": "tsc --noEmit"
   },
   "keywords": [],
   "author": "",
