@@ -30,6 +30,26 @@ export function renderConsoleReport(input: Report): string {
     }
   }
   lines.push("", "Scope: configured deterministic repository rules only. No scripts or tests were executed.");
+  if (report.ai) {
+    const ai = report.ai;
+    lines.push('', `AI stage: ${ai.execution.toUpperCase()} / ${ai.status} — ${ai.mode}`,
+      `Reviewer: ${ai.reviewer}; model: ${text(ai.model ?? 'not selected')}`,
+      `Planned real model: ${text(ai.plannedModel ?? 'not selected; budget discussion pending')}`,
+      `Selected source files: ${ai.preview.files.length}; skipped: ${ai.preview.skipped.length}; limited: ${ai.preview.limited}`);
+    for (const file of ai.preview.files) lines.push(`  ${text(file.path)} (${file.bytes} bytes, ${file.lines} lines)`);
+    lines.push(`Request size: ${ai.requestBytes} bytes; approximate input tokens: ${ai.estimatedInputTokens} (heuristic)`,
+      `Output limit: ${ai.maxOutputTokens} tokens; retries: 0`,
+      'Live cost estimate: unavailable until model/pricing selection; not a dollar spending cap.');
+    if (ai.execution !== 'injected') lines.push('Offline only: no model ran, no network request, $0 API spend.');
+    if (ai.error) lines.push(`AI failure [${text(ai.error.code)}]: ${text(ai.error.message)}`);
+    if (ai.status === 'preview') lines.push('Preview only: no QA review was performed.');
+    if (ai.status === 'completed') lines.push(`AI candidates: ${ai.candidates.length} — UNVERIFIED${ai.execution === 'mock' ? ' / SYNTHETIC MOCK' : ''}`);
+    for (const candidate of ai.candidates) {
+      lines.push(`  [${candidate.severity.toUpperCase()}] ${text(candidate.title)}`, `    ${text(candidate.explanation)}`);
+      for (const evidence of candidate.evidence) lines.push(`    ${text(evidence.path)}:${evidence.startLine}-${evidence.endLine} — ${text(evidence.excerpt)}`);
+      lines.push(`    Suggested action: ${text(candidate.suggestedAction)}`);
+    }
+  }
   return lines.join("\n");
 }
 

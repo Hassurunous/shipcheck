@@ -63,3 +63,12 @@ The report schema remains version 1 with optional evidence line/excerpt fields.
 New profile fields default to empty arrays for older serialized profiles;
 reinspect to populate references and directory inventory. The P2.5 review CLI
 returns 1 for error-level findings and 2 for usage or operational failures.
+
+## P3 AI settings (offline)
+
+Optional `ai` settings configure mode, per-mode model mappings, context limits,
+output limit, and timeout. See [P3 settings](P3_AI.md). Low cost is the default;
+all real model mappings default to null. Ordinary review ignores AI execution
+settings unless the caller explicitly requests preview/mock. A config cannot
+enable network execution. Unknown settings and out-of-range limits are rejected.
+CLI `--mode` overrides `ai.mode`; automatic retries are fixed at zero.

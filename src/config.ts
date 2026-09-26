@@ -1,6 +1,7 @@
 import { readBoundedConfig, validateRoot } from "./filesystem-policy.js";
 import { join } from "node:path";
 import { z } from "zod";
+import { aiSettingsSchema } from "./ai/contracts.js";
 
 export const ruleDefaults = {
   "package/invalid-json": "error",
@@ -30,6 +31,7 @@ export const configSchema = z.object({
   version: z.literal(1).default(1),
   exclude: z.array(pattern).default([]),
   rules: rulesSchema.default({}),
+  ai: aiSettingsSchema.prefault({}),
   overrides: z.array(z.object({
     files: z.array(pattern).min(1), rules: rulesSchema,
     reason: z.string().min(1),

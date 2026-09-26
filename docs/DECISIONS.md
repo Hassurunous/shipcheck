@@ -42,3 +42,8 @@ P2.5 scope clarification — pre-P3 audit
 27. **P3 credential convention:** use the user-provided environment variable name `OPENAI_PROJECTDEV_API_KEY` when AI integration is implemented. No current code reads it, and no key value is stored in project files.
 
 28. **P2.5 audit fixes:** capture filesystem-aware reference existence instead of inferring absence from exact-case inventory sets. Treat skipped/inaccessible references as unknown. Share root validation and byte limits with config loading, rejecting linked/non-regular config files and propagating read failures.
+
+29. **P3 offline first:** explicitly support preview/mock only. Low-cost is the default of three modes; real model mappings are unset until budget discussion. An injected Responses adapter tests the provider boundary without a shipped network transport or SDK.
+30. **Bounded selected context:** source-extension allowlist, sensitive-path/content filters, whole-file selection, and total serialized context limits. Preview metadata and hashes do not contain source bodies. Secret detection is heuristic and requires human review before future live use.
+31. **Candidate provenance:** keep AI candidates separate from deterministic findings, with model/mode/reviewer/execution provenance and unverified evidence. Citation membership/range constraints are input boundaries, not P4 factual verification.
+32. **No unexpected spend:** no credential lookup, live CLI option, automatic retries, or invented pricing. Model/price/budget selection and explicit network activation remain gated; mock results carry no quality claims.

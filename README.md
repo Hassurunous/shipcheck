@@ -1,10 +1,11 @@
 # Shipcheck
 
 Shipcheck is an independent review layer for AI-assisted software development.
-Current status: **pre-alpha / P2.5 configurable review CLI**. Repository inspection,
+Current status: **pre-alpha / P3 offline AI foundation**. Repository inspection,
 configurable deterministic rules, and console/JSON reports are available through the
 API and the `review` command. Help and JSON output are available. Audit, diff,
-task workflows and AI review are not implemented yet.
+task workflows and live AI review remain planned. AI context previews and
+mocked QA review are available with explicit opt-in; no live API spending occurs.
 
 ## Local development
 
@@ -130,4 +131,20 @@ Exit codes: **0** completed without error-level findings, **1** error-level
 findings, **2** usage/configuration/inspection failure. Warnings alone return 0.
 Reports go to stdout; failures go to stderr (including with `--json`). The
 no-argument and `.` readiness smoke tests remain available. Use `review` for
-inspection; audit/diff/task and AI workflows remain unimplemented.
+inspection; audit/diff/task and live AI workflows remain unimplemented.
+
+## P3 preview and mock modes
+
+```powershell
+shipcheck review . --ai preview
+shipcheck review . --ai mock
+shipcheck review . --ai mock --mode balanced
+shipcheck review . --ai mock --mode high-quality --json
+```
+
+Use `npm run review -- . --ai mock` without a global link. Low cost is the
+default mode. Mock results are synthetic plumbing checks, not software defects
+or real model evaluations. Live execution is disabled, no key is read, and
+automatic retries are disabled. Preview lists selected files and limits; live
+cost estimates remain unavailable until we choose real models and pricing.
+See [P3 behavior and limits](docs/P3_AI.md).

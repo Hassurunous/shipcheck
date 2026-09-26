@@ -1,6 +1,6 @@
 # Architecture
 
-## Current implementation (P2.5)
+## Current implementation (P3 offline)
 
 `src/cli.ts` is the executable entry point, with command dispatch in
 `src/cli-command.ts`. `review` performs configured review; help/version explain
@@ -9,7 +9,9 @@ remains unchanged. The exported `inspectRepository`
 API performs repository inspection. `createReport` evaluates captured facts and
 returns deterministic findings with separate inspection warnings.
 `renderConsoleReport` and `renderJsonReport` return report strings without I/O.
-Evidence verification and AI review are not implemented yet.
+Evidence verification and live AI review are not implemented yet. Opt-in AI
+context previews and mocked QA review are implemented separately from the
+ordinary deterministic path; see `docs/P3_AI.md`.
 
 `src/inspect-repository.ts` enumerates the tree and reads content sequentially.
 `src/classify.ts` contains filename/extension heuristics. The Zod schema and
@@ -117,7 +119,8 @@ Reporters
 ```
 
 Inspection, deterministic findings, and console/JSON reporters are implemented;
-AI reviewers and evidence verification remain planned. Introduce small modules
+An offline QA reviewer request/response path is implemented; live AI and evidence
+verification remain planned. Introduce small modules
 only as their milestones require them. Prefer deterministic analysis before AI
 analysis, structured data contracts, and evidence-backed findings. Execution is
 local-first with minimal persistent state and no server requirement for v0.1.
@@ -150,3 +153,14 @@ stops at links and special entries, and honors exclusions using canonical
 casing as well as the declared path. Rules require explicit missing evidence;
 old profiles without those facts do not infer absence. Referenced content is
 never read and pure report generation still performs no filesystem I/O.
+
+## P3 offline modules
+
+`ai/contracts.ts` defines settings, candidate output, and result schemas.
+`ai/context.ts` selects bounded source files and emits preview metadata without
+source bodies. `ai/client.ts` builds a QA/reliability request, validates bounded
+Responses envelopes, and exposes an injected transport seam plus a synthetic
+mock. It has no default HTTP implementation. `ai/review.ts` composes these after
+deterministic inspection, preserving deterministic results on AI-stage failure.
+The optional report.ai section separates unverified candidates from findings.
+No SDK, environment credential read, live request, or retry was introduced.

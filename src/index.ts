@@ -9,3 +9,5 @@ export { createReport, findingSchema, reportSchema, type Finding, type Report } 
 export { renderConsoleReport, renderJsonReport } from "./reporters.js";
 export { configSchema, loadConfig, ruleDefaults, type Config, type ConfigInput, type RuleId } from "./config.js";
 export { reviewRepository } from "./review-repository.js";
+export { reviewWithAi, type AiReviewOptions } from "./ai/review.js";
+export { aiSettingsSchema, modeSchema, qaOutputSchema, type AiMode, type AiResult } from "./ai/contracts.js";

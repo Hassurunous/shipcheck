@@ -2,6 +2,7 @@ import { z } from "zod";
 import { repositoryProfileSchema, type RepositoryProfile } from "./repository-profile.js";
 import { configSchema, isExcluded, ruleLevel, type ConfigInput, type RuleId } from "./config.js";
 import { additionalFindings } from "./additional-rules.js";
+import { aiResultSchema } from "./ai/contracts.js";
 
 export const findingSchema = z.object({
   id: z.string().min(1),
@@ -24,6 +25,7 @@ export const reportSchema = z.object({
   root: z.string().min(1),
   findings: z.array(findingSchema),
   inspectionWarnings: repositoryProfileSchema.shape.warnings,
+  ai: aiResultSchema.optional(),
 });
 export type Report = z.infer<typeof reportSchema>;
 
