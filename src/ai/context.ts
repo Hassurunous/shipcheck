@@ -5,6 +5,7 @@ import { isExcluded } from '../config.js';
 import { validateRoot } from '../filesystem-policy.js';
 import type { RepositoryProfile } from '../repository-profile.js';
 import type { AiSettings, AiResult } from './contracts.js';
+import { localImports, resolveLocalImport } from './local-imports.js';
 
 export type SourceFile = {path: string; content: string};
 export type AiContext = {files: SourceFile[]; preview: AiResult['preview']};
@@ -49,17 +50,24 @@ async function readSource(root: string, path: string, limit: number, excluded: s
 }
 
 /** Only selected source is eligible for a request. Full profiles/marker excerpts are never sent. */
-export async function collectContext(profile: RepositoryProfile, settings: AiSettings): Promise<AiContext> {
+export async function collectContext(profile: RepositoryProfile, settings: AiSettings, requestedPaths?:readonly string[]): Promise<AiContext> {
   const root = await fs.realpath(await validateRoot(profile.root));
   const files: SourceFile[] = [];
   const preview: AiResult['preview'] = {files:[], skipped:[], serializedBytes:2, limited:false};
-  const paths = profile.files.map(f=>f.path).sort((a,b)=> {
+  const inventory = new Set(profile.files.map(f=>f.path));
+  const paths = [...(requestedPaths ?? inventory)].sort((a,b)=> {
     const rank = (p: string) => p.startsWith('src/') ? 0 : /^(?:test|tests)\//.test(p) ? 1 : 2;
     return rank(a)-rank(b) || (a<b ? -1 : a>b ? 1 : 0);
   });
+  const requested = new Set(paths);
+  const visited = new Set<string>();
+  const dependencies: NonNullable<AiResult['preview']['dependencies']> = [];
   for (const path of paths) {
+    if (visited.has(path)) continue;
+    visited.add(path);
     let reason: string | undefined;
-    if (!allowed(path) || isExcluded(path, profile.excluded)) reason = 'excluded-or-not-source';
+    if (!inventory.has(path)) reason = 'not-in-inventory';
+    else if (!allowed(path) || isExcluded(path, profile.excluded)) reason = 'excluded-or-not-source';
     else if (files.length >= settings.maxFiles) { reason = 'file-count-limit'; preview.limited = true; }
     if (reason) { preview.skipped.push({path, reason}); continue; }
     let content: string;
@@ -79,6 +87,21 @@ export async function collectContext(profile: RepositoryProfile, settings: AiSet
     preview.serializedBytes = size;
     preview.files.push({path, bytes:Buffer.byteLength(content), lines:content.split(/\r\n|\n|\r/).length,
       sha256:createHash('sha256').update(content).digest('hex')});
+    const related:string[]=[];
+    for (const specifier of localImports(content)) {
+      const dependency=resolveLocalImport(path,specifier,inventory);
+      dependencies.push({from:path,specifier,path:dependency ?? null,status:dependency?'omitted':'unresolved'});
+      if(dependency && !visited.has(dependency)) related.push(dependency);
+    }
+    // Visit local dependencies immediately after their importer. Reads still use
+    // the same exclusions, credential checks and shared file/context budgets.
+    paths.splice(paths.indexOf(path)+1,0,...related);
   }
+  const included=new Set(files.map(file=>file.path));
+  for(const dependency of dependencies) if(dependency.path && included.has(dependency.path)) dependency.status='included';
+  preview.requestedPaths=[...requested];
+  preview.supportingPaths=files.filter(file=>!requested.has(file.path)).map(file=>file.path);
+  preview.dependencies=dependencies;
+  if(dependencies.some(dependency=>dependency.status!=='included')) preview.limited=true;
   return {files,preview};
 }

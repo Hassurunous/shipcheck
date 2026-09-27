@@ -39,12 +39,16 @@ export const contextPreviewSchema = z.object({
   skipped: z.array(z.object({path: z.string(), reason: z.string()})),
   serializedBytes: z.number().int().nonnegative(),
   limited: z.boolean(),
+  requestedPaths:z.array(z.string()).optional(),
+  supportingPaths:z.array(z.string()).optional(),
+  dependencies:z.array(z.object({from:z.string(),specifier:z.string(),path:z.string().nullable(),
+    status:z.enum(['included','unresolved','omitted'])})).optional(),
 });
 export const aiResultSchema = z.object({
   execution: z.enum(['preview', 'mock', 'injected', 'live']),
   status: z.enum(['preview', 'completed', 'failed']),
   mode: modeSchema,
-  reviewer: z.literal('qa/reliability-v1'),
+  reviewer: z.enum(['qa/reliability-v1','qa/reliability-v2']),
   model: z.string().nullable(),
   plannedModel: z.string().nullable(),
   preview: contextPreviewSchema,
@@ -63,5 +67,9 @@ export const aiResultSchema = z.object({
     }))}).optional(),
   })).max(20),
   error: z.object({code: z.string(), message: z.string()}).nullable(),
+  coverage:z.object({state:z.enum(['preview','complete','partial','failed']),selectedPaths:z.array(z.string()),
+    validResponsePaths:z.array(z.string()),failedResponsePaths:z.array(z.string()),
+    skippedPaths:z.array(z.string()),matchedCandidates:z.number().int(),rejectedCandidates:z.number().int(),
+    outOfScopeCandidates:z.number().int()}).optional(),
 });
 export type AiResult = z.infer<typeof aiResultSchema>;

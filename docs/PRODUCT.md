@@ -36,6 +36,7 @@ and support every reported finding with evidence.
 ## Post-release direction
 
 P6 remains focused on release preparation for the current implementation.
+P6.1 strengthens citation/context reliability and evaluation of the current reviewer.
 P7 will add multi-language check integrations and a developer-agent feedback
 workflow: a separate developer process edits code, invokes Shipcheck, consumes
 its report, and iterates. Shipcheck remains the reviewer and does not modify

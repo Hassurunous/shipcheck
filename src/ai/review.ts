@@ -31,14 +31,13 @@ export async function reviewWithAi(target = '.', options: AiReviewOptions = {exe
   const model = execution === 'mock' ? `mock-${mode}` : plannedModel;
   const result: AiResult = {
     execution, status:options.execution === 'preview' ? 'preview' : 'completed', mode,
-    reviewer:'qa/reliability-v1',model,plannedModel,
+    reviewer:'qa/reliability-v2',model,plannedModel,
     preview:{files:[],skipped:[],serializedBytes:0,limited:false},
     maxOutputTokens:config.ai.maxOutputTokens,requestBytes:0,estimatedInputTokens:0,
     estimatedCostUsd:null,actualCostUsd:execution === 'injected' || execution === 'live' ? null : 0,retries:0,candidates:[],error:null,
   };
   try {
-    const contextProfile = options.paths ? {...profile,files:profile.files.filter(file=>options.paths!.includes(file.path))} : profile;
-    const context = await collectContext(contextProfile,config.ai);
+    const context = await collectContext(profile,config.ai,options.paths);
     result.preview = context.preview;
     const request = buildRequest(context,config.ai,model ?? 'MODEL_NOT_SELECTED');
     result.requestBytes = Buffer.byteLength(JSON.stringify(request));
@@ -60,8 +59,11 @@ export async function reviewWithAi(target = '.', options: AiReviewOptions = {exe
       // Reuse the same bounded, exclusion-aware, link-rejecting reads. A missing,
       // modified, or newly ineligible file cannot receive a matched citation.
       let current = {files:[],preview:context.preview} as typeof context;
-      try { current = await collectContext(contextProfile,config.ai); } catch { /* Fail closed for every citation. */ }
-      result.candidates = output.candidates.map(candidate=>({
+      try { current = await collectContext(profile,config.ai,context.files.map(file=>file.path)); } catch { /* Fail closed for every citation. */ }
+      const candidates=output.candidates.filter(candidate=>!options.paths || candidate.evidence.some(evidence=>options.paths!.includes(evidence.path)));
+      result.coverage={state:'complete',selectedPaths:[],validResponsePaths:[],failedResponsePaths:[],skippedPaths:[],
+        matchedCandidates:0,rejectedCandidates:0,outOfScopeCandidates:output.candidates.length-candidates.length};
+      result.candidates = candidates.map(candidate=>({
         ...candidate, id:`ai/qa:${createHash('sha256').update(JSON.stringify(candidate)).digest('hex').slice(0,16)}`,
         evidenceStatus:'unverified', origin:'ai',
         evidenceVerification:verifyEvidence(candidate,context,current),
@@ -72,5 +74,13 @@ export async function reviewWithAi(target = '.', options: AiReviewOptions = {exe
     result.error = error instanceof AiFailure ? {code:error.code,message:error.message}
       : {code:'context-error',message:'AI context could not be prepared. Deterministic results are preserved.'};
   }
+  const selectedPaths=result.preview.files.map(file=>file.path);
+  const rejectedCandidates=result.candidates.filter(candidate=>candidate.evidenceVerification?.status!=='matched').length;
+  result.coverage={state:result.status==='failed'?'failed':result.status==='preview'?'preview':
+    result.preview.limited || result.preview.skipped.length>0 || rejectedCandidates>0 || (result.coverage?.outOfScopeCandidates ?? 0)>0?'partial':'complete',
+    selectedPaths,validResponsePaths:result.status==='completed'?selectedPaths:[],
+    failedResponsePaths:result.status==='failed'?selectedPaths:[],skippedPaths:result.preview.skipped.map(file=>file.path),
+    matchedCandidates:result.candidates.length-rejectedCandidates,rejectedCandidates,
+    outOfScopeCandidates:result.coverage?.outOfScopeCandidates ?? 0};
   return reportSchema.parse({...report,ai:aiResultSchema.parse(result)});
 }

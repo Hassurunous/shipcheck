@@ -2,8 +2,7 @@
 
 All initial rules operate on typed diagnostics captured while inspecting readable
 files named exactly `package.json`, including nested packages. They report
-severity `error` because these are structural manifest defects. This severity
-does not set a process exit code; command workflows are deferred.
+severity `error` because these are structural manifest defects. Error-level findings produce exit 1 in CLI workflows; warnings alone produce exit 0.
 
 | Rule ID | Trigger | Suggested action |
 | --- | --- | --- |

@@ -109,12 +109,13 @@ describe("repository inspection", () => {
     await write("ok.ts", "FIXME visible");
     const realOpen = fs.open;
     const realReaddir = fs.readdir;
+    const canonicalRoot = await fs.realpath(root);
     vi.spyOn(fs, "open").mockImplementation(async (...args) => {
-      if (args[0] === join(root, "blocked.txt")) throw new Error("EACCES");
+      if (args[0] === join(canonicalRoot, "blocked.txt")) throw new Error("EACCES");
       return realOpen(...args);
     });
     vi.spyOn(fs, "readdir").mockImplementation((...args: Parameters<typeof fs.readdir>) => {
-      if (args[0] === join(root, "blocked")) return Promise.reject(new Error("EACCES"));
+      if (args[0] === join(canonicalRoot, "blocked")) return Promise.reject(new Error("EACCES"));
       return realReaddir(...args);
     });
     const profile = await inspectRepository(root);

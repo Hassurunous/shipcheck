@@ -1,0 +1,104 @@
+[
+  {
+    "id": "seeded-isolated",
+    "variant": "isolated",
+    "description": "Known seeded control.",
+    "expectedBugs": [
+      {
+        "id": "missing-value-removal",
+        "description": "Removing an absent value deletes the final array element."
+      }
+    ],
+    "files": [
+      {
+        "path": "src/remove.ts",
+        "content": "export function remove(items: string[], value: string) {\n  const result = [...items];\n  result.splice(result.indexOf(value), 1);\n  return result;\n}\n"
+      }
+    ]
+  },
+  {
+    "id": "seeded-mixed",
+    "variant": "mixed",
+    "description": "Known seeded control with unrelated source.",
+    "expectedBugs": [
+      {
+        "id": "missing-value-removal",
+        "description": "Removing an absent value deletes the final array element."
+      }
+    ],
+    "files": [
+      {
+        "path": "src/remove.ts",
+        "content": "export function remove(items: string[], value: string) {\n  const result = [...items];\n  result.splice(result.indexOf(value), 1);\n  return result;\n}\n"
+      },
+      {
+        "path": "src/format.ts",
+        "content": "export const format = (value: number) => String(value);\n"
+      }
+    ]
+  },
+  {
+    "id": "clean-isolated",
+    "variant": "isolated",
+    "description": "Known clean control.",
+    "expectedBugs": [],
+    "files": [
+      {
+        "path": "src/remove.ts",
+        "content": "export function remove(items: string[], value: string) {\n  const result = [...items];\n  const index = result.indexOf(value);\n  if (index >= 0) result.splice(index, 1);\n  return result;\n}\n"
+      }
+    ]
+  },
+  {
+    "id": "clean-mixed",
+    "variant": "mixed",
+    "description": "Known clean control with unrelated source.",
+    "expectedBugs": [],
+    "files": [
+      {
+        "path": "src/remove.ts",
+        "content": "export function remove(items: string[], value: string) {\n  const result = [...items];\n  const index = result.indexOf(value);\n  if (index >= 0) result.splice(index, 1);\n  return result;\n}\n"
+      },
+      {
+        "path": "src/format.ts",
+        "content": "export const format = (value: number) => String(value);\n"
+      }
+    ]
+  },
+  {
+    "id": "guard-isolated",
+    "variant": "cross-file",
+    "description": "Known guard control.",
+    "expectedBugs": [],
+    "files": [
+      {
+        "path": "src/entry.ts",
+        "content": "import { validate } from './guard.js';\nexport function useModel(model: string) {\n  validate(model);\n  return model;\n}\n"
+      },
+      {
+        "path": "src/guard.ts",
+        "content": "export function validate(model: string) {\n  if (model !== 'allowed') throw new Error('Unsupported model');\n}\n"
+      }
+    ]
+  },
+  {
+    "id": "guard-mixed",
+    "variant": "mixed",
+    "description": "Known guard control with unrelated source.",
+    "expectedBugs": [],
+    "files": [
+      {
+        "path": "src/entry.ts",
+        "content": "import { validate } from './guard.js';\nexport function useModel(model: string) {\n  validate(model);\n  return model;\n}\n"
+      },
+      {
+        "path": "src/guard.ts",
+        "content": "export function validate(model: string) {\n  if (model !== 'allowed') throw new Error('Unsupported model');\n}\n"
+      },
+      {
+        "path": "src/format.ts",
+        "content": "export const format = (value: number) => String(value);\n"
+      }
+    ]
+  }
+]

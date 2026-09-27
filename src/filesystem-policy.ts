@@ -9,7 +9,9 @@ export async function validateRoot(target: string): Promise<string> {
   if (!stat.isDirectory() || stat.isSymbolicLink()) {
     throw new Error(`Repository target must be a directory, not a file or symlink: ${root}`);
   }
-  return root;
+  // Ancestor aliases are allowed, but all subsequent inspection uses one
+  // canonical root. The explicitly selected final directory cannot be a link.
+  return fs.realpath(root);
 }
 
 /** For stable local trees; not a defense against concurrent path replacement. */

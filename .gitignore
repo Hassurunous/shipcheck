@@ -1,6 +1,8 @@
 node_modules/
 dist/
 coverage/
+*.tgz
+.release-check/
 .env
 .env.*
 !.env.example

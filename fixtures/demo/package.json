@@ -1,0 +1,5 @@
+{
+  "name": "shipcheck-demo",
+  "private": true,
+  "scripts": {"start": "node missing-entry.js"}
+}

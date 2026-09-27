@@ -3,6 +3,7 @@ import { renderConsoleReport, renderJsonReport } from './reporters.js';
 import { modeSchema } from './ai/contracts.js';
 import { initializeTrial, trialStatus } from './ai/trial-budget.js';
 import { runWorkflow } from './workflows.js';
+import { renderMarkdownReport } from './markdown-report.js';
 
 const help = `Shipcheck v0.1
 
@@ -19,6 +20,7 @@ Commands:
 
 Audit, diff, and task options:
   --json           Print the report as JSON
+  --markdown       Print a Markdown report (exclusive with --json)
   --ai preview     Preview bounded AI input metadata without sending anything
   --ai mock        Exercise the QA reviewer with a synthetic offline response
   --ai live --trial Run one approved trial attempt for the selected mode
@@ -63,6 +65,7 @@ export async function runCli(args: readonly string[]): Promise<CliResult> {
   }
   let target: string | undefined;
   let json = false;
+  let markdown = false;
   let literal = false;
   let wantsHelp = false;
   let ai: 'preview' | 'mock' | 'live' | undefined;
@@ -73,6 +76,7 @@ export async function runCli(args: readonly string[]): Promise<CliResult> {
     if (!literal && arg === '--') { literal = true; continue; }
     if (!literal && (arg === '--help' || arg === '-h')) { wantsHelp = true; continue; }
     if (!literal && arg === '--json') { json = true; continue; }
+    if (!literal && arg === '--markdown') { markdown = true; continue; }
     if (!literal && arg === '--trial') { trial = true; continue; }
     if (!literal && arg === '--ai') {
       const value = args[++index];
@@ -89,6 +93,7 @@ export async function runCli(args: readonly string[]): Promise<CliResult> {
     target = arg;
   }
   if (wantsHelp) return ok(help);
+  if (json && markdown) return fail('Choose --json or --markdown, not both.');
   if (command==='task' && !target) return fail('task requires a JSON task file.');
   if (mode && !ai) return fail('--mode requires --ai.');
   if ((ai === 'live') !== trial) return fail('Live AI requires --trial; --trial is only valid with --ai live.');
@@ -96,7 +101,7 @@ export async function runCli(args: readonly string[]): Promise<CliResult> {
     const aiOptions = ai ? {execution:ai,trial,...(mode ? {mode:modeSchema.parse(mode)} : {})} : undefined;
     const report = await runWorkflow(target ?? '.',command,aiOptions);
     const aiFailed = report.ai?.status === 'failed';
-    return { stdout: json ? renderJsonReport(report) : renderConsoleReport(report),
+    return { stdout: json ? renderJsonReport(report) : markdown ? renderMarkdownReport(report) : renderConsoleReport(report),
       stderr: aiFailed ? `Shipcheck: AI stage failed (${report.ai?.error?.code}); deterministic results are retained.` : '',
       exitCode: aiFailed ? 2 : report.findings.some(f => f.severity === 'error') ? 1 : 0 };
   } catch (error) {

@@ -61,11 +61,21 @@
 - [x] Task
 
 ## P6 — Release
-- [ ] README polish
-- [ ] npm packaging
-- [ ] Demo fixture
-- [ ] Markdown reports
-- [ ] Release checklist
+- [x] README polish
+- [x] npm packaging
+- [x] Demo fixture
+- [x] Markdown reports
+- [x] Release checklist
+
+## P6.1 � Audit reliability
+
+- [x] Return early for empty diffs without repository inspection
+- [x] Supply explicitly numbered source lines and retain strict citation checks
+- [x] Prioritize related local imports and disclose missing context
+- [x] Report selected, skipped, failed and rejected coverage clearly
+- [x] Define and test canonical ancestor/root-link policy
+- [x] Add repeatable isolated/mixed bug and clean-control evaluation with human semantic scoring
+- [x] Run a bounded low-cost live evaluation and record limitations
 
 ## P7 — Multi-language checks and developer-agent feedback
 

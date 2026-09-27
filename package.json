@@ -6,15 +6,17 @@
   "type": "module",
   "main": "./dist/src/index.js",
   "bin": { "shipcheck": "./dist/src/cli.js" },
-  "files": ["dist/src", "README.md"],
+  "files": ["dist/src", "README.md", "docs", "fixtures/demo", "tasks/example.json", "tasks/backlog.md"],
   "engines": { "node": ">=22" },
   "scripts": {
     "dev": "tsx src/cli.ts",
     "shipcheck": "tsx src/cli.ts",
     "audit": "tsx src/cli.ts audit",
     "build": "tsc",
+    "prepack": "npm run build",
     "test": "vitest run",
     "test:watch": "vitest",
+    "evaluate": "npm run build --silent && node scripts/evaluate.mjs",
     "typecheck": "tsc --noEmit"
   },
   "keywords": [],

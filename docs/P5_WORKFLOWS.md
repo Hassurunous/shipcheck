@@ -1,7 +1,7 @@
 # P5 — audit, diff and task
 
 All workflows are read-only and offline by default. They accept the existing
---json, --ai preview/mock/live, --mode, and --trial options. No scripts or tests
+--json or --markdown, --ai preview/mock/live, --mode, and --trial options. No scripts or tests
 are executed, no code is modified, and AI spending limits are unchanged.
 
 ```powershell
@@ -26,7 +26,7 @@ Git runs with argument arrays, no shell, optional locks disabled, a ten-second
 timeout and 1 MiB output cap. No external diff or text conversion is used.
 
 Review uses current full-file contents, not patch hunks or historical contents.
-AI context is limited to selected paths and retains all prior exclusions and
+AI context focuses on selected paths, with bounded supporting local imports, and retains all prior exclusions and
 size limits. Deterministic inspection uses repository context to resolve facts;
 only findings with evidence on a changed path remain in the result. Consequently
 this is not regression attribution: existing defects on changed files can
@@ -34,7 +34,7 @@ appear, and impacts whose evidence is solely on unchanged files can be omitted.
 Repository-wide inspection warnings remain visible.
 
 Deleted, linked, and non-regular selected paths are disclosed as unavailable.
-An empty diff returns no scoped findings and skips AI. A nonempty scope with
+An empty diff returns no scoped findings and skips configuration loading, repository inspection and AI. A nonempty scope with
 no eligible AI source fails explicitly if AI was requested. Renames follow
 Git's name-only output; there is no rename-history analysis. Arbitrary bases,
 staged-only review and merge-base comparisons are not implemented.

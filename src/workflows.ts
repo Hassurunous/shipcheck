@@ -25,6 +25,9 @@ export async function runWorkflow(target:string, kind:'audit'|'diff'|'task', ai?
   const task = kind==='task' ? await loadTask(target) : undefined;
   if (task) target = task.repository;
   const paths = kind==='diff' ? await changedPaths(target) : task ? [...new Set(task.files)].sort() : undefined;
+  if (kind==='diff' && paths?.length===0) return reportSchema.parse({schemaVersion:1,
+    root:await realpath(await validateRoot(target)),findings:[],inspectionWarnings:[],
+    workflow:{kind:'diff',scope:[],baseline:'HEAD',unavailablePaths:[]}});
   const unavailablePaths: string[] = [];
   for (const path of paths ?? []) {
     let current = target;

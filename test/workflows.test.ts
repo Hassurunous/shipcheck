@@ -50,6 +50,16 @@ it('reports clean diffs without invoking AI and discloses deleted content',async
   const deleted=await runCli(['diff',root,'--json']);
   expect(JSON.parse(deleted.stdout).workflow.unavailablePaths).toEqual(['b.ts']);
 });
+
+it('returns an empty diff without loading unrelated invalid repository configuration',async()=> {
+  await initialize();
+  await fs.writeFile(join(root,'shipcheck.config.json'),'{');
+  await git('add','.'); await git('commit','-m','invalid config fixture');
+  const result=await runCli(['diff',root,'--ai','mock','--json']);
+  expect(result.exitCode).toBe(0);
+  expect(JSON.parse(result.stdout)).toMatchObject({findings:[],inspectionWarnings:[],workflow:{scope:[]}});
+  expect(fetch).not.toHaveBeenCalled();
+});
 it('filters deterministic findings to changed evidence paths',async()=> {
   await initialize();
   await fs.writeFile(join(root,'package.json'),'{'); await git('add','.'); await git('commit','-m','existing bad manifest');

@@ -183,3 +183,20 @@ file review and structured tasks. task-file.ts validates bounded JSON task
 files. AI context is restricted before source collection; deterministic findings
 are filtered after full-context rule evaluation. Reporters display workflow
 scope and unassessed task criteria. See P5_WORKFLOWS.md for limitations.
+
+## P6 local distribution
+
+markdown-report.ts produces a summary and a safely fenced complete report.
+--markdown is available on audit/diff/task and is exclusive with --json. Renderers
+return strings; shell redirection can save output. prepack builds the CLI; the
+package allowlist includes docs and the offline demo but excludes tests and
+local artifacts. See RELEASE_CHECKLIST.md for validation and known limits.
+
+## P6.1 audit reliability
+
+Empty diffs stop before config loading/inspection. The AI context selector follows
+static local import hints within existing limits; requests serialize explicit
+numbered lines. Coverage is separate from citation and semantic validity.
+Ancestor aliases are canonicalized while linked final roots remain rejected.
+Evaluation tooling replays responses and scores human assessments against fixed
+cases. See P6_1_AUDIT_RELIABILITY.md for limits and live evaluation results.

@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "exclude": ["dist/**", "coverage/**"],
+  "exclude": ["dist/**", "coverage/**", ".release-check/**"],
   "rules": {},
   "overrides": []
 }

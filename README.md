@@ -1,169 +1,127 @@
 # Shipcheck
 
-Shipcheck is an independent review layer for AI-assisted software development.
-Current status: **pre-alpha / P3 AI review with bounded live trial**. Repository inspection,
-configurable deterministic rules, and console/JSON reports are available through the
-API and the `audit` command. Help and JSON output are available. Audit, diff,
-task workflows are now available. AI previews and mocked QA review are offline;
-explicit live trial review has been tested in all three modes.
+Shipcheck is a local review tool for AI-assisted software development.
+**Status: pre-alpha, local v0.1 release preparation.** It provides configurable
+repository checks, audit/diff/task workflows, console/JSON/Markdown reports,
+and optional AI review with citation checks. Most deterministic checks currently
+focus on Node package manifests. Multi-language tool integration is planned for P7.
 
-## Local development
+## Install from this repository
 
-Requires Node.js 22+ and npm. From the repository root:
+Requires Node.js 22+ and npm. Git is required for the diff workflow.
 
-```sh
-npm install
-npm run dev -- .
+```powershell
+npm ci
+npm run build
+npm link
+shipcheck help
+shipcheck audit .
+```
+
+On Windows, ensure `npm prefix -g` is on your user PATH and restart the terminal
+after changing PATH. Check `Get-Command shipcheck`. Rebuild after source changes.
+Without linking, use `npm run audit -- .` or `node dist/src/cli.js audit .`.
+Use `npm run audit`, not `npm audit` (which is npm's dependency security command).
+
+## Commands
+
+```powershell
+shipcheck audit .
+shipcheck diff . --json
+shipcheck task tasks/example.json
+shipcheck audit . --markdown > report.md
+shipcheck audit . --ai preview
+shipcheck audit fixtures/demo --ai mock
+shipcheck help audit
+```
+
+- **audit:** configured repository checks. Replaces the removed review command.
+- **diff:** current contents of changed files versus HEAD, including staged,
+  unstaged, and untracked non-ignored files. Requires the Git repository root
+  and a valid HEAD. It does not analyze patch hunks or establish regressions.
+- **task:** files selected by a JSON task; acceptance criteria require human
+  confirmation. Repository paths resolve relative to the task file.
+
+All workflows are offline by default. They do not execute project scripts or
+modify source. --json and --markdown are mutually exclusive. Reports go to
+stdout, diagnostics to stderr. Redirection saves a report; choose a path outside
+the audited tree to avoid including a previous report in later inspection.
+Exit codes: 0 completed without deterministic errors, 1 deterministic error
+findings, 2 usage/configuration/inspection/AI failure. AI candidates do not set
+exit 1. Bare invocation and an explicit path retain the bootstrap readiness test;
+use audit to inspect files. Use `--` before a target starting with a dash.
+
+## Rules and configuration
+
+Create `shipcheck.config.json` in the audited repository root. Missing settings
+use defaults; `rules: {}` does not disable checks.
+
+```json
+{
+  "version": 1,
+  "exclude": ["dist/**", "coverage/**"],
+  "rules": {"repository/missing-readme": "warning"},
+  "overrides": []
+}
+```
+
+See the [rule catalog](docs/RULES.md), [configuration reference](docs/CONFIGURATION.md),
+and [workflow/task format](docs/P5_WORKFLOWS.md). Levels are off/info/warning/error.
+Rules include malformed manifests, conflicting lockfiles and missing local
+references; README, test detection, entry points and FIXME policies are opt-in.
+No linter, type checker or test runner is executed. Zero findings is not proof
+of correctness. Inspection ignores .git and node_modules, rejects/skips links,
+and bounds reads; .gitignore is not generally interpreted.
+
+## AI and evidence
+
+Preview shows source selection metadata without transmitting it. Mock generates
+explicitly synthetic candidates, with no API key or network required. Citation
+checks re-read selected source and compare files, ranges and exact excerpts;
+matching citations do not establish that the diagnosis is correct.
+
+Live execution requires --ai live --trial, OPENAI_PROJECTDEV_API_KEY, and an
+initialized persistent trial allowance. The approved development trial is
+complete and exhausted. Its fixed pricing approval expires October 3, 2026 UTC.
+This is not an ongoing production spending policy. Do not delete the ledger to
+reset spending. See [AI limits](docs/P3_AI.md), [trial results](docs/LIVE_TRIAL.md),
+and [citation verification](docs/P4_VERIFICATION.md).
+
+## Offline demonstration
+
+```powershell
+shipcheck audit fixtures/demo --markdown
+```
+
+Expected: two warnings (missing-script-target and source/fixme), exit 0. Add
+--ai mock for a synthetic AI candidate with a matching citation. No spending.
+
+## Local package and development
+
+```powershell
 npm run typecheck
 npm test
-npm run build
+npm pack
+npm install --global ./shipcheck-0.1.0.tgz
 ```
 
-Expected CLI output:
+Packing builds first. The package includes compiled source, docs, and the offline
+demo, excluding tests and credentials. It remains private to prevent accidental
+registry publication; local tarball installation is supported. The demo is inside
+the installed package's fixtures/demo directory. The example task in tasks/
+targets checkout source and is intended for repository users.
 
-```text
-Shipcheck v0.1
+Library exports include inspectRepository, reviewRepository, reviewWithAi,
+runWorkflow, and renderConsoleReport/renderJsonReport/renderMarkdownReport.
+Renderers return strings; they do not write files. For development use
+`npm run dev -- audit .` and `npm run test:watch`.
 
-Target: .
-Status: ready
-```
+See [release checks](docs/RELEASE_CHECKLIST.md), [product](docs/PRODUCT.md),
+[architecture](docs/ARCHITECTURE.md), and [milestone backlog](tasks/backlog.md).
 
-The first argument is the target, defaulting to `.`. No files are inspected or
-modified, and no environment variables or network access are needed at runtime.
-Use `npm run test:watch` for watch mode. After building, run
-`node dist/src/cli.js .`. The package has a future `shipcheck` executable mapping
-and is private to prevent accidental publication.
+## Audit reliability (P6.1)
 
-See [product scope](docs/PRODUCT.md), [architecture](docs/ARCHITECTURE.md),
-[decisions](docs/DECISIONS.md), and [backlog](tasks/backlog.md).
-
-## Inspect a repository (API)
-
-After `npm run build`, import the inspector from JavaScript:
-
-```js
-import { inspectRepository } from "./dist/src/index.js";
-
-const profile = await inspectRepository(".");
-console.log(JSON.stringify(profile, null, 2));
-```
-
-The validated profile includes files, languages, manifests, README/test
-indicators, package scripts, TODO/FIXME locations, and inspection warnings.
-Inspection is read-only and never executes package scripts. It skips `.git`,
-`node_modules`, and symlinks, and reads at most 1 MiB per file. Binary or non-UTF-8
-content is skipped. `.gitignore` is not interpreted; explicit exclusions are
-supported through inspection options or review configuration. Detection is
-heuristic; marker matches and test indicators are facts, not
-quality findings. See the architecture document for boundaries and limitations.
-
-## Generate a report (API)
-
-After building, run this from the repository root (PowerShell or a typical shell):
-
-```sh
-node --input-type=module -e "import { reviewRepository, renderConsoleReport } from './dist/src/index.js'; console.log(renderConsoleReport(await reviewRepository('.')));"
-```
-
-For JSON output, replace both occurrences of `renderConsoleReport` with
-`renderJsonReport`. These functions return strings; callers choose where to
-print or save them. No files are written by the report functions.
-
-`reviewRepository` loads `shipcheck.config.json` from the target root. This
-repository excludes build/coverage output. P2 checks package structure,
-conflicting lockfiles, missing local dependencies, and simple script targets.
-Entry-point, README, test-detection, and source FIXME policies are opt-in.
-Findings include rule IDs, severity, explanation, evidence, and suggested
-actions. Inspection warnings are separate. Zero findings is not a general
-quality assessment. See [the rule catalog](docs/RULES.md) and
-[configuration](docs/CONFIGURATION.md) for defaults and limitations.
-
-## Command-line shortcuts (P2.5)
-
-From the checkout, no build or global installation is needed:
-
-```powershell
-npm run audit
-npm run audit -- "D:\path\to\repository"
-npm run audit -- . --json
-npm run shipcheck -- help
-npm run shipcheck -- help audit
-npm run shipcheck -- --version
-```
-
-`audit` defaults to the current directory and loads the target's configuration.
-For clean JSON without npm's script banner, use `npm run --silent audit -- . --json`.
-Unknown options, extra targets, and unknown commands produce usage errors.
-Use `audit -- --leading-dash-folder` for a target beginning with a dash.
-
-For a direct `shipcheck` command, optionally run `npm run build` then `npm link`
-locally once. This creates a local command link, not a published package:
-
-On Windows, npm's global prefix must also be on PATH. Check it with
-`npm prefix -g` and verify command discovery with `Get-Command shipcheck`.
-Some Node version managers install launchers in a version-specific folder that
-is not on PATH. To make the linked command available in the current PowerShell:
-
-```powershell
-$env:Path += ";$(npm prefix -g)"
-Get-Command shipcheck
-shipcheck --version
-```
-
-For persistence, add that prefix to your **user PATH** in Windows Environment
-Variables. Restart the terminal application afterward; existing terminals keep
-their old environment. Recheck the prefix and link after switching Node versions.
-`npm run audit` does not require global PATH setup.
-
-```powershell
-shipcheck audit .
-shipcheck audit . --json
-shipcheck help
-shipcheck help audit
-shipcheck --version
-```
-
-Rebuild after source changes when using the linked command. Remove the link
-with `npm uninstall -g shipcheck` when no longer needed. Alternatively run
-`node dist/src/cli.js audit .` after building.
-
-Exit codes: **0** completed without error-level findings, **1** error-level
-findings, **2** usage/configuration/inspection failure. Warnings alone return 0.
-Reports go to stdout; failures go to stderr (including with `--json`). The
-no-argument and `.` readiness smoke tests remain available. Use `audit` for
-inspection; audit/diff/task add explicit workflow scope.
-
-## P3 preview and mock modes
-
-```powershell
-shipcheck audit . --ai preview
-shipcheck audit . --ai mock
-shipcheck audit . --ai mock --mode balanced
-shipcheck audit . --ai mock --mode high-quality --json
-```
-
-Use `npm run audit -- . --ai mock` without a global link. Low cost is the
-default mode. Mock results are synthetic plumbing checks, not software defects
-or real model evaluations. Preview and mock never read credentials or use the
-network. Live review requires --ai live --trial and a persistent allowance.
-The approved three-mode trial is complete; further attempts are blocked.
-Run `shipcheck trial status` for reservations and usage. See [live trial results
-and controls](docs/LIVE_TRIAL.md). Automatic retries are disabled.
-See [P3 behavior and limits](docs/P3_AI.md).
-
-## P4 citation checks
-
-AI candidates now include file freshness, line-range, and exact-excerpt checks.
-Console reports show MATCHED or REJECTED citations; diagnoses remain unverified.
-See [verification behavior](docs/P4_VERIFICATION.md). No extra API call is needed.
-
-## P5 workflows
-
-```powershell
-shipcheck audit .
-shipcheck diff . --ai preview
-shipcheck task tasks/example.json --ai mock
-```
-
-See [workflow scope and task format](docs/P5_WORKFLOWS.md). These commands are
-offline by default. Task criteria require human confirmation.
+AI requests use explicit line numbers and bounded local-import context. Reports
+show missing dependency context, skipped/failed coverage and rejected citations.
+Empty diffs skip inspection. See [P6.1 behavior and evaluation](docs/P6_1_AUDIT_RELIABILITY.md).
+For checkout-only offline replay: `npm run evaluate -- recorded-responses.json`.
