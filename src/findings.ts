@@ -26,6 +26,9 @@ export const reportSchema = z.object({
   findings: z.array(findingSchema),
   inspectionWarnings: repositoryProfileSchema.shape.warnings,
   ai: aiResultSchema.optional(),
+  workflow: z.object({kind:z.enum(['audit','diff','task']),scope:z.array(z.string()).nullable(),baseline:z.string().nullable(),
+    unavailablePaths:z.array(z.string()),
+    criteria:z.array(z.string()).optional()}).optional(),
 });
 export type Report = z.infer<typeof reportSchema>;
 

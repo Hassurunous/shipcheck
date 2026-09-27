@@ -3,7 +3,7 @@
 ## Current implementation (P3 with bounded live trial)
 
 `src/cli.ts` is the executable entry point, with command dispatch in
-`src/cli-command.ts`. `review` performs configured review; help/version explain
+`src/cli-command.ts`. `audit` performs configured review; help/version explain
 usage without inspecting files. The no-argument and `.` smoke-test output
 remains unchanged. The exported `inspectRepository`
 API performs repository inspection. `createReport` evaluates captured facts and
@@ -128,16 +128,16 @@ local-first with minimal persistent state and no server requirement for v0.1.
 ## P2.5 command interface
 
 `src/cli-command.ts` parses commands and returns stdout, stderr, and exit code;
-`src/cli.ts` handles process I/O. `review [target] [--json]` composes configured
+`src/cli.ts` handles process I/O. `audit [target] [--json]` composes configured
 inspection and reporting. Help/version do not inspect files. Local npm scripts
-expose `review` and `shipcheck`; the existing bin mapping supports optional npm
+expose `audit` and `shipcheck`; the existing bin mapping supports optional npm
 link after building. No CLI framework was added.
 
 Exit codes are 0 for completed reviews without error-level findings, 1 for
 error-level findings, and 2 for usage/configuration/inspection failures. Warnings
 alone do not fail the command. The no-argument and explicit-path readiness
 entry points remain for bootstrap compatibility; named targets should be passed
-to `review`. This is a deterministic review command, not the planned AI audit,
+to `audit`. This is a deterministic review command, not the planned AI audit,
 Git diff, or task workflow.
 
 ## P2.5 audit follow-up implementation
@@ -175,3 +175,11 @@ ai/verify-evidence.ts compares citations against submitted and freshly read
 source. ai/review.ts reuses bounded context collection after the response and
 attaches per-candidate verification results. Deterministic createReport remains
 pure. See P4_VERIFICATION.md for matching rules, failures, and limitations.
+
+## P5 workflow composition
+
+workflows.ts composes existing review functions for audit, HEAD-relative changed
+file review and structured tasks. task-file.ts validates bounded JSON task
+files. AI context is restricted before source collection; deterministic findings
+are filtered after full-context rule evaluation. Reporters display workflow
+scope and unassessed task criteria. See P5_WORKFLOWS.md for limitations.

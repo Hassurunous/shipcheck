@@ -1,0 +1,6 @@
+{
+  "version": 1,
+  "repository": "..",
+  "files": ["src/cli-command.ts", "src/workflows.ts"],
+  "criteria": ["Audit reports configured findings."]
+}

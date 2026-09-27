@@ -13,6 +13,13 @@ export function renderConsoleReport(input: Report): string {
   const report = reportSchema.parse(input);
   const lines = ["Shipcheck — deterministic review", `Target: ${text(report.root)}`, "",
     `Findings: ${report.findings.length}`, `Inspection warnings: ${report.inspectionWarnings.length}`];
+  if (report.workflow) {
+    lines.push(`Workflow: ${report.workflow.kind}; scope: ${report.workflow.scope===null?'whole repository':`${report.workflow.scope.length} selected paths`}`);
+    if (report.workflow.baseline) lines.push(`Git baseline: ${text(report.workflow.baseline)}; current file contents reviewed, not historical patches.`);
+    for (const path of report.workflow.scope ?? []) lines.push(`  Selected: ${text(path)}`);
+    for (const path of report.workflow.unavailablePaths) lines.push(`  Content unavailable (deleted, linked, or non-regular): ${text(path)}`);
+    for (const criterion of report.workflow.criteria ?? []) lines.push(`Acceptance criterion (human confirmation required): ${text(criterion)}`);
+  }
   for (const finding of report.findings) {
     lines.push("", `[${finding.severity.toUpperCase()}] ${text(finding.ruleId)} — ${text(finding.title)}`,
       `  ${text(finding.explanation)}`);

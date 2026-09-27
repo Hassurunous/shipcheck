@@ -7,16 +7,16 @@ results](LIVE_TRIAL.md); the sections below describe the shared foundation.
 ## Commands
 
 ```powershell
-shipcheck review . --ai preview
-shipcheck review . --ai mock
-shipcheck review . --ai mock --mode balanced
-shipcheck review . --ai mock --mode high-quality --json
+shipcheck audit . --ai preview
+shipcheck audit . --ai mock
+shipcheck audit . --ai mock --mode balanced
+shipcheck audit . --ai mock --mode high-quality --json
 ```
 
-Without a linked command, use `npm run review -- . --ai mock`. Rebuild after
+Without a linked command, use `npm run audit -- . --ai mock`. Rebuild after
 source changes when using the linked command. `--mode` requires `--ai`.
 `--ai live` requires `--trial` and an initialized, unexhausted allowance.
-Ordinary `shipcheck review .` remains deterministic and does not prepare AI
+Ordinary `shipcheck audit .` remains deterministic and does not prepare AI
 context. Configuration alone never enables an AI run.
 
 Preview lists selected paths, line counts, source bytes, hashes (JSON), skipped

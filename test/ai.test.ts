@@ -62,7 +62,7 @@ it('rejects unknown modes, models shape, unsafe limits and live execution', asyn
   }
   // Runtime callers may bypass TypeScript; guard the execution boundary too.
   await expect(reviewWithAi(root,{execution:'live'} as never)).rejects.toThrow('disabled');
-  expect((await runCli(['review',root,'--ai','live'])).exitCode).toBe(2);
+  expect((await runCli(['audit',root,'--ai','live'])).exitCode).toBe(2);
 });
 
 describe('context boundaries',()=> {
@@ -167,17 +167,17 @@ it('rejects reversed/out-of-range citations and unexpected candidate fields',asy
   expect(()=>decodeResponse(body([{...candidate(),instruction:'execute'}]),context)).toThrow('schema');
 });
 it('exposes preview/mock commands and partial failure exit codes',async()=> {
-  const empty = await runCli(['review',root,'--ai','mock','--json']);
+  const empty = await runCli(['audit',root,'--ai','mock','--json']);
   expect(empty.exitCode).toBe(2); expect(JSON.parse(empty.stdout).ai.error.code).toBe('empty-context');
   await write('src/math.ts');
   for (const execution of ['preview','mock']) {
-    const result = await runCli(['review',root,'--ai',execution,'--mode','balanced','--json']);
+    const result = await runCli(['audit',root,'--ai',execution,'--mode','balanced','--json']);
     expect(result.exitCode).toBe(0); expect(result.stderr).toBe('');
     expect(JSON.parse(result.stdout).ai.mode).toBe('balanced');
   }
-  expect((await runCli(['review',root,'--mode','balanced'])).exitCode).toBe(2);
-  expect((await runCli(['review',root,'--ai','mock','--mode','wrong'])).exitCode).toBe(2);
-  expect((await runCli(['review','--help'])).stdout).toContain('--ai mock');
+  expect((await runCli(['audit',root,'--mode','balanced'])).exitCode).toBe(2);
+  expect((await runCli(['audit',root,'--ai','mock','--mode','wrong'])).exitCode).toBe(2);
+  expect((await runCli(['audit','--help'])).stdout).toContain('--ai mock');
   expect(fetch).not.toHaveBeenCalled();
 });
 

@@ -13,6 +13,7 @@ import { verifyEvidence } from './verify-evidence.js';
 export type AiReviewOptions = {
   execution: 'preview' | 'mock' | 'live';
   trial?: boolean;
+  paths?: string[];
   mode?: AiMode;
   config?: ConfigInput;
 };
@@ -36,7 +37,8 @@ export async function reviewWithAi(target = '.', options: AiReviewOptions = {exe
     estimatedCostUsd:null,actualCostUsd:execution === 'injected' || execution === 'live' ? null : 0,retries:0,candidates:[],error:null,
   };
   try {
-    const context = await collectContext(profile,config.ai);
+    const contextProfile = options.paths ? {...profile,files:profile.files.filter(file=>options.paths!.includes(file.path))} : profile;
+    const context = await collectContext(contextProfile,config.ai);
     result.preview = context.preview;
     const request = buildRequest(context,config.ai,model ?? 'MODEL_NOT_SELECTED');
     result.requestBytes = Buffer.byteLength(JSON.stringify(request));
@@ -58,7 +60,7 @@ export async function reviewWithAi(target = '.', options: AiReviewOptions = {exe
       // Reuse the same bounded, exclusion-aware, link-rejecting reads. A missing,
       // modified, or newly ineligible file cannot receive a matched citation.
       let current = {files:[],preview:context.preview} as typeof context;
-      try { current = await collectContext(profile,config.ai); } catch { /* Fail closed for every citation. */ }
+      try { current = await collectContext(contextProfile,config.ai); } catch { /* Fail closed for every citation. */ }
       result.candidates = output.candidates.map(candidate=>({
         ...candidate, id:`ai/qa:${createHash('sha256').update(JSON.stringify(candidate)).digest('hex').slice(0,16)}`,
         evidenceStatus:'unverified', origin:'ai',

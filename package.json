@@ -11,7 +11,7 @@
   "scripts": {
     "dev": "tsx src/cli.ts",
     "shipcheck": "tsx src/cli.ts",
-    "review": "tsx src/cli.ts review",
+    "audit": "tsx src/cli.ts audit",
     "build": "tsc",
     "test": "vitest run",
     "test:watch": "vitest",

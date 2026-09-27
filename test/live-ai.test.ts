@@ -121,6 +121,6 @@ it('rejects missing credentials, unapproved models and output limits before rese
   expect((await trialStatus(directory)).attempts).toEqual([]); expect(fetch).not.toHaveBeenCalled();
 });
 it('requires explicit CLI activation and rejects mismatched trial flags without network',async()=> {
-  for (const args of [['review','--ai','live'],['review','--trial'],['review','--ai','mock','--trial']]) expect((await runCli(args)).exitCode).toBe(2);
+  for (const args of [['audit','--ai','live'],['audit','--trial'],['audit','--ai','mock','--trial']]) expect((await runCli(args)).exitCode).toBe(2);
   expect((await runCli(['help','trial'])).stdout).toContain('trial status'); expect(fetch).not.toHaveBeenCalled();
 });

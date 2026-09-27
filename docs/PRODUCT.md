@@ -3,7 +3,7 @@
 Shipcheck is an independent review layer for
 AI-assisted software development.
 
-## Planned v0.1 workflows
+## v0.1 workflows
 
 shipcheck audit .
 shipcheck diff .
@@ -11,8 +11,7 @@ shipcheck task <task-file>
 
 Current status: pre-alpha, with repository inspection, deterministic package
 findings, and console/JSON reporting available as a local TypeScript/JavaScript
-API and a `review` CLI command with help and JSON output. The planned audit,
-diff and task workflows are not implemented yet. P3 provides
+API and a `audit` CLI command with help and JSON output. Audit, diff and structured JSON task workflows are implemented; see P5_WORKFLOWS.md. P3 provides
 explicit source-context previews, mocked QA review, and a bounded live trial with
 low-cost, balanced, and high-quality modes. P2 rules cover package
 structure, lockfile conflicts, and missing local references, with optional
@@ -27,7 +26,7 @@ audit/diff/task workflows. P3's offline implementation and approved $0.50 live
 trial are delivered. All three modes passed the tiny fixture smoke test; see
 LIVE_TRIAL.md. General recurring live budgets are not implemented.
 P4 now checks AI evidence files, line ranges, and exact excerpts; semantic
-verification remains future work. P5 adds those workflows, and P6 prepares a release. The
+verification remains future work. P5 implements those workflows, and P6 prepares a release. The
 P2.5 audit follow-ups are resolved. Mock AI candidates are not real diagnoses.
 
 Find meaningful software problems using a combination

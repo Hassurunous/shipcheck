@@ -9,8 +9,8 @@ in the repository or ledger. Ordinary review, preview and mock stay offline.
 
 ```powershell
 shipcheck trial status
-shipcheck review fixtures/live-trial --ai preview
-shipcheck review fixtures/live-trial --ai live --trial --mode low-cost
+shipcheck audit fixtures/live-trial --ai preview
+shipcheck audit fixtures/live-trial --ai live --trial --mode low-cost
 ```
 
 `shipcheck trial init` creates an allowance once; it never resets an existing

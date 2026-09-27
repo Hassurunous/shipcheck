@@ -3,8 +3,8 @@
 Shipcheck is an independent review layer for AI-assisted software development.
 Current status: **pre-alpha / P3 AI review with bounded live trial**. Repository inspection,
 configurable deterministic rules, and console/JSON reports are available through the
-API and the `review` command. Help and JSON output are available. Audit, diff,
-task workflows remain planned. AI previews and mocked QA review are offline;
+API and the `audit` command. Help and JSON output are available. Audit, diff,
+task workflows are now available. AI previews and mocked QA review are offline;
 explicit live trial review has been tested in all three modes.
 
 ## Local development
@@ -83,18 +83,18 @@ quality assessment. See [the rule catalog](docs/RULES.md) and
 From the checkout, no build or global installation is needed:
 
 ```powershell
-npm run review
-npm run review -- "D:\path\to\repository"
-npm run review -- . --json
+npm run audit
+npm run audit -- "D:\path\to\repository"
+npm run audit -- . --json
 npm run shipcheck -- help
-npm run shipcheck -- help review
+npm run shipcheck -- help audit
 npm run shipcheck -- --version
 ```
 
-`review` defaults to the current directory and loads the target's configuration.
-For clean JSON without npm's script banner, use `npm run --silent review -- . --json`.
+`audit` defaults to the current directory and loads the target's configuration.
+For clean JSON without npm's script banner, use `npm run --silent audit -- . --json`.
 Unknown options, extra targets, and unknown commands produce usage errors.
-Use `review -- --leading-dash-folder` for a target beginning with a dash.
+Use `audit -- --leading-dash-folder` for a target beginning with a dash.
 
 For a direct `shipcheck` command, optionally run `npm run build` then `npm link`
 locally once. This creates a local command link, not a published package:
@@ -113,36 +113,36 @@ shipcheck --version
 For persistence, add that prefix to your **user PATH** in Windows Environment
 Variables. Restart the terminal application afterward; existing terminals keep
 their old environment. Recheck the prefix and link after switching Node versions.
-`npm run review` does not require global PATH setup.
+`npm run audit` does not require global PATH setup.
 
 ```powershell
-shipcheck review .
-shipcheck review . --json
+shipcheck audit .
+shipcheck audit . --json
 shipcheck help
-shipcheck help review
+shipcheck help audit
 shipcheck --version
 ```
 
 Rebuild after source changes when using the linked command. Remove the link
 with `npm uninstall -g shipcheck` when no longer needed. Alternatively run
-`node dist/src/cli.js review .` after building.
+`node dist/src/cli.js audit .` after building.
 
 Exit codes: **0** completed without error-level findings, **1** error-level
 findings, **2** usage/configuration/inspection failure. Warnings alone return 0.
 Reports go to stdout; failures go to stderr (including with `--json`). The
-no-argument and `.` readiness smoke tests remain available. Use `review` for
-inspection; audit/diff/task workflows remain unimplemented.
+no-argument and `.` readiness smoke tests remain available. Use `audit` for
+inspection; audit/diff/task add explicit workflow scope.
 
 ## P3 preview and mock modes
 
 ```powershell
-shipcheck review . --ai preview
-shipcheck review . --ai mock
-shipcheck review . --ai mock --mode balanced
-shipcheck review . --ai mock --mode high-quality --json
+shipcheck audit . --ai preview
+shipcheck audit . --ai mock
+shipcheck audit . --ai mock --mode balanced
+shipcheck audit . --ai mock --mode high-quality --json
 ```
 
-Use `npm run review -- . --ai mock` without a global link. Low cost is the
+Use `npm run audit -- . --ai mock` without a global link. Low cost is the
 default mode. Mock results are synthetic plumbing checks, not software defects
 or real model evaluations. Preview and mock never read credentials or use the
 network. Live review requires --ai live --trial and a persistent allowance.
@@ -156,3 +156,14 @@ See [P3 behavior and limits](docs/P3_AI.md).
 AI candidates now include file freshness, line-range, and exact-excerpt checks.
 Console reports show MATCHED or REJECTED citations; diagnoses remain unverified.
 See [verification behavior](docs/P4_VERIFICATION.md). No extra API call is needed.
+
+## P5 workflows
+
+```powershell
+shipcheck audit .
+shipcheck diff . --ai preview
+shipcheck task tasks/example.json --ai mock
+```
+
+See [workflow scope and task format](docs/P5_WORKFLOWS.md). These commands are
+offline by default. Task criteria require human confirmation.

@@ -1,22 +1,23 @@
 import { formatStatus } from './index.js';
-import { reviewRepository } from './review-repository.js';
 import { renderConsoleReport, renderJsonReport } from './reporters.js';
-import { reviewWithAi } from './ai/review.js';
 import { modeSchema } from './ai/contracts.js';
 import { initializeTrial, trialStatus } from './ai/trial-budget.js';
+import { runWorkflow } from './workflows.js';
 
 const help = `Shipcheck v0.1
 
 Usage: shipcheck <command> [target] [options]
 
 Commands:
-  review [target]   Review a repository using shipcheck.config.json (default: .)
+  audit [target]    Audit a repository using shipcheck.config.json (default: .)
+  diff [target]     Review changed files versus HEAD, including untracked files
+  task <task-file>  Review files selected by a structured JSON task
   trial init       Initialize the one-time $0.50 / three-mode trial (never resets)
   trial status     Show persistent trial reservations and usage
-  help [command]   Show this help or help for review
+  help [command]   Show help for audit, diff, task, or trial
   --version        Show the version
 
-Review options:
+Audit, diff, and task options:
   --json           Print the report as JSON
   --ai preview     Preview bounded AI input metadata without sending anything
   --ai mock        Exercise the QA reviewer with a synthetic offline response
@@ -26,8 +27,8 @@ Review options:
   --               Treat remaining arguments as a target path
 
 Local shortcuts:
-  npm run review -- .
-  npm run review -- . --json
+  npm run audit -- .
+  npm run audit -- . --json
   npm run shipcheck -- help
 
 Exit codes: 0 completed, 1 error-level findings, 2 usage/configuration/inspection failure.
@@ -49,12 +50,13 @@ export async function runCli(args: readonly string[]): Promise<CliResult> {
     } catch (error) { return fail(error instanceof Error ? error.message : 'Trial state failed.'); }
   }
   if (command === 'help') {
-    if (args.length > 2 || (args[1] && !['review', 'help', 'trial'].includes(args[1]))) return fail('Unknown help topic.');
+    if (args.length > 2 || (args[1] && !['audit', 'diff', 'task', 'help', 'trial'].includes(args[1]))) return fail('Unknown help topic.');
     return ok(help);
   }
   if (command === '--help' || command === '-h') return args.length === 1 ? ok(help) : fail('Unexpected arguments after help.');
   if (command === '--version' || command === '-v') return args.length === 1 ? ok('Shipcheck v0.1') : fail('Unexpected arguments after version.');
-  if (command !== 'review') {
+  if (command === 'review') return fail('The review command has been removed. Use shipcheck audit instead.');
+  if (command !== 'audit' && command !== 'diff' && command !== 'task') {
     if (command === undefined) return ok(formatStatus());
     if (args.length === 1 && (command === '.' || command === '..' || /[\\/]/.test(command))) return ok(formatStatus(args));
     return fail(`Unknown command ${JSON.stringify(command)}.`);
@@ -87,11 +89,12 @@ export async function runCli(args: readonly string[]): Promise<CliResult> {
     target = arg;
   }
   if (wantsHelp) return ok(help);
+  if (command==='task' && !target) return fail('task requires a JSON task file.');
   if (mode && !ai) return fail('--mode requires --ai.');
   if ((ai === 'live') !== trial) return fail('Live AI requires --trial; --trial is only valid with --ai live.');
   try {
-    const report = ai ? await reviewWithAi(target ?? '.', {execution:ai, trial, ...(mode ? {mode:modeSchema.parse(mode)} : {})})
-      : await reviewRepository(target ?? '.');
+    const aiOptions = ai ? {execution:ai,trial,...(mode ? {mode:modeSchema.parse(mode)} : {})} : undefined;
+    const report = await runWorkflow(target ?? '.',command,aiOptions);
     const aiFailed = report.ai?.status === 'failed';
     return { stdout: json ? renderJsonReport(report) : renderConsoleReport(report),
       stderr: aiFailed ? `Shipcheck: AI stage failed (${report.ai?.error?.code}); deterministic results are retained.` : '',
