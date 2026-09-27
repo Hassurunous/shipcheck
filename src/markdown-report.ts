@@ -10,7 +10,8 @@ export function renderMarkdownReport(input: Report): string {
   return ['# Shipcheck report','',
     `- Deterministic findings: ${report.findings.length}`,
     `- Inspection warnings: ${report.inspectionWarnings.length}`,
-    `- AI candidates: ${report.ai?.candidates.length ?? 0}`,'',
+    `- AI candidates: ${(report.ai?.candidates.length ?? 0)+(report.aiAudit?.batches.reduce((sum,batch)=>sum+batch.candidates.length,0) ?? 0)}`,
+    ...(report.checks?.length ? [`- External checks: ${report.checks.length}; ${report.checks.filter(check=>check.status==='passed').length} passed`] : []),'',
     '## Review details','',fence+'text',content,fence,'',
     'A clean report does not establish correctness. AI diagnoses remain unverified.',''].join('\n');
 }

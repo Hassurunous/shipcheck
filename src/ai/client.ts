@@ -8,7 +8,7 @@ export function buildRequest(context: AiContext, settings: AiSettings, model: st
   const { $schema: _dialect, ...responseSchema } = schema;
   return {
     model, store:false, max_output_tokens:settings.maxOutputTokens,
-    instructions:QA_INSTRUCTIONS,
+    instructions:QA_INSTRUCTIONS+` Review focus: ${settings.focus.join(', ')}. For race conditions describe the competing operations and a concrete failing interleaving. For code smells explain a specific maintenance or reliability consequence; avoid style-only preferences. Do not claim that running tests or static analysis occurred.`,
     input:[{role:'user' as const, content:JSON.stringify({sourceFiles:context.files.map(file=>({path:file.path,numberedLines:file.content.split(/\r\n|\n|\r/).map((text,index)=>({line:index+1,text}))})), lineNumbering:'explicit-one-based', focusPaths:context.preview.requestedPaths ?? context.files.map(file=>file.path), missingDependencies:(context.preview.dependencies ?? []).filter(dependency=>dependency.status!=='included')})}],
     text:{format:{type:'json_schema' as const, name:'shipcheck_qa_candidates', strict:true, schema:responseSchema}},
   };

@@ -2,5 +2,9 @@
   "version": 1,
   "exclude": ["dist/**", "coverage/**", ".release-check/**"],
   "rules": {},
+  "checks": [
+    {"id":"typecheck","command":"node","args":["node_modules/typescript/bin/tsc","--noEmit"]},
+    {"id":"tests","command":"node","args":["node_modules/vitest/vitest.mjs","run"],"timeoutMs":120000}
+  ],
   "overrides": []
 }

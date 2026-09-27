@@ -55,7 +55,9 @@ export async function collectContext(profile: RepositoryProfile, settings: AiSet
   const files: SourceFile[] = [];
   const preview: AiResult['preview'] = {files:[], skipped:[], serializedBytes:2, limited:false};
   const inventory = new Set(profile.files.map(f=>f.path));
-  const paths = [...(requestedPaths ?? inventory)].sort((a,b)=> {
+  // Preserve explicit batch order: re-sorting can let supporting imports displace
+  // the still-unreviewed file that seeded a whole-repository batch.
+  const paths = requestedPaths ? [...requestedPaths] : [...inventory].sort((a,b)=> {
     const rank = (p: string) => p.startsWith('src/') ? 0 : /^(?:test|tests)\//.test(p) ? 1 : 2;
     return rank(a)-rank(b) || (a<b ? -1 : a>b ? 1 : 0);
   });

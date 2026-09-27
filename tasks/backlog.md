@@ -67,7 +67,7 @@
 - [x] Markdown reports
 - [x] Release checklist
 
-## P6.1 � Audit reliability
+## P6.1 — Audit reliability
 
 - [x] Return early for empty diffs without repository inspection
 - [x] Supply explicitly numbered source lines and retain strict citation checks
@@ -79,14 +79,25 @@
 
 ## P7 — Multi-language checks and developer-agent feedback
 
-Planned after P6; this work does not expand the P6 release requirements.
+In progress after P6/P6.1; this work does not expand the P6 release requirements.
+
+First slice delivered:
+- [x] Root config for language-independent commands and AI credential environment references
+- [x] Command opt-in, direct-child timeout/output limits, and separate tool statuses
+- [x] Whole-repository preview/mock batches with bounded requests and disclosed skips
+- [x] Configurable AI concerns including race conditions and code smells
+- [x] Configuration examples and baseline-to-diff developer workflow documentation
+
+Remaining P7 work:
+- [ ] Persistent aggregate spending limits and live whole-repository batch execution
+- [ ] Descendant process cleanup across supported platforms
 
 - [ ] Define a small adapter contract for language-specific linters and analyzers
 - [ ] Add configurable language detection and check selection, initially JavaScript/TypeScript and Python
 - [ ] Integrate established tools and normalize findings, locations, severities, and tool failures
 - [ ] Add explicitly authorized command execution with timeouts and output limits; never silently execute repository configuration
 - [ ] Define configurable pass/fail thresholds while distinguishing deterministic results from AI candidates
-- [ ] Document a developer-agent loop: implement, invoke Shipcheck, read JSON results, fix, repeat
+- [x] Document a developer-agent loop: implement, invoke Shipcheck, read JSON results, fix, repeat
 - [ ] Improve rule/configuration discoverability and include detailed documentation and language examples in distributed packages
 - [ ] Add offline integration fixtures and tests for multiple languages and execution failures
 

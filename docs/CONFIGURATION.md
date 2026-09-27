@@ -3,7 +3,8 @@
 `reviewRepository(target)` loads `shipcheck.config.json` from the target root,
 then inspects and reports with that configuration. No config file means defaults.
 Malformed JSON, unknown keys/rule IDs, unsupported patterns, and invalid
-severities fail clearly. Config is data only; no JavaScript is executed.
+severities fail clearly. Loading config does not execute code. Configured commands
+run only with explicit `--run-checks`; see [P7 settings](P7_CONFIGURATION.md).
 
 The root must be a real directory, not a symlink. A missing config uses defaults;
 linked, non-regular, unreadable, oversized, or invalid UTF-8 config files fail.

@@ -47,7 +47,7 @@ async function post(url: string, payload: unknown, apiKey: string, timeoutMs: nu
 
 export async function requestLiveQa(request: QaRequest, context: AiContext, mode: AiMode, timeoutMs: number,
   apiKey: string | undefined, dependencies: LiveDependencies = {}) {
-  if (!apiKey?.trim()) throw new AiFailure('missing-credentials','Set OPENAI_PROJECTDEV_API_KEY in this process before live review.');
+  if (!apiKey?.trim()) throw new AiFailure('missing-credentials','Provide the configured API credential before live review.');
   if (request.model !== TRIAL_MODELS[mode].model) throw new AiFailure('trial-model','Model does not match the approved trial mapping.');
   if (request.max_output_tokens > OUTPUT_LIMIT || request.max_output_tokens < 128) throw new AiFailure('trial-output-limit','Trial output limit is 128–2000 tokens.');
   const payload = {...request,reasoning:{effort:'low'},service_tier:'default'};

@@ -21,6 +21,8 @@ Commands:
 Audit, diff, and task options:
   --json           Print the report as JSON
   --markdown       Print a Markdown report (exclusive with --json)
+  --run-checks     Execute trusted configured checks (whole repository)
+  --whole-repository Batch all eligible source for audit --ai preview/mock
   --ai preview     Preview bounded AI input metadata without sending anything
   --ai mock        Exercise the QA reviewer with a synthetic offline response
   --ai live --trial Run one approved trial attempt for the selected mode
@@ -70,6 +72,8 @@ export async function runCli(args: readonly string[]): Promise<CliResult> {
   let wantsHelp = false;
   let ai: 'preview' | 'mock' | 'live' | undefined;
   let trial = false;
+  let runChecks = false;
+  let wholeRepository = false;
   let mode: string | undefined;
   for (let index = 1; index < args.length; index++) {
     const arg = args[index]!;
@@ -78,6 +82,8 @@ export async function runCli(args: readonly string[]): Promise<CliResult> {
     if (!literal && arg === '--json') { json = true; continue; }
     if (!literal && arg === '--markdown') { markdown = true; continue; }
     if (!literal && arg === '--trial') { trial = true; continue; }
+    if (!literal && arg === '--run-checks') { runChecks = true; continue; }
+    if (!literal && arg === '--whole-repository') { wholeRepository = true; continue; }
     if (!literal && arg === '--ai') {
       const value = args[++index];
       if (value !== 'preview' && value !== 'mock' && value !== 'live') return fail('Use --ai preview, --ai mock, or --ai live --trial.');
@@ -99,11 +105,13 @@ export async function runCli(args: readonly string[]): Promise<CliResult> {
   if ((ai === 'live') !== trial) return fail('Live AI requires --trial; --trial is only valid with --ai live.');
   try {
     const aiOptions = ai ? {execution:ai,trial,...(mode ? {mode:modeSchema.parse(mode)} : {})} : undefined;
-    const report = await runWorkflow(target ?? '.',command,aiOptions);
-    const aiFailed = report.ai?.status === 'failed';
+    const report = await runWorkflow(target ?? '.',command,aiOptions,{runChecks,wholeRepository});
+    const aiFailed = report.ai?.status === 'failed' || report.aiAudit?.state==='failed';
+    const checkError=report.checks?.some(check=>check.status==='error');
+    const checkFailed=report.checks?.some(check=>check.status==='failed');
     return { stdout: json ? renderJsonReport(report) : markdown ? renderMarkdownReport(report) : renderConsoleReport(report),
-      stderr: aiFailed ? `Shipcheck: AI stage failed (${report.ai?.error?.code}); deterministic results are retained.` : '',
-      exitCode: aiFailed ? 2 : report.findings.some(f => f.severity === 'error') ? 1 : 0 };
+      stderr: aiFailed ? `Shipcheck: AI stage failed (${report.ai?.error?.code ?? 'batch-failure'}); deterministic results are retained.` : checkError ? 'Shipcheck: A configured check could not complete; see the report.' : '',
+      exitCode: aiFailed || checkError ? 2 : checkFailed || report.findings.some(f => f.severity === 'error') ? 1 : 0 };
   } catch (error) {
     return fail(error instanceof Error ? error.message : String(error));
   }

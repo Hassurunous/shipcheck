@@ -101,7 +101,7 @@ The offline transport is injected. This
 lets tests exercise successful responses, authentication/rate-limit failures,
 refusals, incomplete output, malformed JSON, timeouts, and transport errors
 without network access. The separate live transport enforces a response
-stream byte limit and uses `OPENAI_PROJECTDEV_API_KEY` only for explicit live
+stream byte limit and uses `ai.apiKeyEnv` (default `SHIPCHECK_API_KEY`) only for explicit live
 execution. It uses native fetch with a fixed endpoint and no SDK.
 
 Responses are limited to 128 KiB at the adapter boundary. Structured candidates

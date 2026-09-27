@@ -48,7 +48,8 @@ export async function reviewWithAi(target = '.', options: AiReviewOptions = {exe
       if (injected && !plannedModel) throw new AiFailure('missing-model','Select a model mapping before using an injected client.');
       let output;
       if (execution === 'live') {
-        const live = await requestLiveQa(request,context,mode,config.ai.timeoutMs,process.env.OPENAI_PROJECTDEV_API_KEY);
+        if(!process.env[config.ai.apiKeyEnv]?.trim()) throw new AiFailure('missing-credentials',`Set ${config.ai.apiKeyEnv} in this process before live review.`);
+        const live = await requestLiveQa(request,context,mode,config.ai.timeoutMs,process.env[config.ai.apiKeyEnv]);
         const {output:liveOutput,...trial} = live;
         result.trial = trial;
         output = liveOutput;

@@ -37,7 +37,23 @@ export function renderConsoleReport(input: Report): string {
       lines.push(`  ${text(warning.path)} [${warning.code}]: ${text(warning.message)}`);
     }
   }
-  lines.push("", "Scope: configured deterministic repository rules only. No scripts or tests were executed.");
+  if(report.checks?.length) {
+    lines.push('', 'Configured checks (whole repository; tool output is not citation-verified):');
+    for(const check of report.checks) {
+      lines.push(`  [${check.status.toUpperCase()}] ${text(check.id)}: ${text(check.reason)}`);
+      if(check.output)lines.push(`    ${text(check.output)}`);
+    }
+  }
+  lines.push("", report.checks?.some(check=>check.status!=='skipped')
+    ? 'Scope: configured deterministic rules and explicitly authorized external checks. A successful command does not prove correctness.'
+    : 'Scope: configured deterministic repository rules only. No scripts or tests were executed.');
+  if(report.aiAudit) {
+    const audit=report.aiAudit;
+    lines.push('',`Whole-repository AI: ${audit.state.toUpperCase()}; ${audit.batches.length} batches; ${audit.selectedPaths.length} selected files; ${audit.validResponsePaths.length} files with valid responses; ${audit.skipped.length} skipped.`,
+      'Whole-repository scope does not guarantee complete context or defect detection. Preview/mock results are not real diagnoses.');
+    for(const item of audit.skipped)lines.push(`  Skipped: ${text(item.path)} — ${text(item.reason)}`);
+    audit.batches.forEach((ai,index)=>lines.push('',`AI batch ${index+1}:`,renderConsoleReport({schemaVersion:1,root:report.root,findings:[],inspectionWarnings:[],ai})));
+  }
   if (report.ai) {
     const ai = report.ai;
     if(ai.coverage) {

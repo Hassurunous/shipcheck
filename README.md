@@ -4,7 +4,8 @@ Shipcheck is a local review tool for AI-assisted software development.
 **Status: pre-alpha, local v0.1 release preparation.** It provides configurable
 repository checks, audit/diff/task workflows, console/JSON/Markdown reports,
 and optional AI review with citation checks. Most deterministic checks currently
-focus on Node package manifests. Multi-language tool integration is planned for P7.
+focus on Node package manifests. P7 adds opt-in external tool commands; normalized
+multi-language diagnostics and paid whole-repository AI batching remain in progress.
 
 ## Install from this repository
 
@@ -80,7 +81,7 @@ explicitly synthetic candidates, with no API key or network required. Citation
 checks re-read selected source and compare files, ranges and exact excerpts;
 matching citations do not establish that the diagnosis is correct.
 
-Live execution requires --ai live --trial, OPENAI_PROJECTDEV_API_KEY, and an
+Live execution requires --ai live --trial, SHIPCHECK_API_KEY (or the configured ai.apiKeyEnv), and an
 initialized persistent trial allowance. The approved development trial is
 complete and exhausted. Its fixed pricing approval expires October 3, 2026 UTC.
 This is not an ongoing production spending policy. Do not delete the ledger to
@@ -125,3 +126,16 @@ AI requests use explicit line numbers and bounded local-import context. Reports
 show missing dependency context, skipped/failed coverage and rejected citations.
 Empty diffs skip inspection. See [P6.1 behavior and evaluation](docs/P6_1_AUDIT_RELIABILITY.md).
 For checkout-only offline replay: `npm run evaluate -- recorded-responses.json`.
+## P7 setup
+
+Shipcheck supports explicitly authorized external checks and whole-repository AI
+previews/mocks. Configure `checks`, `ai.apiKeyEnv`, `ai.focus`, and `ai.scope` in
+`shipcheck.config.json`. See [P7 configuration](docs/P7_CONFIGURATION.md) for
+JavaScript/Python examples, importing the API, execution limits, and remaining work.
+
+```powershell
+shipcheck audit . --run-checks --json
+shipcheck audit . --ai preview --whole-repository --json
+```
+
+Whole-repository paid AI batching is not enabled yet. Preview/mock do not diagnose bugs.

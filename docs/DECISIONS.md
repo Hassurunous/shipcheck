@@ -51,3 +51,9 @@ P2.5 scope clarification — pre-P3 audit
 33. **One repository command:** at user request, remove the redundant review CLI command and npm script. audit is the repository-wide verb. Library reviewRepository/reviewWithAi APIs retain their names.
 
 34. **Post-release expansion:** schedule multi-language tool integrations, explicit bounded check execution, developer-agent feedback, and expanded configuration documentation as P7 after P6. Preserve P6 release scope. Number subsequent agreed milestones P8 onward; this roadmap change does not implement or activate those capabilities.
+## P7 credential default
+
+The default credential environment variable is now `SHIPCHECK_API_KEY`.
+`ai.apiKeyEnv` can override it, including with `OPENAI_PROJECTDEV_API_KEY` for
+existing setups. This supersedes the default naming convention in the historical
+P3 decisions below; no credentials or spending allowances are migrated.

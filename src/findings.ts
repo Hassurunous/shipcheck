@@ -3,6 +3,7 @@ import { repositoryProfileSchema, type RepositoryProfile } from "./repository-pr
 import { configSchema, isExcluded, ruleLevel, type ConfigInput, type RuleId } from "./config.js";
 import { additionalFindings } from "./additional-rules.js";
 import { aiResultSchema } from "./ai/contracts.js";
+import { checkResultSchema } from './checks.js';
 
 export const findingSchema = z.object({
   id: z.string().min(1),
@@ -26,6 +27,11 @@ export const reportSchema = z.object({
   findings: z.array(findingSchema),
   inspectionWarnings: repositoryProfileSchema.shape.warnings,
   ai: aiResultSchema.optional(),
+  checks:z.array(checkResultSchema).optional(),
+  aiAudit:z.object({scope:z.literal('whole-repository'),batches:z.array(aiResultSchema),
+    selectedPaths:z.array(z.string()),validResponsePaths:z.array(z.string()),
+    skipped:z.array(z.object({path:z.string(),reason:z.string()})),
+    state:z.enum(['preview','partial','complete','failed'])}).optional(),
   workflow: z.object({kind:z.enum(['audit','diff','task']),scope:z.array(z.string()).nullable(),baseline:z.string().nullable(),
     unavailablePaths:z.array(z.string()),
     criteria:z.array(z.string()).optional()}).optional(),

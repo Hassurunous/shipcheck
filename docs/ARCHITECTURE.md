@@ -166,7 +166,7 @@ The optional report.ai section separates unverified candidates from findings.
 No SDK or retry was introduced. The separate ai/live.ts module implements
 bounded HTTP for explicit --ai live --trial execution. ai/trial-budget.ts
 persists reservations and receipts outside repositories and locks concurrent
-requests. Only live execution reads OPENAI_PROJECTDEV_API_KEY. See
+requests. Only live execution reads the configured ai.apiKeyEnv (default SHIPCHECK_API_KEY). See
 LIVE_TRIAL.md for allowance limits and observed three-mode results.
 
 ## P4 citation verification
@@ -200,3 +200,12 @@ numbered lines. Coverage is separate from citation and semantic validity.
 Ancestor aliases are canonicalized while linked final roots remain rejected.
 Evaluation tooling replays responses and scores human assessments against fixed
 cases. See P6_1_AUDIT_RELIABILITY.md for limits and live evaluation results.
+## P7 first implementation slice
+
+checks.ts validates commands and executes direct child processes only after explicit
+authorization. Reports retain external check statuses and bounded raw output separately
+from deterministic findings and AI candidates. Checks always have whole-repository scope.
+ai/whole-repository.ts batches source for preview/mock with existing selection controls,
+a maximum batch count, and explicit coverage. Paid batching awaits aggregate budgets.
+ai.apiKeyEnv references credentials outside the repository; ai.focus configures review
+concerns. See P7_CONFIGURATION.md for contracts and execution limitations.

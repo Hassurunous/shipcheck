@@ -3,6 +3,10 @@ import { z } from 'zod';
 export const modeSchema = z.enum(['low-cost', 'balanced', 'high-quality']);
 export type AiMode = z.infer<typeof modeSchema>;
 export const aiSettingsSchema = z.object({
+  apiKeyEnv:z.string().regex(/^[A-Za-z_][A-Za-z0-9_]*$/).default('SHIPCHECK_API_KEY'),
+  scope:z.enum(['bounded','whole-repository']).default('bounded'),
+  maxBatches:z.number().int().min(1).max(100).default(20),
+  focus:z.array(z.enum(['correctness','race-conditions','resource-management','error-handling','code-smells'])).min(1).max(5).default(['correctness','race-conditions','resource-management','error-handling']),
   mode: modeSchema.default('low-cost'),
   models: z.object({
     'low-cost': z.string().min(1).max(100).nullable().default(null),

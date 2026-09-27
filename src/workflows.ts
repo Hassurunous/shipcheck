@@ -7,6 +7,11 @@ import { reviewRepository } from './review-repository.js';
 import { reviewWithAi, type AiReviewOptions } from './ai/review.js';
 import { reportSchema, type Report } from './findings.js';
 import { loadTask } from './task-file.js';
+import { configSchema, loadConfig } from './config.js';
+import { runChecks } from './checks.js';
+import { reviewWholeRepository } from './ai/whole-repository.js';
+
+export type WorkflowOptions={runChecks?:boolean;wholeRepository?:boolean};
 
 const exec = promisify(execFile);
 async function git(root:string, args:string[]) {
@@ -21,7 +26,8 @@ export async function changedPaths(target:string): Promise<string[]> {
   const untracked = await git(root,['ls-files','--others','--exclude-standard','-z']);
   return [...new Set((tracked+untracked).split('\0').filter(Boolean))].sort();
 }
-export async function runWorkflow(target:string, kind:'audit'|'diff'|'task', ai?:AiReviewOptions): Promise<Report> {
+export async function runWorkflow(target:string, kind:'audit'|'diff'|'task', ai?:AiReviewOptions, options:WorkflowOptions={}): Promise<Report> {
+  if(options.wholeRepository && (kind!=='audit' || !ai)) throw new Error('--whole-repository requires audit with --ai.');
   const task = kind==='task' ? await loadTask(target) : undefined;
   if (task) target = task.repository;
   const paths = kind==='diff' ? await changedPaths(target) : task ? [...new Set(task.files)].sort() : undefined;
@@ -40,9 +46,14 @@ export async function runWorkflow(target:string, kind:'audit'|'diff'|'task', ai?
     } catch { unavailablePaths.push(path); }
   }
   if (task && unavailablePaths.length) throw new Error('Task selects missing, linked, or non-regular files. Correct the task file before review.');
-  const report = ai && paths?.length !== 0 ? await reviewWithAi(target,{...ai,...(paths ? {paths} : {})}) : await reviewRepository(target);
+  const config=ai?.config===undefined?await loadConfig(target):configSchema.parse(ai.config);
+  const whole=kind==='audit' && (options.wholeRepository || config.ai.scope==='whole-repository');
+  const report = ai && paths?.length !== 0 ? whole ? await reviewWholeRepository(target,{...ai,config})
+    : await reviewWithAi(target,{...ai,...(paths ? {paths} : {})}) : await reviewRepository(target);
+  const checks=await runChecks(report.root,config.checks,options.runChecks===true,config.ai.apiKeyEnv);
   const selected = new Set(paths);
   return reportSchema.parse({...report,
+    ...(checks.length?{checks}:{}),
     findings:paths ? report.findings.filter(f=>f.evidence.some(e=>selected.has(e.path))) : report.findings,
     workflow:{kind,scope:paths ?? null,baseline:kind==='diff'?'HEAD':null,unavailablePaths,...(task ? {criteria:task.criteria} : {})},
   });

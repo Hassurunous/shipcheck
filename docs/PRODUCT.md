@@ -37,7 +37,9 @@ and support every reported finding with evidence.
 
 P6 remains focused on release preparation for the current implementation.
 P6.1 strengthens citation/context reliability and evaluation of the current reviewer.
-P7 will add multi-language check integrations and a developer-agent feedback
+P7 is in progress: configurable external commands and whole-repository AI preview/mock
+batching are implemented; see P7_CONFIGURATION.md for capabilities and limits.
+Remaining P7 work will add normalized multi-language check integrations and a developer-agent feedback
 workflow: a separate developer process edits code, invokes Shipcheck, consumes
 its report, and iterates. Shipcheck remains the reviewer and does not modify
 code. Planned checks will reuse established language tools, with explicit
