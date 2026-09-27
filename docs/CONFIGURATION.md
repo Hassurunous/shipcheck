@@ -64,11 +64,15 @@ New profile fields default to empty arrays for older serialized profiles;
 reinspect to populate references and directory inventory. The P2.5 review CLI
 returns 1 for error-level findings and 2 for usage or operational failures.
 
-## P3 AI settings (offline)
+## P3 AI settings
 
 Optional `ai` settings configure mode, per-mode model mappings, context limits,
 output limit, and timeout. See [P3 settings](P3_AI.md). Low cost is the default;
 all real model mappings default to null. Ordinary review ignores AI execution
-settings unless the caller explicitly requests preview/mock. A config cannot
+settings unless the caller explicitly requests AI execution. A config cannot
 enable network execution. Unknown settings and out-of-range limits are rejected.
 CLI `--mode` overrides `ai.mode`; automatic retries are fixed at zero.
+
+Live trials use pinned priced models when mappings are null; other mappings
+are rejected for live requests. Configuration cannot increase the trial budget
+or its 5,000 input / 2,000 output token caps. See [live trial](LIVE_TRIAL.md).

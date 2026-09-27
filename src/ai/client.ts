@@ -14,7 +14,7 @@ export function buildRequest(context: AiContext, settings: AiSettings, model: st
   };
 }
 export type QaRequest = ReturnType<typeof buildRequest>;
-/** An injected transport is required. There is deliberately no default fetch/live transport. */
+/** Offline adapter seam. The gated live transport is implemented separately in live.ts. */
 export type ResponseTransport = (request: QaRequest, options: {signal:AbortSignal; apiKey:string}) => Promise<{status:number; body:string}>;
 export class AiFailure extends Error {
   constructor(public readonly code: string, message: string) { super(message); }

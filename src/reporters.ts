@@ -39,8 +39,11 @@ export function renderConsoleReport(input: Report): string {
     for (const file of ai.preview.files) lines.push(`  ${text(file.path)} (${file.bytes} bytes, ${file.lines} lines)`);
     lines.push(`Request size: ${ai.requestBytes} bytes; approximate input tokens: ${ai.estimatedInputTokens} (heuristic)`,
       `Output limit: ${ai.maxOutputTokens} tokens; retries: 0`,
-      'Live cost estimate: unavailable until model/pricing selection; not a dollar spending cap.');
-    if (ai.execution !== 'injected') lines.push('Offline only: no model ran, no network request, $0 API spend.');
+      ai.execution === 'live' ? 'Live trial: $0.50 allowance; one attempt per mode; no retries. See shipcheck trial status.'
+        : 'Live cost estimate: unavailable in offline mode.');
+    if (ai.execution === 'preview' || ai.execution === 'mock') lines.push('Offline only: no model ran, no network request, $0 API spend.');
+    if (ai.trial) lines.push(`Counted input: ${ai.trial.countedInputTokens}; usage: ${ai.trial.usage.input_tokens} input / ${ai.trial.usage.output_tokens} output tokens`,
+      `Reserved: $${ai.trial.reservedUsd.toFixed(6)}; priced usage upper bound: $${ai.trial.pricedUsageUpperBoundUsd.toFixed(6)} (not an invoice).`);
     if (ai.error) lines.push(`AI failure [${text(ai.error.code)}]: ${text(ai.error.message)}`);
     if (ai.status === 'preview') lines.push('Preview only: no QA review was performed.');
     if (ai.status === 'completed') lines.push(`AI candidates: ${ai.candidates.length} — UNVERIFIED${ai.execution === 'mock' ? ' / SYNTHETIC MOCK' : ''}`);

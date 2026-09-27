@@ -1,0 +1,1 @@
+{"ai":{"maxFiles":2,"maxFileBytes":2000,"maxContextBytes":4000,"maxOutputTokens":2000,"timeoutMs":60000}}

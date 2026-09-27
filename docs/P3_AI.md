@@ -1,9 +1,8 @@
 # P3 — offline AI review foundation
 
-P3 is implemented and tested offline. No live model has been selected, called,
-or evaluated. There is no built-in network transport, no automatic credential
-lookup, and no paid API spending. Model mappings and pricing remain pending the
-user's budget discussion. Mock results do not measure model quality.
+P3 supports offline previews/mocks and an explicitly gated live trial. The
+approved $0.50 three-mode trial completed successfully. See [live controls and
+results](LIVE_TRIAL.md); the sections below describe the shared foundation.
 
 ## Commands
 
@@ -16,7 +15,7 @@ shipcheck review . --ai mock --mode high-quality --json
 
 Without a linked command, use `npm run review -- . --ai mock`. Rebuild after
 source changes when using the linked command. `--mode` requires `--ai`.
-`--ai live` is rejected even if a credential is present in the environment.
+`--ai live` requires `--trial` and an initialized, unexhausted allowance.
 Ordinary `shipcheck review .` remains deterministic and does not prepare AI
 context. Configuration alone never enables an AI run.
 
@@ -55,16 +54,18 @@ Optional `ai` configuration in `shipcheck.config.json`:
 
 CLI mode overrides configuration. Model mappings can be specified for offline
 adapter tests/previews but never enable network execution. There is no claim
-that a named mode is faster, cheaper, or better until real models are selected.
+that a named mode is better based on the tiny smoke test. Live model mappings
+are pinned to the priced trial models; config cannot substitute another model.
 
 Hard configurable ranges: files 1–64, file bytes 128–65,536, serialized context
 bytes 256–262,144, output tokens 128–4,096, timeout 10–60,000 ms. Request size
 includes additional instructions/schema overhead beyond the context limit.
 Input tokens are estimated as request bytes / 3, rounded up, not counted with
 a model tokenizer. They are not a strict token ceiling or billing quote.
-Live estimated cost is null until pricing/model selection; preview/mock actual
-API cost is zero. No dollar spending ceiling has been agreed or implemented.
-Retries are fixed at zero. A live budget policy is required before activation.
+Preview/mock actual API cost is zero. Live actualCostUsd remains null because
+usage pricing is not an invoice; trial.pricedUsageUpperBoundUsd reports a
+conservative calculation. Persistent trial reservations enforce the approved
+$0.50 allowance. Retries are fixed at zero.
 
 ## Context and trust boundaries
 
@@ -96,12 +97,12 @@ Instructions in source cannot authorize tool use because none is provided.
 `src/ai/client.ts` builds a Responses API-shaped request with strict JSON Schema,
 `store: false`, and `max_output_tokens`, then validates the response. It follows
 the [official Structured Outputs guide](https://developers.openai.com/api/docs/guides/structured-outputs).
-The transport is injected; no fetch implementation or SDK is shipped. This
+The offline transport is injected. This
 lets tests exercise successful responses, authentication/rate-limit failures,
 refusals, incomplete output, malformed JSON, timeouts, and transport errors
-without network access. A later live transport must enforce its own response
-stream byte limit and pass the agreed credential explicitly. The reserved
-credential name is `OPENAI_PROJECTDEV_API_KEY`; current CLI code never reads it.
+without network access. The separate live transport enforces a response
+stream byte limit and uses `OPENAI_PROJECTDEV_API_KEY` only for explicit live
+execution. It uses native fetch with a fixed endpoint and no SDK.
 
 Responses are limited to 128 KiB at the adapter boundary. Structured candidates
 have bounded text and evidence counts. Citation paths must be relative and
@@ -122,9 +123,9 @@ CLI exit 2 means an AI stage failed; the partial report still goes to stdout
 and a short diagnostic to stderr. Exit 1 remains for deterministic error-level
 findings. Unverified AI candidates do not change exit status in this milestone.
 
-## Remaining live gate
+## Live trial status
 
-Before any paid request: choose real models and current pricing, agree spending
-limits, review selected source, implement the explicitly gated network
-transport/credential wiring, and run a tiny approved fixture once per mode.
-Live model quality and pricing have not been validated by offline tests.
+All three approved generation requests completed. Each identified the seeded
+defect without flagging the clean control. The allowance is exhausted by its
+request count, with conservative priced usage totaling $0.014746. Further
+spending requires a new policy decision; see [trial record](LIVE_TRIAL.md).

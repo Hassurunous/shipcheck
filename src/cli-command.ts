@@ -3,6 +3,7 @@ import { reviewRepository } from './review-repository.js';
 import { renderConsoleReport, renderJsonReport } from './reporters.js';
 import { reviewWithAi } from './ai/review.js';
 import { modeSchema } from './ai/contracts.js';
+import { initializeTrial, trialStatus } from './ai/trial-budget.js';
 
 const help = `Shipcheck v0.1
 
@@ -10,6 +11,8 @@ Usage: shipcheck <command> [target] [options]
 
 Commands:
   review [target]   Review a repository using shipcheck.config.json (default: .)
+  trial init       Initialize the one-time $0.50 / three-mode trial (never resets)
+  trial status     Show persistent trial reservations and usage
   help [command]   Show this help or help for review
   --version        Show the version
 
@@ -17,6 +20,7 @@ Review options:
   --json           Print the report as JSON
   --ai preview     Preview bounded AI input metadata without sending anything
   --ai mock        Exercise the QA reviewer with a synthetic offline response
+  --ai live --trial Run one approved trial attempt for the selected mode
   --mode <mode>    low-cost (default), balanced, or high-quality
   -h, --help       Show help
   --               Treat remaining arguments as a target path
@@ -27,7 +31,7 @@ Local shortcuts:
   npm run shipcheck -- help
 
 Exit codes: 0 completed, 1 error-level findings, 2 usage/configuration/inspection failure.
-Warnings alone do not change the exit code. Live AI is disabled; no API spending.
+Warnings alone do not change the exit code. Live AI requires --trial and initialized allowance.
 Mock candidates are synthetic and unverified, not diagnosed defects.
 Running with no arguments or an explicit path (such as . or ./repo) retains the readiness smoke test.`;
 
@@ -37,8 +41,15 @@ export async function runCli(args: readonly string[]): Promise<CliResult> {
   const ok = (stdout: string): CliResult => ({ stdout, stderr: '', exitCode: 0 });
   const fail = (message: string): CliResult => ({ stdout: '', stderr: `Shipcheck: ${message}\nRun shipcheck help for usage.`, exitCode: 2 });
   const command = args[0];
+  if (command === 'trial') {
+    if (args.length !== 2 || !['init','status'].includes(args[1]!)) return fail('Use trial init or trial status.');
+    try {
+      if (args[1] === 'init') await initializeTrial();
+      return ok(JSON.stringify(await trialStatus(),null,2));
+    } catch (error) { return fail(error instanceof Error ? error.message : 'Trial state failed.'); }
+  }
   if (command === 'help') {
-    if (args.length > 2 || (args[1] && !['review', 'help'].includes(args[1]))) return fail('Unknown help topic.');
+    if (args.length > 2 || (args[1] && !['review', 'help', 'trial'].includes(args[1]))) return fail('Unknown help topic.');
     return ok(help);
   }
   if (command === '--help' || command === '-h') return args.length === 1 ? ok(help) : fail('Unexpected arguments after help.');
@@ -52,16 +63,18 @@ export async function runCli(args: readonly string[]): Promise<CliResult> {
   let json = false;
   let literal = false;
   let wantsHelp = false;
-  let ai: 'preview' | 'mock' | undefined;
+  let ai: 'preview' | 'mock' | 'live' | undefined;
+  let trial = false;
   let mode: string | undefined;
   for (let index = 1; index < args.length; index++) {
     const arg = args[index]!;
     if (!literal && arg === '--') { literal = true; continue; }
     if (!literal && (arg === '--help' || arg === '-h')) { wantsHelp = true; continue; }
     if (!literal && arg === '--json') { json = true; continue; }
+    if (!literal && arg === '--trial') { trial = true; continue; }
     if (!literal && arg === '--ai') {
       const value = args[++index];
-      if (value !== 'preview' && value !== 'mock') return fail('Use --ai preview or --ai mock. Live AI is disabled pending budget approval.');
+      if (value !== 'preview' && value !== 'mock' && value !== 'live') return fail('Use --ai preview, --ai mock, or --ai live --trial.');
       ai = value; continue;
     }
     if (!literal && arg === '--mode') {
@@ -74,9 +87,10 @@ export async function runCli(args: readonly string[]): Promise<CliResult> {
     target = arg;
   }
   if (wantsHelp) return ok(help);
-  if (mode && !ai) return fail('--mode requires --ai preview or --ai mock.');
+  if (mode && !ai) return fail('--mode requires --ai.');
+  if ((ai === 'live') !== trial) return fail('Live AI requires --trial; --trial is only valid with --ai live.');
   try {
-    const report = ai ? await reviewWithAi(target ?? '.', {execution:ai, ...(mode ? {mode:modeSchema.parse(mode)} : {})})
+    const report = ai ? await reviewWithAi(target ?? '.', {execution:ai, trial, ...(mode ? {mode:modeSchema.parse(mode)} : {})})
       : await reviewRepository(target ?? '.');
     const aiFailed = report.ai?.status === 'failed';
     return { stdout: json ? renderJsonReport(report) : renderConsoleReport(report),

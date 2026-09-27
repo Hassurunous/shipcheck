@@ -1,11 +1,11 @@
 # Shipcheck
 
 Shipcheck is an independent review layer for AI-assisted software development.
-Current status: **pre-alpha / P3 offline AI foundation**. Repository inspection,
+Current status: **pre-alpha / P3 AI review with bounded live trial**. Repository inspection,
 configurable deterministic rules, and console/JSON reports are available through the
 API and the `review` command. Help and JSON output are available. Audit, diff,
-task workflows and live AI review remain planned. AI context previews and
-mocked QA review are available with explicit opt-in; no live API spending occurs.
+task workflows remain planned. AI previews and mocked QA review are offline;
+explicit live trial review has been tested in all three modes.
 
 ## Local development
 
@@ -131,7 +131,7 @@ Exit codes: **0** completed without error-level findings, **1** error-level
 findings, **2** usage/configuration/inspection failure. Warnings alone return 0.
 Reports go to stdout; failures go to stderr (including with `--json`). The
 no-argument and `.` readiness smoke tests remain available. Use `review` for
-inspection; audit/diff/task and live AI workflows remain unimplemented.
+inspection; audit/diff/task workflows remain unimplemented.
 
 ## P3 preview and mock modes
 
@@ -144,7 +144,9 @@ shipcheck review . --ai mock --mode high-quality --json
 
 Use `npm run review -- . --ai mock` without a global link. Low cost is the
 default mode. Mock results are synthetic plumbing checks, not software defects
-or real model evaluations. Live execution is disabled, no key is read, and
-automatic retries are disabled. Preview lists selected files and limits; live
-cost estimates remain unavailable until we choose real models and pricing.
+or real model evaluations. Preview and mock never read credentials or use the
+network. Live review requires --ai live --trial and a persistent allowance.
+The approved three-mode trial is complete; further attempts are blocked.
+Run `shipcheck trial status` for reservations and usage. See [live trial results
+and controls](docs/LIVE_TRIAL.md). Automatic retries are disabled.
 See [P3 behavior and limits](docs/P3_AI.md).

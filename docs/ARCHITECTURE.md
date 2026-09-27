@@ -1,6 +1,6 @@
 # Architecture
 
-## Current implementation (P3 offline)
+## Current implementation (P3 with bounded live trial)
 
 `src/cli.ts` is the executable entry point, with command dispatch in
 `src/cli-command.ts`. `review` performs configured review; help/version explain
@@ -9,7 +9,7 @@ remains unchanged. The exported `inspectRepository`
 API performs repository inspection. `createReport` evaluates captured facts and
 returns deterministic findings with separate inspection warnings.
 `renderConsoleReport` and `renderJsonReport` return report strings without I/O.
-Evidence verification and live AI review are not implemented yet. Opt-in AI
+Evidence verification is not implemented yet. Opt-in AI
 context previews and mocked QA review are implemented separately from the
 ordinary deterministic path; see `docs/P3_AI.md`.
 
@@ -46,7 +46,7 @@ inspection options. `reviewRepository` loads root configuration and passes its
 exclusions into inspection. Inspection does not create
 a filesystem snapshot or protect against concurrent malicious path replacement;
 use a stable local tree. Read limits are per file, not a total tree budget.
-No files are written and no network calls are made.
+Deterministic inspection writes no files and makes no network calls.
 
 TypeScript uses strict NodeNext ESM settings with explicit `.js` import paths.
 One configuration checks source and tests and emits them under `dist/`; the
@@ -119,8 +119,8 @@ Reporters
 ```
 
 Inspection, deterministic findings, and console/JSON reporters are implemented;
-An offline QA reviewer request/response path is implemented; live AI and evidence
-verification remain planned. Introduce small modules
+QA review supports offline execution and an explicitly gated live trial;
+evidence verification remains planned. Introduce small modules
 only as their milestones require them. Prefer deterministic analysis before AI
 analysis, structured data contracts, and evidence-backed findings. Execution is
 local-first with minimal persistent state and no server requirement for v0.1.
@@ -163,4 +163,8 @@ Responses envelopes, and exposes an injected transport seam plus a synthetic
 mock. It has no default HTTP implementation. `ai/review.ts` composes these after
 deterministic inspection, preserving deterministic results on AI-stage failure.
 The optional report.ai section separates unverified candidates from findings.
-No SDK, environment credential read, live request, or retry was introduced.
+No SDK or retry was introduced. The separate ai/live.ts module implements
+bounded HTTP for explicit --ai live --trial execution. ai/trial-budget.ts
+persists reservations and receipts outside repositories and locks concurrent
+requests. Only live execution reads OPENAI_PROJECTDEV_API_KEY. See
+LIVE_TRIAL.md for allowance limits and observed three-mode results.
