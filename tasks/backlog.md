@@ -66,3 +66,20 @@
 - [ ] Demo fixture
 - [ ] Markdown reports
 - [ ] Release checklist
+
+## P7 — Multi-language checks and developer-agent feedback
+
+Planned after P6; this work does not expand the P6 release requirements.
+
+- [ ] Define a small adapter contract for language-specific linters and analyzers
+- [ ] Add configurable language detection and check selection, initially JavaScript/TypeScript and Python
+- [ ] Integrate established tools and normalize findings, locations, severities, and tool failures
+- [ ] Add explicitly authorized command execution with timeouts and output limits; never silently execute repository configuration
+- [ ] Define configurable pass/fail thresholds while distinguishing deterministic results from AI candidates
+- [ ] Document a developer-agent loop: implement, invoke Shipcheck, read JSON results, fix, repeat
+- [ ] Improve rule/configuration discoverability and include detailed documentation and language examples in distributed packages
+- [ ] Add offline integration fixtures and tests for multiple languages and execution failures
+
+Start with explicit invocation by the developer agent. Background watching,
+additional languages, and further capabilities can be proposed as P8 and later
+milestones as development continues; they are not committed P7 requirements.

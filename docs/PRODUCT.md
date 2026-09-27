@@ -33,7 +33,19 @@ Find meaningful software problems using a combination
 of deterministic analysis and specialized AI review,
 and support every reported finding with evidence.
 
-## Non-goals
+## Post-release direction
+
+P6 remains focused on release preparation for the current implementation.
+P7 will add multi-language check integrations and a developer-agent feedback
+workflow: a separate developer process edits code, invokes Shipcheck, consumes
+its report, and iterates. Shipcheck remains the reviewer and does not modify
+code. Planned checks will reuse established language tools, with explicit
+execution authorization and bounded execution. AI candidates will remain
+distinct from deterministic failures; a clean report will not prove correctness.
+See `tasks/backlog.md` for P7 scope. Further development will use P8 and later
+milestone numbers as scope is agreed.
+
+## Non-goals for the current release
 
 - No web dashboard
 - No accounts

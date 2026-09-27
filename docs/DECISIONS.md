@@ -49,3 +49,5 @@ P2.5 scope clarification — pre-P3 audit
 32. **No unexpected spend:** the original offline gate was extended only after explicit approval of a $0.50, three-mode trial. Live execution requires --ai live --trial, uses OPENAI_PROJECTDEV_API_KEY, pinned priced models, persistent reservations, token caps, and no retries. Mock results carry no quality claims. See LIVE_TRIAL.md for controls and observed results; general recurring live budgets remain deferred.
 
 33. **One repository command:** at user request, remove the redundant review CLI command and npm script. audit is the repository-wide verb. Library reviewRepository/reviewWithAi APIs retain their names.
+
+34. **Post-release expansion:** schedule multi-language tool integrations, explicit bounded check execution, developer-agent feedback, and expanded configuration documentation as P7 after P6. Preserve P6 release scope. Number subsequent agreed milestones P8 onward; this roadmap change does not implement or activate those capabilities.
