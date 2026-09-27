@@ -113,23 +113,35 @@ Remaining P7 work:
 - [ ] Explicit external-repository roots and approved remote documentation snapshots
 - [ ] Conflicting-source handling and reproducible evidence tests
 
-## P9 — Contract auditing (planned)
+## P9 — Contract auditing (started)
+
+- [x] Offline OpenAPI JSON operation index with provenance and explicit partial coverage
+- [ ] Integrate the index with CLI reports and consumer-call comparisons
+
+See `docs/P9_CONTRACT_AUDITING.md`; P8 remains partially implemented.
 
 - [ ] OpenAPI and installed TypeScript SDK declaration adapters
 - [ ] Version-aware call/contract comparisons with consumer/provider evidence
 - [ ] Cross-repository interface comparisons and missing-contract outcomes
 
-## P10 — Requirements and architectural policies (planned)
+## P10 — Requirements and architectural policies (started)
+
+- [x] Pure policy schemas with stable requirement/boundary IDs and content hash
+- [x] Evaluate supplied dependency observations against forbidden directory boundaries
+- [x] Offline violation/clean controls and explicit unassessed requirement outcomes
+
+See `docs/P10_INTENT_POLICIES.md`. CLI integration and source extraction are pending.
 
 - [ ] Requirement IDs, architecture/dependency-direction policies and conventions
 - [ ] Evidence-based intent assessments with ambiguity and conflict outcomes
 - [ ] Evaluation corpus for requirement/architecture violations and clean controls
 
-## P11 — Inline current-task auditing (planned)
+## P11 — Inline current-task auditing (started)
 
 See `docs/P11_TASK_AUDITING.md` for the agreed ownership and write boundaries.
 
-- [ ] Inline `currentTask` in tool configuration; no additional file required
+- [x] Inline `currentTask` in tool configuration; no additional file required
+- [x] No-file task invocation with normalized task hash and explicitly unassessed criteria
 - [ ] `shipcheck task` assesses that task, preserving explicit task-file support
 - [ ] Per-criterion assessments, evidence and exact task content hash
 - [ ] Document user-authorized developer-agent edits to requirements as accepted risk
@@ -138,3 +150,89 @@ See `docs/P11_TASK_AUDITING.md` for the agreed ownership and write boundaries.
 
 Issue-tracker connectors, background watching and enforced read-only sandboxes
 remain outside these first implementations unless separately authorized.
+
+## Remaining implementation milestones
+
+P8–P11 remain partial foundations. The following milestones organize their
+unfinished requirements into end-to-end capabilities, in execution order.
+Documentation and evaluation should develop alongside implementation, with their
+final integration and release gates in P17/P18.
+
+### P12 — Reference-aware audits
+
+Completes core P8 integration.
+
+- [ ] Select relevant local reference content within context and spending limits
+- [ ] Supply references to reviewers and verify submitted/current reference citations
+- [ ] Report missing, changed, conflicting and omitted references and actual coverage
+
+Completion: audits assess code using local specifications with evidence from both
+sources and explicit insufficient-context outcomes.
+
+### P13 — Requirement-aware task audits
+
+Completes the central P10/P11 task-assessment capability.
+
+- [ ] Supply task requirements, description and non-goals to reviewers
+- [ ] Report per-criterion potential violations, supporting evidence, insufficient evidence and clarification needs
+- [ ] Verify code/reference citations and detect task changes during assessment
+- [ ] Keep task assessments separate from general code-quality findings
+
+Completion: implemented, violated, ambiguous and unsupported requirements receive
+evidence-backed assessments without treating uncertainty as a pass. Users retain
+control over developer-agent edits to expectations; Shipcheck never rewrites them.
+
+### P14 — Functional contract auditing
+
+Completes the first end-to-end portion of P9.
+
+- [ ] Map source clients to service contracts and extract narrowly supported calls
+- [ ] Compare methods/routes and supported parameters with contract evidence
+- [ ] Distinguish incompatible versions, dynamic calls and unsupported operations
+- [ ] Integrate consumer/provider evidence into CLI reports
+
+Completion: one documented language/client pattern works against OpenAPI with
+seeded incorrect calls, clean controls and explicit unresolved-call limitations.
+
+### P15 — Automatic architecture-policy checks
+
+Completes deterministic P10 integration.
+
+- [ ] Configure policies and report them through the CLI
+- [ ] Extract dependencies and resolve supported imports/aliases
+- [ ] Evaluate dependency boundaries and precise convention rules
+- [ ] Disclose unsupported resolution and incomplete coverage
+
+Completion: repository boundary checks run without manually supplied observations.
+
+### P16 — External contracts and broader interface support
+
+Completes broader P8/P9 resource scope.
+
+- [ ] Explicitly authorized secondary repository roots and controlled remote snapshots
+- [ ] Installed TypeScript SDK declaration support
+- [ ] Cross-repository consumer/provider comparisons with version/conflict handling
+
+Completion: supported external integrations have reproducible contract evidence
+and explicit access boundaries.
+
+### P17 — User and developer-agent integration
+
+- [ ] Consolidated user setup and agent operating guides
+- [ ] Report schema/compatibility contract, exit codes and partial/failure handling
+- [ ] Reference development loop with iteration, spending and no-progress limits
+- [ ] Examples for source edits, requirement edits and human decisions
+
+Completion: users and developer agents operate Shipcheck from documentation alone.
+
+### P18 — Adversarial validation and release qualification
+
+Includes remaining P7 validation obligations.
+
+- [ ] Installed ESLint/Ruff validation and supported-platform installation/process cleanup
+- [ ] Scored defect/clean-control corpus and real developer-agent loop experiments
+- [ ] Prompt-injection, stale-evidence, interrupted-request, budget-concurrency and malformed-output tests
+- [ ] Published quality/cost measurements, limitations and release gates
+
+Completion: repeatable tests and bounded live experiments establish the supported
+workflows and their practical limitations.

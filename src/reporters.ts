@@ -22,6 +22,7 @@ export function renderConsoleReport(input: Report): string {
     for (const criterion of report.workflow.criteria ?? []) lines.push(`Acceptance criterion (human confirmation required): ${text(criterion)}`);
   }
   for (const finding of report.findings) {
+    // Findings remain separate from task-criterion assessments.
     lines.push("", `[${finding.severity.toUpperCase()}] ${text(finding.ruleId)} — ${text(finding.title)}`,
       `  ${text(finding.explanation)}`);
     for (const evidence of finding.evidence) {
@@ -31,6 +32,13 @@ export function renderConsoleReport(input: Report): string {
     lines.push(`  Suggested action: ${text(finding.suggestedAction)}`);
   }
   if (report.findings.length === 0) lines.push("", "No findings from the implemented rules.");
+  if(report.currentTask) {
+    const task=report.currentTask;
+    lines.push('',`Current task: ${text(task.id)} — ${text(task.title)}`,`Task SHA256 (normalized content): ${task.sha256}`,
+      'Task requirements: NOT ASSESSED. Optional AI reviews selected code, not requirement satisfaction.');
+    for(const item of task.requirements)lines.push(`  [INSUFFICIENT EVIDENCE] ${text(item.id)}: ${text(item.text)}`);
+    for(const nonGoal of task.nonGoals)lines.push(`  Non-goal: ${text(nonGoal)}`);
+  }
   if(report.references) {
     lines.push('',`Reference loading: ${report.references.state.toUpperCase()} — NOT ASSESSED`,
       'Reference bodies are not supplied to AI in this P8 slice. Hashes identify loaded bytes; declared versions and authority are user assertions.');

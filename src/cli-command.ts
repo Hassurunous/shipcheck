@@ -13,7 +13,7 @@ Usage: shipcheck <command> [target] [options]
 Commands:
   audit [target]    Audit a repository using shipcheck.config.json (default: .)
   diff [target]     Review changed files versus HEAD, including untracked files
-  task <task-file>  Review files selected by a structured JSON task
+  task [task-file]  Review a task file, or currentTask in the current directory config
   trial init       Initialize the one-time $0.50 / three-mode trial (never resets)
   trial status     Show persistent trial reservations and usage
   budget init <name> --usd <amount> Create a persistent allowance (never resets)
@@ -120,13 +120,12 @@ export async function runCli(args: readonly string[]): Promise<CliResult> {
   }
   if (wantsHelp) return ok(help);
   if (json && markdown) return fail('Choose --json or --markdown, not both.');
-  if (command==='task' && !target) return fail('task requires a JSON task file.');
   if (mode && !ai) return fail('--mode requires --ai.');
   if (trial && budget) return fail('Choose --trial or --budget, not both.');
   if ((ai === 'live') !== Boolean(trial || budget)) return fail('Live AI requires --trial or --budget; spending authorization is only valid with --ai live.');
   try {
     const aiOptions = ai ? {execution:ai,trial,...(budget?{budget}:{}),...(mode ? {mode:modeSchema.parse(mode)} : {})} : undefined;
-    const report = await runWorkflow(target ?? '.',command,aiOptions,{runChecks,wholeRepository});
+    const report = await runWorkflow(target ?? process.cwd(),command,aiOptions,{runChecks,wholeRepository,currentTask:command==='task' && target===undefined});
     const aiFailed = report.ai?.status === 'failed' || report.aiAudit?.state==='failed';
     const failedBatchIndex=report.aiAudit?.batches.findIndex(batch=>batch.status==='failed') ?? -1;
     const aiError=report.ai?.error ?? (failedBatchIndex>=0 ? report.aiAudit?.batches[failedBatchIndex]?.error : undefined);

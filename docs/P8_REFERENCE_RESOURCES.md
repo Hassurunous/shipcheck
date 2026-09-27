@@ -27,7 +27,7 @@ Add resources to `shipcheck.config.json`:
 Run `shipcheck audit .` or `shipcheck audit . --json` to inspect loading metadata.
 `diff` and `task <file>` load references whose `appliesTo` patterns match selected
 paths. Repository audits consider every configured reference. An empty diff still
-skips inspection. Existing task-file syntax is unchanged; inline tasks are planned
+skips inspection. Existing task-file syntax is unchanged; inline tasks are documented
 in [P11](P11_TASK_AUDITING.md).
 
 Each resource requires a unique ID and a relative forward-slash file path. Defaults

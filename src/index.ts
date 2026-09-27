@@ -17,6 +17,9 @@ export { initializeBudget, budgetStatus, settleBudgetAttempt } from './ai/audit-
 export { checkSchema, checkResultSchema, type CheckResult } from './checks.js';
 export { loadReferenceResources, verifyResourceEvidence, type ResourceSnapshot } from './reference-resources.js';
 export { resourceDefinitionSchema, resourceEvidenceSchema, referencesSchema } from './resource-contracts.js';
+export { indexOpenApi, openApiIndexSchema, type OpenApiIndex } from './openapi-contract.js';
+export { intentPolicySchema, dependencyObservationSchema, assessIntentPolicy } from './intent-policy.js';
 export { taskSchema, loadTask } from './task-file.js';
+export { currentTaskSchema, describeCurrentTask } from './task-file.js';
 export { reviewWithAi, type AiReviewOptions } from "./ai/review.js";
 export { aiSettingsSchema, modeSchema, qaOutputSchema, type AiMode, type AiResult } from "./ai/contracts.js";

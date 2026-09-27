@@ -132,4 +132,4 @@ not diagnosis correctness. Preview/mock and external checks spend no API credits
 Optional `resources` configuration now supports bounded local reference loading.
 See [P8 reference resources](P8_REFERENCE_RESOURCES.md) for schema, examples and
 limits. Loaded references are explicitly **not yet assessed by AI**.
-Inline `currentTask` is planned in [P11](P11_TASK_AUDITING.md), not supported syntax.
+Inline `currentTask` is supported by [P11](P11_TASK_AUDITING.md); requirement assessment remains pending.

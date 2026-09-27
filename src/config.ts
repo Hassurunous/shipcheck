@@ -4,6 +4,7 @@ import { z } from "zod";
 import { aiSettingsSchema } from "./ai/contracts.js";
 import { checksSchema } from './checks.js';
 import {resourceDefinitionSchema} from './resource-contracts.js';
+import {currentTaskSchema} from './task-file.js';
 
 export const ruleDefaults = {
   "package/invalid-json": "error",
@@ -31,6 +32,7 @@ const pattern = z.string().min(1).refine(value =>
 "Use relative slash-separated patterns with * or whole-segment ** only.");
 export const configSchema = z.object({
   version: z.literal(1).default(1),
+  currentTask:currentTaskSchema.optional(),
   exclude: z.array(pattern).default([]),
   rules: rulesSchema.default({}),
   ai: aiSettingsSchema.prefault({}),

@@ -151,4 +151,13 @@ language selection, severity thresholds, and diagnostic fields for developer age
 P8 has started with [local reference loading](docs/P8_REFERENCE_RESOURCES.md):
 configure document/contract paths and inspect bounded snapshots, hashes and loading
 statuses. References are not yet supplied to AI. [P11 task auditing](docs/P11_TASK_AUDITING.md)
-documents the planned inline current-task workflow and ownership boundaries.
+documents the inline `currentTask` configuration and `shipcheck task` workflow.
+Task criteria remain explicitly unassessed; requirement-aware AI review is pending.
+
+[P9 contract auditing](docs/P9_CONTRACT_AUDITING.md) has started with an exported
+offline OpenAPI operation index. CLI integration and source/contract comparisons
+remain pending.
+
+[P10 intent policies](docs/P10_INTENT_POLICIES.md) now provides a library foundation
+for requirement identities and forbidden dependency boundaries. It evaluates
+supplied observations only; automatic source extraction and CLI integration are pending.

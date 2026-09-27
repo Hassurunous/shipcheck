@@ -14,6 +14,8 @@ export const checkSchema = z.object({
   failOn:z.enum(['error','warning','info','never']).default('error'),
   languages:z.array(z.enum(['JavaScript','TypeScript','Python'])).min(1).optional(),
 }).strict().superRefine((check,context)=>{
+  if(check.args.some(arg=>/^--(?:fix|fix-only|unsafe-fixes|write)(?:=|$)/i.test(arg)))
+    context.addIssue({code:'custom',path:['args'],message:'Inspection checks must not use recognized fix/write flags.'});
   if(check.format==='text' && check.failOn!=='error')context.addIssue({code:'custom',path:['failOn'],message:'Severity thresholds require a structured JSON format.'});
 });
 export const checksSchema = z.array(checkSchema).max(20).default([]).refine(

@@ -233,3 +233,27 @@ with in-memory text snapshots. Workflows report metadata and skip AI if a requir
 applicable reference fails to load. Reference bodies are not yet AI context.
 The standalone verifier compares submitted and fresh snapshots and exact line
 excerpts; integration with AI evidence is pending. See P8_REFERENCE_RESOURCES.md.
+
+## P9 operation-index foundation
+
+openapi-contract.ts indexes direct operations from loaded OpenAPI JSON snapshots
+as a pure exported API. Snapshot hashes and JSON Pointers preserve structural
+provenance; unresolved references and malformed entries produce explicit issues.
+It does not yet participate in workflow reports or compare source calls. See
+P9_CONTRACT_AUDITING.md for supported input and limitations.
+
+## P10 policy foundation
+
+intent-policy.ts validates requirements and forbidden dependency directions,
+hashes normalized policy content and evaluates caller-supplied dependency
+observations. It performs no I/O and does not verify evidence or assess natural
+language. Results explicitly disclose observation-only coverage. It is exported
+as a library API; CLI integration remains pending. See P10_INTENT_POLICIES.md.
+
+## P11 inline task selection
+
+task-file.ts defines bounded currentTask configuration and normalized task identity.
+The no-file CLI task invocation selects currentTask from the working directory's
+configuration; explicit task files retain their existing behavior. Workflow reports
+include unassessed per-criterion statuses. AI requirement assessment is pending.
+Checks reject recognized fixing flags; arbitrary external commands are not sandboxed.
