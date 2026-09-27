@@ -150,3 +150,9 @@ The approved three-mode trial is complete; further attempts are blocked.
 Run `shipcheck trial status` for reservations and usage. See [live trial results
 and controls](docs/LIVE_TRIAL.md). Automatic retries are disabled.
 See [P3 behavior and limits](docs/P3_AI.md).
+
+## P4 citation checks
+
+AI candidates now include file freshness, line-range, and exact-excerpt checks.
+Console reports show MATCHED or REJECTED citations; diagnoses remain unverified.
+See [verification behavior](docs/P4_VERIFICATION.md). No extra API call is needed.

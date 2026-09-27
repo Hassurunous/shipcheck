@@ -198,3 +198,31 @@ it('never treats completed envelopes without output as clean reviews',async()=> 
   const context = await collectContext(await inspectRepository(root),settings());
   expect(()=>decodeResponse(JSON.stringify({status:'completed',output:[]}),context)).toThrow('one structured output');
 });
+
+it('checks exact evidence in the review pipeline and preserves rejected candidates visibly',async()=> {
+  await write('src/math.ts');
+  const mock = await reviewWithAi(root,{execution:'mock'});
+  expect(mock.ai!.candidates[0]!.evidenceVerification!.status).toBe('matched');
+  const rejected = await reviewWithAi(root,{execution:'mock',config},{transport:response(body()),apiKey:'dummy'});
+  expect(rejected.ai!.candidates[0]!.evidenceVerification!.checks[0]!.reason).toBe('excerpt-mismatch');
+  expect(renderConsoleReport(rejected)).toContain('Citation check: REJECTED');
+  expect(rejected.findings).toEqual([]);
+  expect(JSON.parse(renderJsonReport(rejected)).ai.candidates[0].evidenceVerification.status).toBe('rejected');
+});
+
+it.each(['changed','deleted','linked'] as const)('rejects evidence when source is %s during review',async change=> {
+  await write('src/math.ts');
+  const transport: ResponseTransport = async()=> {
+    if (change === 'changed') await write('src/math.ts',code+'// changed\n');
+    else if (change === 'deleted') await fs.unlink(join(root,'src/math.ts'));
+    else {
+      await fs.rename(join(root,'src'),join(root,'saved'));
+      await fs.symlink(join(root,'saved'),join(root,'src'),'junction');
+    }
+    return {status:200,body:body()};
+  };
+  const result = await reviewWithAi(root,{execution:'mock',config},{transport,apiKey:'dummy'});
+  expect(result.ai!.status).toBe('completed');
+  expect(result.ai!.candidates[0]!.evidenceVerification!.checks[0]!.reason).toBe(change==='changed'?'source-changed':'file-unavailable');
+  expect(fetch).not.toHaveBeenCalled();
+});

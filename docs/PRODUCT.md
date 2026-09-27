@@ -26,7 +26,8 @@ P2.5 makes deterministic review convenient; it does not implement the planned
 audit/diff/task workflows. P3's offline implementation and approved $0.50 live
 trial are delivered. All three modes passed the tiny fixture smoke test; see
 LIVE_TRIAL.md. General recurring live budgets are not implemented.
-P4 verifies evidence, P5 adds those workflows, and P6 prepares a release. The
+P4 now checks AI evidence files, line ranges, and exact excerpts; semantic
+verification remains future work. P5 adds those workflows, and P6 prepares a release. The
 P2.5 audit follow-ups are resolved. Mock AI candidates are not real diagnoses.
 
 Find meaningful software problems using a combination

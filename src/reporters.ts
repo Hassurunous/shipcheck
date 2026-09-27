@@ -49,6 +49,11 @@ export function renderConsoleReport(input: Report): string {
     if (ai.status === 'completed') lines.push(`AI candidates: ${ai.candidates.length} — UNVERIFIED${ai.execution === 'mock' ? ' / SYNTHETIC MOCK' : ''}`);
     for (const candidate of ai.candidates) {
       lines.push(`  [${candidate.severity.toUpperCase()}] ${text(candidate.title)}`, `    ${text(candidate.explanation)}`);
+      if (candidate.evidenceVerification) {
+        lines.push(`    Citation check: ${candidate.evidenceVerification.status.toUpperCase()} (diagnosis remains unverified)`);
+        for (const check of candidate.evidenceVerification.checks) if (check.status === 'rejected')
+          lines.push(`    Rejected evidence: ${text(check.path)} — ${text(check.reason)}`);
+      }
       for (const evidence of candidate.evidence) lines.push(`    ${text(evidence.path)}:${evidence.startLine}-${evidence.endLine} — ${text(evidence.excerpt)}`);
       lines.push(`    Suggested action: ${text(candidate.suggestedAction)}`);
     }

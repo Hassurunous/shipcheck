@@ -58,6 +58,9 @@ export const aiResultSchema = z.object({
     usage:z.object({input_tokens:z.number().int(),output_tokens:z.number().int()})}).optional(),
   candidates: z.array(candidateSchema.extend({
     id: z.string(), evidenceStatus: z.literal('unverified'), origin: z.literal('ai'),
+    evidenceVerification: z.object({status:z.enum(['matched','rejected']),checks:z.array(z.object({
+      path:z.string(),status:z.enum(['matched','rejected']),reason:z.string(),
+    }))}).optional(),
   })).max(20),
   error: z.object({code: z.string(), message: z.string()}).nullable(),
 });

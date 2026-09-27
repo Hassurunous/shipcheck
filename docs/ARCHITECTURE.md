@@ -9,7 +9,7 @@ remains unchanged. The exported `inspectRepository`
 API performs repository inspection. `createReport` evaluates captured facts and
 returns deterministic findings with separate inspection warnings.
 `renderConsoleReport` and `renderJsonReport` return report strings without I/O.
-Evidence verification is not implemented yet. Opt-in AI
+AI citation verification is implemented; semantic verification remains future work. Opt-in AI
 context previews and mocked QA review are implemented separately from the
 ordinary deterministic path; see `docs/P3_AI.md`.
 
@@ -120,7 +120,7 @@ Reporters
 
 Inspection, deterministic findings, and console/JSON reporters are implemented;
 QA review supports offline execution and an explicitly gated live trial;
-evidence verification remains planned. Introduce small modules
+semantic verification remains planned. Introduce small modules
 only as their milestones require them. Prefer deterministic analysis before AI
 analysis, structured data contracts, and evidence-backed findings. Execution is
 local-first with minimal persistent state and no server requirement for v0.1.
@@ -168,3 +168,10 @@ bounded HTTP for explicit --ai live --trial execution. ai/trial-budget.ts
 persists reservations and receipts outside repositories and locks concurrent
 requests. Only live execution reads OPENAI_PROJECTDEV_API_KEY. See
 LIVE_TRIAL.md for allowance limits and observed three-mode results.
+
+## P4 citation verification
+
+ai/verify-evidence.ts compares citations against submitted and freshly read
+source. ai/review.ts reuses bounded context collection after the response and
+attaches per-candidate verification results. Deterministic createReport remains
+pure. See P4_VERIFICATION.md for matching rules, failures, and limitations.

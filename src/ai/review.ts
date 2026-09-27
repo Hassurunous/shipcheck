@@ -8,6 +8,7 @@ import { aiResultSchema, modeSchema, type AiMode, type AiResult } from './contra
 import { AiFailure, buildRequest, mockTransport, requestQa, type ResponseTransport } from './client.js';
 import { requestLiveQa } from './live.js';
 import { TRIAL_MODELS } from './trial-budget.js';
+import { verifyEvidence } from './verify-evidence.js';
 
 export type AiReviewOptions = {
   execution: 'preview' | 'mock' | 'live';
@@ -54,9 +55,14 @@ export async function reviewWithAi(target = '.', options: AiReviewOptions = {exe
         output = await requestQa(injected?.transport ?? mockTransport(context),request,context,
           config.ai.timeoutMs,injected ? injected.apiKey : 'offline-mock');
       }
+      // Reuse the same bounded, exclusion-aware, link-rejecting reads. A missing,
+      // modified, or newly ineligible file cannot receive a matched citation.
+      let current = {files:[],preview:context.preview} as typeof context;
+      try { current = await collectContext(profile,config.ai); } catch { /* Fail closed for every citation. */ }
       result.candidates = output.candidates.map(candidate=>({
         ...candidate, id:`ai/qa:${createHash('sha256').update(JSON.stringify(candidate)).digest('hex').slice(0,16)}`,
         evidenceStatus:'unverified', origin:'ai',
+        evidenceVerification:verifyEvidence(candidate,context,current),
       }));
     }
   } catch (error) {

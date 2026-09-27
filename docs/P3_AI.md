@@ -129,3 +129,9 @@ All three approved generation requests completed. Each identified the seeded
 defect without flagging the clean control. The allowance is exhausted by its
 request count, with conservative priced usage totaling $0.014746. Further
 spending requires a new policy decision; see [trial record](LIVE_TRIAL.md).
+
+## P4 extension
+
+The P3 history above describes its initial boundary. AI candidates now receive
+fresh-source and exact-excerpt checks after response validation; see
+[P4 verification](P4_VERIFICATION.md). Semantic validity remains unverified.
