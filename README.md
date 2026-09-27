@@ -5,7 +5,8 @@ Shipcheck is a local review tool for AI-assisted software development.
 repository checks, audit/diff/task workflows, console/JSON/Markdown reports,
 and optional AI review with citation checks. Most deterministic checks currently
 focus on Node package manifests. P7 adds opt-in external tool commands; normalized
-multi-language diagnostics and paid whole-repository AI batching remain in progress.
+ESLint/Ruff JSON adapters provide multi-language diagnostics. Live whole-repository AI uses a
+named persistent allowance; see [live audit budgets](docs/P7_LIVE_AUDITS.md).
 
 ## Install from this repository
 
@@ -81,7 +82,7 @@ explicitly synthetic candidates, with no API key or network required. Citation
 checks re-read selected source and compare files, ranges and exact excerpts;
 matching citations do not establish that the diagnosis is correct.
 
-Live execution requires --ai live --trial, SHIPCHECK_API_KEY (or the configured ai.apiKeyEnv), and an
+Legacy trial execution requires --ai live --trial, SHIPCHECK_API_KEY (or the configured ai.apiKeyEnv), and an
 initialized persistent trial allowance. The approved development trial is
 complete and exhausted. Its fixed pricing approval expires October 3, 2026 UTC.
 This is not an ongoing production spending policy. Do not delete the ledger to
@@ -138,4 +139,16 @@ shipcheck audit . --run-checks --json
 shipcheck audit . --ai preview --whole-repository --json
 ```
 
-Whole-repository paid AI batching is not enabled yet. Preview/mock do not diagnose bugs.
+Whole-repository paid AI uses `--ai live --budget <name>` after explicit budget
+initialization. See [live audit commands and limits](docs/P7_LIVE_AUDITS.md).
+Preview/mock do not diagnose bugs.
+
+See [structured linter checks](docs/P7_STRUCTURED_CHECKS.md) for ESLint/Ruff examples,
+language selection, severity thresholds, and diagnostic fields for developer agents.
+
+## Reference resources and roadmap
+
+P8 has started with [local reference loading](docs/P8_REFERENCE_RESOURCES.md):
+configure document/contract paths and inspect bounded snapshots, hashes and loading
+statuses. References are not yet supplied to AI. [P11 task auditing](docs/P11_TASK_AUDITING.md)
+documents the planned inline current-task workflow and ownership boundaries.

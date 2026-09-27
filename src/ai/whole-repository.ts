@@ -4,9 +4,10 @@ import { createReport, reportSchema, type Report } from '../findings.js';
 import { collectContext } from './context.js';
 import { reviewWithAi, type AiReviewOptions } from './review.js';
 
-/** Bounded offline batching. Live execution needs a separately approved aggregate budget. */
+/** Bounded batching; live requests share a durable, explicitly named allowance. */
 export async function reviewWholeRepository(target:string,options:AiReviewOptions):Promise<Report> {
-  if(options.execution==='live') throw new Error('Whole-repository live AI is not enabled: aggregate spending limits are required. Use --ai preview or --ai mock.');
+  if(options.execution==='live' && (!options.budget || options.trial)) throw new Error('Whole-repository live AI requires --budget NAME, not the one-time trial.');
+  if(options.execution!=='live' && (options.budget || options.trial))throw new Error('Spending authorization requires live AI.');
   if(options.paths) throw new Error('Whole-repository AI cannot be combined with selected paths.');
   const config=options.config===undefined?await loadConfig(target):configSchema.parse(options.config);
   const profile=await inspectRepository(target,{exclude:config.exclude});
@@ -16,6 +17,7 @@ export async function reviewWholeRepository(target:string,options:AiReviewOption
   const valid=new Set<string>();
   const skipped=new Map<string,string>();
   const batches:NonNullable<Report['aiAudit']>['batches']=[];
+  let stoppedReason:string|undefined;
   while(remaining.size && batches.length<config.ai.maxBatches) {
     const context=await collectContext(profile,config.ai,[...remaining]);
     for(const item of context.preview.skipped) {
@@ -36,11 +38,13 @@ export async function reviewWholeRepository(target:string,options:AiReviewOption
     }
     for(const file of batch.preview.files) {selected.add(file.path);remaining.delete(file.path);skipped.delete(file.path);}
     for(const path of batch.coverage?.validResponsePaths ?? [])valid.add(path);
+    if(batch.status==='failed') {stoppedReason=batch.error?.code ?? 'batch-failure';break;}
   }
-  for(const path of remaining)skipped.set(path,'batch-count-limit');
+  for(const path of remaining)skipped.set(path,stoppedReason?`stopped:${stoppedReason}`:'batch-count-limit');
   const failed=batches.some(batch=>batch.status==='failed');
   const partial=skipped.size>0 || batches.some(batch=>batch.coverage?.state==='partial');
-  return reportSchema.parse({...report,aiAudit:{scope:'whole-repository',batches,
+  return reportSchema.parse({...report,aiAudit:{scope:'whole-repository',batches,...(options.budget?{budgetName:options.budget}:{}),
+    ...(stoppedReason?{stoppedReason}:{}),
     selectedPaths:[...selected].sort(),validResponsePaths:[...valid].sort(),
     skipped:[...skipped].map(([path,reason])=>({path,reason})),
     state:failed?'failed':options.execution==='preview'?'preview':partial?'partial':'complete'}});

@@ -93,6 +93,17 @@ it('blocks paid whole-repository batching and incompatible CLI scopes before any
   expect((await runCli(['audit',root,'--whole-repository'])).exitCode).toBe(2);
   expect(fetch).not.toHaveBeenCalled();
 });
+it('shows the underlying batch error and actionable credential message on stderr',async()=>{
+  vi.stubEnv('SHIPCHECK_API_KEY','');
+  await writeFile(join(root,'a.py'),'value = 1');
+  const result=await runCli(['audit',root,'--whole-repository','--ai','live','--budget','baseline','--json']);
+  expect(result.exitCode).toBe(2);
+  expect(result.stderr).toContain('AI stage failed (missing-credentials) in batch 1');
+  expect(result.stderr).toContain('Set SHIPCHECK_API_KEY in this process');
+  expect(result.stderr).not.toContain('batch-failure');
+  expect(JSON.parse(result.stdout).aiAudit.stoppedReason).toBe('missing-credentials');
+  expect(fetch).not.toHaveBeenCalled();
+});
 it('places configurable review concerns in the prompt without claiming verification',()=>{
   const request=buildRequest({files:[],preview:{files:[],skipped:[],serializedBytes:2,limited:false}},aiSettingsSchema.parse({focus:['code-smells','race-conditions']}),'offline');
   expect(request.instructions).toContain('Review focus: code-smells, race-conditions');

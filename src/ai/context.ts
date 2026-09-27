@@ -6,12 +6,11 @@ import { validateRoot } from '../filesystem-policy.js';
 import type { RepositoryProfile } from '../repository-profile.js';
 import type { AiSettings, AiResult } from './contracts.js';
 import { localImports, resolveLocalImport } from './local-imports.js';
+import {sensitiveName as deniedNames,sensitiveContent as looksSensitive} from '../sensitive-content.js';
 
 export type SourceFile = {path: string; content: string};
 export type AiContext = {files: SourceFile[]; preview: AiResult['preview']};
 const extensions = new Set(['.ts','.tsx','.mts','.cts','.js','.jsx','.mjs','.cjs','.py','.go','.rs','.java','.cs','.c','.cpp','.h','.rb','.php','.swift']);
-const deniedNames = /(?:^|[._-])(?:secrets?|credentials?|tokens?|passwords?|private|keys?)(?:[._-]|$)/i;
-const looksSensitive = /-----BEGIN (?:[A-Z ]+ )?PRIVATE KEY-----|\bsk-[A-Za-z0-9_-]{16,}|\bAKIA[A-Z0-9]{16}\b|(?:api[_-]?key|password|secret|token)\s*[:=]\s*["'][^"'\r\n]{8,}["']/i;
 
 function allowed(path: string) {
   const parts = path.split('/');

@@ -24,7 +24,8 @@ user-approved P2.5 configurable rules and review/help/version CLI are delivered.
 P2.5 makes deterministic review convenient; it does not implement the planned
 audit/diff/task workflows. P3's offline implementation and approved $0.50 live
 trial are delivered. All three modes passed the tiny fixture smoke test; see
-LIVE_TRIAL.md. General recurring live budgets are not implemented.
+LIVE_TRIAL.md. P7 adds named persistent allowances for repeated/batched audits;
+see P7_LIVE_AUDITS.md for limits and pricing expiry.
 P4 now checks AI evidence files, line ranges, and exact excerpts; semantic
 verification remains future work. P5 implements those workflows, and P6 prepares a release. The
 P2.5 audit follow-ups are resolved. Mock AI candidates are not real diagnoses.
@@ -37,16 +38,23 @@ and support every reported finding with evidence.
 
 P6 remains focused on release preparation for the current implementation.
 P6.1 strengthens citation/context reliability and evaluation of the current reviewer.
-P7 is in progress: configurable external commands and whole-repository AI preview/mock
-batching are implemented; see P7_CONFIGURATION.md for capabilities and limits.
-Remaining P7 work will add normalized multi-language check integrations and a developer-agent feedback
-workflow: a separate developer process edits code, invokes Shipcheck, consumes
+P7 is in progress: configurable external commands and whole-repository AI batching
+with explicit named budgets are implemented; see P7_CONFIGURATION.md for limits.
+P7 now provides ESLint/Ruff JSON adapters, language-based check selection and
+severity thresholds for a developer-agent feedback workflow: a separate developer process edits code, invokes Shipcheck, consumes
 its report, and iterates. Shipcheck remains the reviewer and does not modify
 code. Planned checks will reuse established language tools, with explicit
 execution authorization and bounded execution. AI candidates will remain
 distinct from deterministic failures; a clean report will not prove correctness.
-See `tasks/backlog.md` for P7 scope. Further development will use P8 and later
-milestone numbers as scope is agreed.
+P8 adds explicit reference resources, reproducible snapshots and evidence handling.
+P9/P10 cover contract auditing and requirements/architecture policies. P11 adds
+inline current-task auditing; see `docs/P11_TASK_AUDITING.md`. Users may authorize
+their developer agents to change requirements. Shipcheck assesses the current
+expectations and reports their identity without imposing approval/locking rules.
+Shipcheck and its AI reviewers do not edit source, task definitions or configuration.
+External check programs must be trusted and configured for inspection: they run
+with user permissions and are not a read-only sandbox. Budget records and explicitly
+requested report files are separate permitted outputs. See `tasks/backlog.md`.
 
 ## Non-goals for the current release
 

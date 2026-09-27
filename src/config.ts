@@ -3,6 +3,7 @@ import { join } from "node:path";
 import { z } from "zod";
 import { aiSettingsSchema } from "./ai/contracts.js";
 import { checksSchema } from './checks.js';
+import {resourceDefinitionSchema} from './resource-contracts.js';
 
 export const ruleDefaults = {
   "package/invalid-json": "error",
@@ -34,6 +35,8 @@ export const configSchema = z.object({
   rules: rulesSchema.default({}),
   ai: aiSettingsSchema.prefault({}),
   checks: checksSchema,
+  resources:z.array(resourceDefinitionSchema.extend({appliesTo:z.array(pattern).min(1).default(['**'])})).max(32).default([])
+    .refine(resources=>new Set(resources.map(resource=>resource.id)).size===resources.length,'Resource IDs must be unique.'),
   overrides: z.array(z.object({
     files: z.array(pattern).min(1), rules: rulesSchema,
     reason: z.string().min(1),

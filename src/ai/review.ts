@@ -6,13 +6,15 @@ import { createReport, reportSchema, type Report } from '../findings.js';
 import { collectContext } from './context.js';
 import { aiResultSchema, modeSchema, type AiMode, type AiResult } from './contracts.js';
 import { AiFailure, buildRequest, mockTransport, requestQa, type ResponseTransport } from './client.js';
-import { requestLiveQa } from './live.js';
+import { requestLiveQa, requestBudgetQa } from './live.js';
+import { budgetNameSchema } from './audit-budget.js';
 import { TRIAL_MODELS } from './trial-budget.js';
 import { verifyEvidence } from './verify-evidence.js';
 
 export type AiReviewOptions = {
   execution: 'preview' | 'mock' | 'live';
   trial?: boolean;
+  budget?: string;
   paths?: string[];
   mode?: AiMode;
   config?: ConfigInput;
@@ -21,7 +23,10 @@ export type AiReviewOptions = {
 export type InjectedClient = {transport:ResponseTransport; apiKey?:string};
 
 export async function reviewWithAi(target = '.', options: AiReviewOptions = {execution:'preview'}, injected?: InjectedClient): Promise<Report> {
-  if (!['preview','mock','live'].includes(options.execution) || (options.execution === 'live' && (!options.trial || injected))) throw new Error('Live AI is disabled without explicit trial activation.');
+  if (!['preview','mock','live'].includes(options.execution) || (options.execution === 'live' && (!(options.trial || options.budget) || injected))) throw new Error('Live AI is disabled without explicit --trial or --budget activation.');
+  if(options.budget)budgetNameSchema.parse(options.budget);
+  if(options.trial && options.budget)throw new Error('Choose --trial or --budget, not both.');
+  if(options.execution!=='live' && (options.trial || options.budget))throw new Error('Spending authorization requires live AI.');
   const config = options.config === undefined ? await loadConfig(resolve(target)) : configSchema.parse(options.config);
   const mode = modeSchema.parse(options.mode ?? config.ai.mode);
   const profile = await inspectRepository(target,{exclude:config.exclude});
@@ -49,9 +54,11 @@ export async function reviewWithAi(target = '.', options: AiReviewOptions = {exe
       let output;
       if (execution === 'live') {
         if(!process.env[config.ai.apiKeyEnv]?.trim()) throw new AiFailure('missing-credentials',`Set ${config.ai.apiKeyEnv} in this process before live review.`);
-        const live = await requestLiveQa(request,context,mode,config.ai.timeoutMs,process.env[config.ai.apiKeyEnv]);
-        const {output:liveOutput,...trial} = live;
-        result.trial = trial;
+        const live = options.budget ? await requestBudgetQa(request,context,mode,config.ai.timeoutMs,process.env[config.ai.apiKeyEnv],options.budget)
+          : await requestLiveQa(request,context,mode,config.ai.timeoutMs,process.env[config.ai.apiKeyEnv]);
+        const {output:liveOutput,...accounting} = live;
+        if(options.budget)result.budget={name:options.budget,...accounting};
+        else result.trial = accounting;
         output = liveOutput;
       } else {
         output = await requestQa(injected?.transport ?? mockTransport(context),request,context,

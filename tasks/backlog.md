@@ -89,18 +89,52 @@ First slice delivered:
 - [x] Configuration examples and baseline-to-diff developer workflow documentation
 
 Remaining P7 work:
-- [ ] Persistent aggregate spending limits and live whole-repository batch execution
-- [ ] Descendant process cleanup across supported platforms
+- [x] Persistent aggregate spending limits and live whole-repository batch execution
+- [x] Best-effort descendant cleanup (Windows tree tested; POSIX group implementation awaits platform validation)
 
-- [ ] Define a small adapter contract for language-specific linters and analyzers
-- [ ] Add configurable language detection and check selection, initially JavaScript/TypeScript and Python
-- [ ] Integrate established tools and normalize findings, locations, severities, and tool failures
-- [ ] Add explicitly authorized command execution with timeouts and output limits; never silently execute repository configuration
-- [ ] Define configurable pass/fail thresholds while distinguishing deterministic results from AI candidates
+- [x] Define a small adapter contract for language-specific linters and analyzers
+- [x] Add configurable language detection and check selection, initially JavaScript/TypeScript and Python
+- [x] Integrate ESLint/Ruff JSON and normalize diagnostics, locations, severities, and tool failures (offline fixture validation)
+- [x] Add explicitly authorized command execution with timeouts and output limits; never silently execute repository configuration
+- [x] Define configurable pass/fail thresholds while distinguishing deterministic results from AI candidates
 - [x] Document a developer-agent loop: implement, invoke Shipcheck, read JSON results, fix, repeat
-- [ ] Improve rule/configuration discoverability and include detailed documentation and language examples in distributed packages
-- [ ] Add offline integration fixtures and tests for multiple languages and execution failures
+- [x] Improve rule/configuration discoverability and include detailed documentation and language examples in distributed packages
+- [x] Add offline integration fixtures and tests for multiple languages and execution failures
+- [ ] Validate adapters against installed ESLint/Ruff versions and cleanup on POSIX before cross-platform release claims
 
-Start with explicit invocation by the developer agent. Background watching,
-additional languages, and further capabilities can be proposed as P8 and later
-milestones as development continues; they are not committed P7 requirements.
+## P8 — Reference resources and evidence
+
+- [x] Explicit local resource configuration and bounded read-only loading
+- [x] In-memory content snapshots, hashes, declared versions and provenance
+- [x] Loading statuses, optional hash pins and standalone citation-verification helper
+- [ ] Report missing, excluded, incompatible and changed references
+- [ ] Cross-resource citation verification without claiming semantic correctness
+- [ ] Scoped reference selection for AI requests with budget/coverage accounting
+- [ ] Explicit external-repository roots and approved remote documentation snapshots
+- [ ] Conflicting-source handling and reproducible evidence tests
+
+## P9 — Contract auditing (planned)
+
+- [ ] OpenAPI and installed TypeScript SDK declaration adapters
+- [ ] Version-aware call/contract comparisons with consumer/provider evidence
+- [ ] Cross-repository interface comparisons and missing-contract outcomes
+
+## P10 — Requirements and architectural policies (planned)
+
+- [ ] Requirement IDs, architecture/dependency-direction policies and conventions
+- [ ] Evidence-based intent assessments with ambiguity and conflict outcomes
+- [ ] Evaluation corpus for requirement/architecture violations and clean controls
+
+## P11 — Inline current-task auditing (planned)
+
+See `docs/P11_TASK_AUDITING.md` for the agreed ownership and write boundaries.
+
+- [ ] Inline `currentTask` in tool configuration; no additional file required
+- [ ] `shipcheck task` assesses that task, preserving explicit task-file support
+- [ ] Per-criterion assessments, evidence and exact task content hash
+- [ ] Document user-authorized developer-agent edits to requirements as accepted risk
+- [ ] No editing capability for Shipcheck/AI reviewers; document external-check risks
+- [ ] Recognized fix-mode guards, validation, tests and user examples
+
+Issue-tracker connectors, background watching and enforced read-only sandboxes
+remain outside these first implementations unless separately authorized.

@@ -205,7 +205,31 @@ cases. See P6_1_AUDIT_RELIABILITY.md for limits and live evaluation results.
 checks.ts validates commands and executes direct child processes only after explicit
 authorization. Reports retain external check statuses and bounded raw output separately
 from deterministic findings and AI candidates. Checks always have whole-repository scope.
-ai/whole-repository.ts batches source for preview/mock with existing selection controls,
-a maximum batch count, and explicit coverage. Paid batching awaits aggregate budgets.
+ai/whole-repository.ts batches source with existing selection controls, a maximum
+batch count, and explicit coverage. Live calls require a named audit-budget.ts
+allowance; immutable reservations and receipts persist under the user home.
+Reservations consume worst-case cost before HTTP and are never refunded. Unresolved
+attempts block further spending. The first failed batch stops the audit while
+retaining earlier results and disclosing remaining paths. P7_LIVE_AUDITS.md documents
+the pinned pricing expiry, commands, and operational limits.
 ai.apiKeyEnv references credentials outside the repository; ai.focus configures review
 concerns. See P7_CONFIGURATION.md for contracts and execution limitations.
+
+## P7 structured checks
+
+check-diagnostics.ts parses ESLint/Ruff JSON stdout into external-tool diagnostics,
+normalizes paths without reading their content, and evaluates severity thresholds.
+Checks keep stdout/stderr separate under one output cap. Optional language gates
+use an exclusion-aware repository inventory; they never authorize execution.
+check-process.ts performs best-effort Windows tree/POSIX group termination after
+timeout or overflow. P7_STRUCTURED_CHECKS.md documents schemas and validation limits.
+
+## P8 local references (first slice)
+
+resource-contracts.ts defines resource metadata and citation contracts. Config
+validates explicit local paths and scope patterns. reference-resources.ts performs
+bounded reads, rejects links/exclusions/likely secrets, and captures raw-byte hashes
+with in-memory text snapshots. Workflows report metadata and skip AI if a required
+applicable reference fails to load. Reference bodies are not yet AI context.
+The standalone verifier compares submitted and fresh snapshots and exact line
+excerpts; integration with AI evidence is pending. See P8_REFERENCE_RESOURCES.md.

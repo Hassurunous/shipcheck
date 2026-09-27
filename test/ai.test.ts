@@ -18,6 +18,16 @@ async function write(path: string, content: string | Buffer = code) {
   await fs.mkdir(dirname(join(root,path)),{recursive:true}); await fs.writeFile(join(root,path),content);
 }
 const settings = () => aiSettingsSchema.parse({});
+it('explains recognized incomplete reasons without echoing arbitrary provider text',()=>{
+  const context={files:[],preview:{files:[],skipped:[],serializedBytes:2,limited:false}};
+  const incomplete=(reason:string)=>JSON.stringify({status:'incomplete',incomplete_details:{reason},output:[]});
+  expect(()=>decodeResponse(incomplete('max_output_tokens'),context)).toThrow('Output token limit reached (including reasoning tokens)');
+  expect(()=>decodeResponse(incomplete('content_filter'),context)).toThrow('content filtering');
+  try {decodeResponse(incomplete('secret-provider-text'),context);} catch(error) {
+    expect(String(error)).not.toContain('secret-provider-text');
+    expect(String(error)).toContain('recognized completion reason');
+  }
+});
 const config = {ai:{models:{'low-cost':'test-small',balanced:'test-medium','high-quality':'test-large'}}};
 function candidate(path = 'src/math.ts') { return {title:'Example candidate',severity:'warning',explanation:'A test response, not an actual diagnosis.',
   suggestedAction:'Inspect the cited source.',evidence:[{path,startLine:1,endLine:2,excerpt:'export function divide'}]}; }

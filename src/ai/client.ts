@@ -22,6 +22,7 @@ export class AiFailure extends Error {
 
 const envelopeSchema = z.object({
   status:z.string(),
+  incomplete_details:z.object({reason:z.string().optional()}).nullable().optional(),
   output:z.array(z.object({type:z.string(), content:z.array(z.object({
     type:z.string(), text:z.string().optional(),
   }).passthrough()).optional()}).passthrough()).optional(),
@@ -32,7 +33,13 @@ export function decodeResponse(body: string, context: AiContext): QaOutput {
   let envelope;
   try { envelope = envelopeSchema.parse(JSON.parse(body)); }
   catch { throw new AiFailure('invalid-response','AI returned an invalid response envelope.'); }
-  if (envelope.status !== 'completed') throw new AiFailure('incomplete','AI response did not complete.');
+  if (envelope.status !== 'completed') {
+    const reason=envelope.incomplete_details?.reason;
+    const detail=reason==='max_output_tokens'
+      ? ' Output token limit reached (including reasoning tokens). Increase ai.maxOutputTokens within the live limit or reduce batch context.'
+      : reason==='content_filter' ? ' The provider reported content filtering.' : ' The provider did not supply a recognized completion reason.';
+    throw new AiFailure('incomplete',`AI response did not complete.${detail} Partial output was not accepted.`);
+  }
   const messages = (envelope.output ?? []).filter(item=>item.type === 'message');
   const content = messages.flatMap(item=>item.content ?? []);
   if (content.some(item=>item.type === 'refusal')) throw new AiFailure('refused','AI declined the review.');

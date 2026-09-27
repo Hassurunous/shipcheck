@@ -10,6 +10,8 @@ import { loadTask } from './task-file.js';
 import { configSchema, loadConfig } from './config.js';
 import { runChecks } from './checks.js';
 import { reviewWholeRepository } from './ai/whole-repository.js';
+import { inspectRepository } from './inspect-repository.js';
+import { loadReferenceResources } from './reference-resources.js';
 
 export type WorkflowOptions={runChecks?:boolean;wholeRepository?:boolean};
 
@@ -48,11 +50,15 @@ export async function runWorkflow(target:string, kind:'audit'|'diff'|'task', ai?
   if (task && unavailablePaths.length) throw new Error('Task selects missing, linked, or non-regular files. Correct the task file before review.');
   const config=ai?.config===undefined?await loadConfig(target):configSchema.parse(ai.config);
   const whole=kind==='audit' && (options.wholeRepository || config.ai.scope==='whole-repository');
-  const report = ai && paths?.length !== 0 ? whole ? await reviewWholeRepository(target,{...ai,config})
+  const references=config.resources.length?(await loadReferenceResources(target,config,paths)).report:undefined;
+  const report = ai && paths?.length !== 0 && references?.state!=='incomplete' ? whole ? await reviewWholeRepository(target,{...ai,config})
     : await reviewWithAi(target,{...ai,...(paths ? {paths} : {})}) : await reviewRepository(target);
-  const checks=await runChecks(report.root,config.checks,options.runChecks===true,config.ai.apiKeyEnv);
+  const languages=options.runChecks && config.checks.some(check=>check.languages)
+    ? Object.keys((await inspectRepository(report.root,{exclude:config.exclude})).languages):undefined;
+  const checks=await runChecks(report.root,config.checks,options.runChecks===true,config.ai.apiKeyEnv,languages);
   const selected = new Set(paths);
   return reportSchema.parse({...report,
+    ...(references?{references}:{}),
     ...(checks.length?{checks}:{}),
     findings:paths ? report.findings.filter(f=>f.evidence.some(e=>selected.has(e.path))) : report.findings,
     workflow:{kind,scope:paths ?? null,baseline:kind==='diff'?'HEAD':null,unavailablePaths,...(task ? {criteria:task.criteria} : {})},

@@ -1,8 +1,9 @@
 # P7: configurable checks and repository baselines
 
 This first P7 slice adds external check commands, AI credential references and
-review concerns, and whole-repository AI batching in preview/mock mode. Diagnostic
-adapters and recurring paid batch budgets remain pending; P7 is not complete.
+review concerns, and whole-repository AI batching. Live batches share a named,
+persistent allowance. ESLint and Ruff JSON adapters provide normalized diagnostics;
+see [structured checks](P7_STRUCTURED_CHECKS.md) for configuration and validation limits.
 
 ## Configuration discovery
 
@@ -74,7 +75,7 @@ and mock use no model/network and produce no real AI diagnoses.
 `audit` already inspects the whole inventory subject to exclusions. `diff` restricts
 findings/AI focus to changed paths. External checks currently always run at the root,
 including for diff/task, and report `scope: "whole-repository"`. Empty diffs skip all
-work. `--whole-repository` requires audit with AI preview/mock; `ai.scope` supplies
+work. `--whole-repository` requires audit with AI preview/mock/live; `ai.scope` supplies
 that default for audit, without changing diff/task.
 
 ```js
@@ -98,15 +99,17 @@ Arguments are literal, without shell expansion/pipelines. On Windows, use Node p
 a JS entry point instead of `.cmd`/`.bat` shims. No automatic npx downloads occur.
 
 Results contain ID, passed/failed/error/skipped status, exit code, bounded combined
-stdout/stderr, and reason. Zero passes; `failureExitCodes` (default `[1]`) means a
+stdout/stderr, and reason. With the default text format, zero passes; `failureExitCodes` (default `[1]`) means a
 check failure; other codes, launch failures, timeout and overflow are operational
 errors. CLI exits 1 for check/error-level rule failures, 2 for operational/AI failures,
-otherwise 0. Skipped checks are explicit and do not fail the command. Output is not
-yet normalized into file/line findings or citation-verified.
+otherwise 0. Skipped checks are explicit and do not fail the command. Structured
+formats add diagnostics and severity thresholds; locations are tool claims, not
+citation-verified findings.
 
 Limits: 20 checks; timeout 100–300000 ms (default 60000); output 128–1048576 bytes
-(default 65536). Timeout/overflow kills the direct child; detached grandchildren
-are not guaranteed to stop. Credential-like environment variables are withheld and
+(default 65536). Timeout/overflow attempts process-tree termination (Windows taskkill
+or a POSIX process group), allowing up to five seconds for Windows cleanup. Deliberately
+detached/reparented descendants are not guaranteed to stop. Credential-like environment variables are withheld and
 known values redacted, but a malicious tool can still read user files. Shipcheck's
 exclusions do not configure external tools; maintain their own exclusions too.
 
@@ -119,7 +122,14 @@ behavior can be missed. JSON includes batches, unique selected/valid-response pa
 skips/reasons and preview/partial/complete/failed state. Mock valid responses prove
 plumbing only; full selection never guarantees defect detection.
 
-Whole-repository **live** AI is rejected before network access in this slice.
-A persistent aggregate budget and paid batching validation are next; the original
-trial ledger cannot fund arbitrary recurring batches. Citation checks verify source
-locations, not diagnosis correctness. No additional API spending is used here.
+Whole-repository live AI requires a named allowance; see
+[live audit budgets](P7_LIVE_AUDITS.md) for setup, commands and spending controls.
+The original trial ledger remains separate. Citation checks verify source locations,
+not diagnosis correctness. Preview/mock and external checks spend no API credits.
+
+## Reference resources and planned task auditing
+
+Optional `resources` configuration now supports bounded local reference loading.
+See [P8 reference resources](P8_REFERENCE_RESOURCES.md) for schema, examples and
+limits. Loaded references are explicitly **not yet assessed by AI**.
+Inline `currentTask` is planned in [P11](P11_TASK_AUDITING.md), not supported syntax.

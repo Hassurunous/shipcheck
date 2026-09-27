@@ -64,6 +64,8 @@ export const aiResultSchema = z.object({
   retries: z.literal(0),
   trial: z.object({countedInputTokens:z.number().int(), reservedUsd:z.number(), pricedUsageUpperBoundUsd:z.number(),
     usage:z.object({input_tokens:z.number().int(),output_tokens:z.number().int()})}).optional(),
+  budget:z.object({name:z.string(),countedInputTokens:z.number().int(),reservedUsd:z.number(),pricedUsageUpperBoundUsd:z.number(),
+    usage:z.object({input_tokens:z.number().int(),output_tokens:z.number().int()})}).optional(),
   candidates: z.array(candidateSchema.extend({
     id: z.string(), evidenceStatus: z.literal('unverified'), origin: z.literal('ai'),
     evidenceVerification: z.object({status:z.enum(['matched','rejected']),checks:z.array(z.object({

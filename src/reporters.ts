@@ -31,6 +31,13 @@ export function renderConsoleReport(input: Report): string {
     lines.push(`  Suggested action: ${text(finding.suggestedAction)}`);
   }
   if (report.findings.length === 0) lines.push("", "No findings from the implemented rules.");
+  if(report.references) {
+    lines.push('',`Reference loading: ${report.references.state.toUpperCase()} — NOT ASSESSED`,
+      'Reference bodies are not supplied to AI in this P8 slice. Hashes identify loaded bytes; declared versions and authority are user assertions.');
+    for(const resource of report.references.resources)lines.push(
+      `  [${resource.status.toUpperCase()}] ${text(resource.id)}: ${text(resource.path)} (${resource.kind}; ${resource.authority}; ${resource.required?'required':'optional'})`,
+      `    Declared version: ${text(resource.version ?? 'unspecified')}; SHA256: ${resource.sha256 ?? 'unavailable'}; bytes: ${resource.bytes}`);
+  }
   if (report.inspectionWarnings.length > 0) {
     lines.push("", "Inspection warnings (some content was not analyzed):");
     for (const warning of report.inspectionWarnings) {
@@ -41,6 +48,9 @@ export function renderConsoleReport(input: Report): string {
     lines.push('', 'Configured checks (whole repository; tool output is not citation-verified):');
     for(const check of report.checks) {
       lines.push(`  [${check.status.toUpperCase()}] ${text(check.id)}: ${text(check.reason)}`);
+      for(const diagnostic of check.diagnostics ?? [])lines.push(
+        `    [${diagnostic.severity.toUpperCase()}] ${text(diagnostic.tool)}/${text(diagnostic.ruleId ?? 'unclassified')}: ${text(diagnostic.message)}`,
+        `      ${text(diagnostic.path ?? '(no file location)')}${diagnostic.line?`:${diagnostic.line}`:''}${diagnostic.column?`:${diagnostic.column}`:''}`);
       if(check.output)lines.push(`    ${text(check.output)}`);
     }
   }
@@ -51,6 +61,8 @@ export function renderConsoleReport(input: Report): string {
     const audit=report.aiAudit;
     lines.push('',`Whole-repository AI: ${audit.state.toUpperCase()}; ${audit.batches.length} batches; ${audit.selectedPaths.length} selected files; ${audit.validResponsePaths.length} files with valid responses; ${audit.skipped.length} skipped.`,
       'Whole-repository scope does not guarantee complete context or defect detection. Preview/mock results are not real diagnoses.');
+    if(audit.budgetName)lines.push(`Persistent allowance: ${text(audit.budgetName)}; use shipcheck budget status to inspect reservations.`);
+    if(audit.stoppedReason)lines.push(`Stopped: ${text(audit.stoppedReason)}. Completed batches are retained; remaining paths were not reviewed.`);
     for(const item of audit.skipped)lines.push(`  Skipped: ${text(item.path)} — ${text(item.reason)}`);
     audit.batches.forEach((ai,index)=>lines.push('',`AI batch ${index+1}:`,renderConsoleReport({schemaVersion:1,root:report.root,findings:[],inspectionWarnings:[],ai})));
   }
@@ -74,11 +86,15 @@ export function renderConsoleReport(input: Report): string {
       lines.push(`  Missing dependency context: ${text(dependency.from)} -> ${text(dependency.specifier)} (${dependency.status})`);
     lines.push(`Request size: ${ai.requestBytes} bytes; approximate input tokens: ${ai.estimatedInputTokens} (heuristic)`,
       `Output limit: ${ai.maxOutputTokens} tokens; retries: 0`,
-      ai.execution === 'live' ? 'Live trial: $0.50 allowance; one attempt per mode; no retries. See shipcheck trial status.'
+      ai.execution === 'live' ? ai.budget ? `Live budget: ${text(ai.budget.name)}; persistent reservations; no retries.`
+        : ai.trial ? 'Live trial: $0.50 allowance; one attempt per mode; no retries. See shipcheck trial status.'
+        : 'Live request failed; inspect the selected allowance for any retained reservation.'
         : 'Live cost estimate: unavailable in offline mode.');
     if (ai.execution === 'preview' || ai.execution === 'mock') lines.push('Offline only: no model ran, no network request, $0 API spend.');
     if (ai.trial) lines.push(`Counted input: ${ai.trial.countedInputTokens}; usage: ${ai.trial.usage.input_tokens} input / ${ai.trial.usage.output_tokens} output tokens`,
       `Reserved: $${ai.trial.reservedUsd.toFixed(6)}; priced usage upper bound: $${ai.trial.pricedUsageUpperBoundUsd.toFixed(6)} (not an invoice).`);
+    if(ai.budget)lines.push(`Counted input: ${ai.budget.countedInputTokens}; usage: ${ai.budget.usage.input_tokens} input / ${ai.budget.usage.output_tokens} output tokens`,
+      `Reserved: $${ai.budget.reservedUsd.toFixed(6)}; priced usage upper bound: $${ai.budget.pricedUsageUpperBoundUsd.toFixed(6)} (not an invoice).`);
     if (ai.error) lines.push(`AI failure [${text(ai.error.code)}]: ${text(ai.error.message)}`);
     if (ai.status === 'preview') lines.push('Preview only: no QA review was performed.');
     if (ai.status === 'completed') lines.push(`AI candidates: ${ai.candidates.length} — UNVERIFIED${ai.execution === 'mock' ? ' / SYNTHETIC MOCK' : ''}`);
