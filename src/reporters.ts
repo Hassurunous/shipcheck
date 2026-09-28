@@ -40,11 +40,23 @@ export function renderConsoleReport(input: Report): string {
     for(const nonGoal of task.nonGoals)lines.push(`  Non-goal: ${text(nonGoal)}`);
   }
   if(report.references) {
+    // Resource loading and contract comparison are separate stages.
     lines.push('',`Reference loading: ${report.references.state.toUpperCase()} — NOT ASSESSED`,
       'Loading alone is not assessment. See each AI stage for reference inclusion. Hashes identify loaded bytes; declared versions and authority are user assertions.');
     for(const resource of report.references.resources)lines.push(
       `  [${resource.status.toUpperCase()}] ${text(resource.id)}: ${text(resource.path)} (${resource.kind}; ${resource.authority}; ${resource.required?'required':'optional'})`,
       `    Declared version: ${text(resource.version ?? 'unspecified')}; SHA256: ${resource.sha256 ?? 'unavailable'}; bytes: ${resource.bytes}`);
+  }
+  for(const contract of report.contracts ?? []) {
+    lines.push('',`Contract ${text(contract.id)}: ${contract.state.toUpperCase()} — ${contract.scope==='literal-javascript-fetch-only'?'literal JavaScript fetch only':'literal HTTP calls; adapter-specific coverage'}`,
+      `  Provider: ${text(contract.reference?.path ?? contract.resourceId)}; SHA256: ${contract.reference?.sha256 ?? 'unavailable'}; version: ${text(contract.reference?.apiVersion ?? 'unknown')}`);
+    for(const issue of contract.issues)lines.push(`  Limitation: ${text(issue)}`);
+    for(const file of contract.files)lines.push(`  Consumer: ${text(file.path)} [${text(file.status)}]; SHA256: ${file.sha256 ?? 'unavailable'}`,
+      `    Adapter: ${text(file.adapter ?? 'unavailable')}; language: ${text(file.language ?? 'unsupported/unknown')}; extracted calls: ${file.callCount ?? 'not recorded'}`);
+    for(const call of contract.calls)lines.push(`  [${call.status.toUpperCase()}] ${text(call.path)}:${call.line} — ${text(call.reason)}`,
+      `    Observation: ${call.observationKind ?? 'request-call'}; construction does not establish that a request is sent.`,
+      `    ${text(call.excerpt)}`,`    Contract pointers: ${call.contractPointers.map(text).join(', ') || '(none)'}`);
+    lines.push('  No runtime requests executed. Only mapped files and supported direct calls assessed; a match does not prove integration correctness.');
   }
   if (report.inspectionWarnings.length > 0) {
     lines.push("", "Inspection warnings (some content was not analyzed):");

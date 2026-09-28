@@ -41,7 +41,8 @@ The implementation uses the Paths, Path Item and Operation definitions in the
 Tests cover direct extraction, provenance, escaped pointers, unsupported inputs,
 unresolved references, duplicate identities and partial coverage.
 
-Next work: consumer call extraction and explicit service mapping, version-aware
-comparisons with evidence on both sides, CLI report integration, installed TypeScript
-SDK declarations, and cross-repository contracts. These depend on the remaining
-P8 context/provenance work. No new dependencies or paid API calls were introduced.
+P14 now supplies consumer call extraction, explicit service mapping, version pins,
+and CLI comparisons with evidence on both sides for literal JavaScript fetch calls;
+see [P14 contract checks](P14_CONTRACT_CHECKS.md). The standalone index retains its
+not-compared assessment. Installed SDK declarations and cross-repository contracts
+remain P16. P9 itself introduced no dependencies or paid calls; P14 uses Acorn.

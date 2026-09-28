@@ -190,13 +190,42 @@ control over developer-agent edits to expectations; Shipcheck never rewrites the
 
 Completes the first end-to-end portion of P9.
 
-- [ ] Map source clients to service contracts and extract narrowly supported calls
-- [ ] Compare methods/routes and supported parameters with contract evidence
-- [ ] Distinguish incompatible versions, dynamic calls and unsupported operations
-- [ ] Integrate consumer/provider evidence into CLI reports
+- [x] Map source clients to service contracts and extract narrowly supported calls
+- [x] Compare methods/routes and supported parameters with contract evidence
+- [x] Distinguish version-pin mismatches, dynamic calls and unsupported operations
+- [x] Integrate consumer/provider evidence into CLI reports
 
 Completion: one documented language/client pattern works against OpenAPI with
 seeded incorrect calls, clean controls and explicit unresolved-call limitations.
+Delivered pattern: direct literal JavaScript fetch, OpenAPI JSON, method/route and
+required scalar query-name presence. See docs/P14_CONTRACT_CHECKS.md.
+
+### P14.1 — Multilingual contract auditing (completed)
+
+- [x] Common offline call-observation interface and bundled adapter registry
+- [x] TypeScript/TSX direct fetch and Python Requests literal-call patterns
+- [x] Shared OpenAPI comparison and consumer/provider evidence across languages
+- [x] Adapter/language/call-count reporting; zero supported calls are incomplete
+- [x] Offline safeguards, clean/defect fixtures, and mixed-language CLI verification
+- [x] Optional existing AI review stays separate; no automatic paid fallback
+
+See docs/P14_1_MULTILINGUAL_CONTRACTS.md for exact patterns and exclusions.
+
+### P14.2 — Additional language adapters (completed for documented patterns)
+
+- [x] Go net/http literal request patterns
+- [x] C# HttpClient literal request patterns
+- [x] Java standard HTTP client literal request patterns
+- [x] Per-adapter clean/defect/unsupported fixtures and installed CLI validation
+- [x] Extend coverage for Python HTTPX/Sessions and JavaScript/TypeScript Axios
+- [x] Prioritize Rust reqwest, Ruby Net::HTTP, then PHP cURL for subsequent adapter work
+
+See docs/P14_2_ADDITIONAL_LANGUAGES.md. P15 remains the next core milestone.
+
+Prefer deterministic offline extraction and reuse the comparison/report contracts.
+AI may supplement unsupported complexity with separate evidence-backed candidates;
+it must not erase incomplete offline coverage or require spending for existing checks.
+Shipcheck remains read-only. SDK resolution and external resources remain P16.
 
 ### P15 — Automatic architecture-policy checks
 

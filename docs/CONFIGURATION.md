@@ -1,5 +1,12 @@
 # Configuration
 
+For `contracts` mappings from JavaScript clients to local OpenAPI resources, see
+[P14 contract checks](P14_CONTRACT_CHECKS.md). These deterministic checks run in
+audit/diff/task workflows without enabling AI or external commands.
+Mappings may mix JavaScript, TypeScript/TSX, Python, Go, C# and Java source paths;
+adapters are selected automatically by extension. See
+[current language/client support](P14_2_ADDITIONAL_LANGUAGES.md).
+
 `reviewRepository(target)` loads `shipcheck.config.json` from the target root,
 then inspects and reports with that configuration. No config file means defaults.
 Malformed JSON, unknown keys/rule IDs, unsupported patterns, and invalid

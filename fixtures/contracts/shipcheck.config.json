@@ -1,0 +1,10 @@
+{
+  "resources": [{"id":"users-api","path":"api.json","kind":"openapi"}],
+  "contracts": [{
+    "id":"multilingual-clients",
+    "resourceId":"users-api",
+    "files":["client.ts","client.py"],
+    "baseUrl":"https://api.example.test/v1",
+    "expectedVersion":"1.0"
+  }]
+}

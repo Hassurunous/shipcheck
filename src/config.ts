@@ -5,6 +5,7 @@ import { aiSettingsSchema } from "./ai/contracts.js";
 import { checksSchema } from './checks.js';
 import {resourceDefinitionSchema} from './resource-contracts.js';
 import {currentTaskSchema} from './task-file.js';
+import {contractBindingSchema} from './contract-contracts.js';
 
 export const ruleDefaults = {
   "package/invalid-json": "error",
@@ -33,6 +34,7 @@ const pattern = z.string().min(1).refine(value =>
 export const configSchema = z.object({
   version: z.literal(1).default(1),
   currentTask:currentTaskSchema.optional(),
+  contracts:z.array(contractBindingSchema).max(20).default([]).refine(items=>new Set(items.map(item=>item.id)).size===items.length,'Contract binding IDs must be unique.'),
   exclude: z.array(pattern).default([]),
   rules: rulesSchema.default({}),
   ai: aiSettingsSchema.prefault({}),

@@ -61,6 +61,14 @@ citations and explicit reference-conflict outcomes. Its four-case low-cost live
 evaluation passed; see P12_EVALUATION.md for limits. P13 adds bounded task requirement
 assessments with citation verification and task freshness; its five live fixtures
 met expectations (P13_EVALUATION.md). External reference sources remain P16.
+P14 adds deterministic comparisons of mapped literal JavaScript fetch calls against
+local OpenAPI contracts, with explicit incomplete outcomes and source/provider
+evidence. It checks methods, routes and supported query-name presence only; see
+P14_CONTRACT_CHECKS.md. It does not establish runtime integration correctness.
+P14.1 adds offline TypeScript/TSX fetch and Python Requests adapters with explicit
+language/client coverage. P14.2 adds bounded Go/C#/Java and Axios/HTTPX/Session patterns;
+see P14_2_ADDITIONAL_LANGUAGES.md for platform and coverage limits. Optional AI supplements
+offline analysis without converting unsupported patterns into deterministic passes.
 
 ## Non-goals for the current release
 

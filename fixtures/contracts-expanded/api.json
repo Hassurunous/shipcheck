@@ -1,0 +1,13 @@
+{
+  "openapi":"3.1.0", "info":{"title":"Offline adapter example","version":"1.0"},
+  "paths":{
+    "/users":{"get":{
+      "parameters":[{"name":"q","in":"query","required":true,"schema":{"type":"string"}}],
+      "responses":{"200":{"description":"Users"}}
+    }},
+    "/users/{id}":{
+      "parameters":[{"name":"id","in":"path","required":true,"schema":{"type":"string"}}],
+      "delete":{"responses":{"204":{"description":"Deleted"}}}
+    }
+  }
+}

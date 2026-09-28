@@ -6,6 +6,7 @@ import { aiResultSchema } from "./ai/contracts.js";
 import { checkResultSchema } from './checks.js';
 import { referencesSchema } from './resource-contracts.js';
 import { currentTaskReportSchema } from './task-file.js';
+import {contractResultSchema} from './contract-contracts.js';
 
 export const findingSchema = z.object({
   id: z.string().min(1),
@@ -31,6 +32,7 @@ export const reportSchema = z.object({
   ai: aiResultSchema.optional(),
   checks:z.array(checkResultSchema).optional(),
   references:referencesSchema.optional(),
+  contracts:z.array(contractResultSchema).optional(),
   currentTask:currentTaskReportSchema.optional(),
   aiAudit:z.object({scope:z.literal('whole-repository'),batches:z.array(aiResultSchema),
     budgetName:z.string().optional(),stoppedReason:z.string().optional(),

@@ -13,6 +13,7 @@ import { runChecks } from './checks.js';
 import { reviewWholeRepository } from './ai/whole-repository.js';
 import { inspectRepository } from './inspect-repository.js';
 import { loadReferenceResources } from './reference-resources.js';
+import {auditContracts} from './contract-audit.js';
 
 export type WorkflowOptions={runChecks?:boolean;wholeRepository?:boolean;currentTask?:boolean};
 
@@ -86,10 +87,12 @@ export async function runWorkflow(target:string, kind:'audit'|'diff'|'task', ai?
     for(const requirement of taskSummary.requirements)requirement.status=report.ai?.taskReview?.assessments.find(item=>item.requirementId===requirement.id)?.status ?? 'insufficient-evidence';
   }
   const selected = new Set(paths);
+  const contracts=await auditContracts(report.root,config,paths);
   return reportSchema.parse({...report,
     ...(taskSummary?{currentTask:taskSummary}:{}),
     ...(references?{references}:{}),
     ...(checks.length?{checks}:{}),
+    ...(contracts.length?{contracts}:{}),
     findings:paths ? report.findings.filter(f=>f.evidence.some(e=>selected.has(e.path))) : report.findings,
     workflow:{kind,scope:paths ?? null,baseline:kind==='diff'?'HEAD':null,unavailablePaths,...(task ? {criteria:task.criteria} : {})},
   });

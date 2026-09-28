@@ -239,7 +239,7 @@ P12 integrates it with AI evidence. See P8_REFERENCE_RESOURCES.md.
 openapi-contract.ts indexes direct operations from loaded OpenAPI JSON snapshots
 as a pure exported API. Snapshot hashes and JSON Pointers preserve structural
 provenance; unresolved references and malformed entries produce explicit issues.
-It does not yet participate in workflow reports or compare source calls. See
+P14 connects the index to workflow reports and narrow source-call comparisons. See
 P9_CONTRACT_AUDITING.md for supported input and limitations.
 
 ## P10 policy foundation
@@ -280,3 +280,37 @@ Workflow-level rechecking also catches task mutations by authorized external che
 Legacy task-file strings map to positional criterion IDs. AI outcomes remain separate
 from general findings and do not independently change CLI exit codes. See
 P13_TASK_ASSESSMENT.md and P13_EVALUATION.md.
+
+## P14 contract comparison
+
+contract-audit.ts loads bounded contract/source snapshots and compares mapped
+JavaScript calls extracted with Acorn in fetch-calls.ts. Structured contracts
+results retain both hashes and provider JSON Pointers. Workflows scope mappings,
+reporters expose limitations, and CLI exit codes distinguish mismatches from
+incomplete comparisons. No runtime requests or client execution occur. See
+P14_CONTRACT_CHECKS.md for the deliberately narrow supported pattern.
+
+## P14.1 multilingual adapters
+
+contract-adapter-types.ts defines language-neutral call observations and extraction
+issues; contract-adapters.ts selects bundled adapters by extension. fetch-calls.ts
+uses Acorn for JavaScript and Babel's ESTree/TypeScript parser for typed syntax.
+python-calls.ts uses Lezer's Python grammar entirely inside Node to identify direct
+Requests calls and literal query-name dictionaries. Neither adapter executes source,
+imports repository modules, or requires a target-language runtime. Shared comparison
+preserves snapshot evidence and labels unsupported/zero-call coverage as partial.
+Reports expose adapter, language and call count; optional AI results stay separate.
+See P14_1_MULTILINGUAL_CONTRACTS.md and the P14.2 extension below.
+
+## P14.2 additional HTTP clients
+
+standard-http-syntax.ts lazily loads the fixed, packaged ast-grep native runtime
+and Go/C#/Java Tree-sitter grammars. Language modules produce the same bounded
+observations without source execution or target compilers. Recovery errors and
+parser availability failures remain explicit; existing JS/TS/Python extraction
+does not require native initialization. axios-calls.ts reuses the JS/TS parser and
+combines Axios/fetch observations under a per-file call cap. python-calls.ts adds
+HTTPX and fresh Session/Client bindings with conservative mutation/scope checks.
+Report observationKind separates constructions from request-call syntax. Adapter
+IDs for JS/TS/Python now end in -http to reflect multiple clients. See
+P14_2_ADDITIONAL_LANGUAGES.md for exact limitations and packaged validation.

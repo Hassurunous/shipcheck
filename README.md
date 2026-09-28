@@ -49,7 +49,8 @@ modify source. --json and --markdown are mutually exclusive. Reports go to
 stdout, diagnostics to stderr. Redirection saves a report; choose a path outside
 the audited tree to avoid including a previous report in later inspection.
 Exit codes: 0 completed without deterministic errors, 1 deterministic error
-findings, 2 usage/configuration/inspection/AI failure. AI candidates do not set
+findings/check failures/contract mismatches, 2 usage/configuration/inspection/AI
+failure or incomplete contract comparison. AI candidates do not set
 exit 1. Bare invocation and an explicit path retain the bootstrap readiness test;
 use audit to inspect files. Use `--` before a target starting with a dash.
 
@@ -157,9 +158,20 @@ documents the inline `currentTask` configuration and `shipcheck task` workflow.
 `shipcheck task --ai live --budget <name> --json`. Supporting evidence is not proof
 of completion; inspect uncertainty, citations and task freshness.
 
-[P9 contract auditing](docs/P9_CONTRACT_AUDITING.md) has started with an exported
-offline OpenAPI operation index. CLI integration and source/contract comparisons
-remain pending.
+[P9 contract auditing](docs/P9_CONTRACT_AUDITING.md) provides the OpenAPI operation
+index. [P14 contract checks](docs/P14_CONTRACT_CHECKS.md) connects mapped literal
+JavaScript fetch calls to local OpenAPI contracts in audit/diff/task reports.
+Method, route and required scalar query-name mismatches return exit 1; incomplete
+contract comparisons return exit 2. No AI or network requests are needed.
+[P14.1](docs/P14_1_MULTILINGUAL_CONTRACTS.md) adds offline TypeScript/TSX fetch and
+Python Requests adapters. List mixed-language files in the same contract mapping;
+reports identify the adapter and extracted call count. Unsupported languages or
+zero supported calls report incomplete coverage.
+[P14.2](docs/P14_2_ADDITIONAL_LANGUAGES.md) adds Go net/http, C# HttpClient,
+Java request builders, Axios, HTTPX and fresh Python sessions. Try
+`shipcheck audit fixtures/contracts-expanded --json` for eight offline observations.
+Supported patterns and native-parser platform limits are documented; this is not
+complete language or runtime integration validation.
 
 [P10 intent policies](docs/P10_INTENT_POLICIES.md) now provides a library foundation
 for requirement identities and forbidden dependency boundaries. It evaluates

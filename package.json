@@ -6,7 +6,7 @@
   "type": "module",
   "main": "./dist/src/index.js",
   "bin": { "shipcheck": "./dist/src/cli.js" },
-  "files": ["dist/src", "README.md", "docs", "fixtures/demo", "tasks/example.json", "tasks/backlog.md"],
+  "files": ["dist/src", "README.md", "docs", "fixtures/demo", "fixtures/contracts", "fixtures/contracts-expanded", "tasks/example.json", "tasks/backlog.md"],
   "engines": { "node": ">=22" },
   "scripts": {
     "dev": "tsx src/cli.ts",
@@ -23,6 +23,14 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@ast-grep/lang-csharp": "0.0.6",
+    "@ast-grep/lang-go": "0.0.6",
+    "@ast-grep/lang-java": "0.0.7",
+    "@ast-grep/napi": "0.45.3",
+    "@babel/parser": "7.29.9",
+    "@lezer/common": "1.5.3",
+    "@lezer/python": "1.1.19",
+    "acorn": "8.18.0",
     "zod": "^4.6.5"
   },
   "devDependencies": {

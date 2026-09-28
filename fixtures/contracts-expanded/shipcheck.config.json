@@ -1,0 +1,8 @@
+{
+  "resources": [{"id":"api","path":"api.json","kind":"openapi"}],
+  "contracts": [{
+    "id":"expanded-clients", "resourceId":"api",
+    "files":["client.go","Client.cs","Client.java","axios-client.ts","httpx-client.py","session-client.py"],
+    "baseUrl":"https://api.example.test/v1", "expectedVersion":"1.0"
+  }]
+}
