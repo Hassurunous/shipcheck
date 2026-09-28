@@ -12,6 +12,9 @@ import { TRIAL_MODELS } from './trial-budget.js';
 import { verifyEvidence } from './verify-evidence.js';
 import {attachReferences} from './reference-context.js';
 import {loadReferenceResources} from '../reference-resources.js';
+import {currentTaskSchema,describeCurrentTask,type CurrentTask} from '../task-file.js';
+import {pendingTaskReview,finishTaskReview,invalidateTaskReview} from './task-review.js';
+import {sensitiveContent} from '../sensitive-content.js';
 
 export type AiReviewOptions = {
   execution: 'preview' | 'mock' | 'live';
@@ -20,6 +23,8 @@ export type AiReviewOptions = {
   paths?: string[];
   mode?: AiMode;
   config?: ConfigInput;
+  task?:CurrentTask;
+  reloadTask?:()=>Promise<CurrentTask>;
 };
 /** Offline test seam: caller supplies transport and dummy credentials. */
 export type InjectedClient = {transport:ResponseTransport; apiKey?:string};
@@ -44,9 +49,22 @@ export async function reviewWithAi(target = '.', options: AiReviewOptions = {exe
     estimatedCostUsd:null,actualCostUsd:execution === 'injected' || execution === 'live' ? null : 0,retries:0,candidates:[],error:null,
   };
   try {
-    const context = await collectContext(profile,config.ai,options.paths);
+    const task=options.task?currentTaskSchema.parse(options.task):undefined;
+    if(task)result.taskReview=pendingTaskReview(task);
+    const taskBytes=task?Buffer.byteLength(JSON.stringify(task)):0;
+    if(task && [task.id,task.title,task.description,...task.files,...task.nonGoals,...task.requirements.flatMap(item=>[item.id,item.text])].some(value=>sensitiveContent.test(value)))
+      throw new AiFailure('sensitive-task','Task text resembles sensitive credentials; no request was sent.');
+    if(taskBytes>config.ai.maxContextBytes-256)throw new AiFailure('task-context-limit','Task exceeds available context space; no request was sent.');
+    const sourceSettings={...config.ai,maxContextBytes:config.ai.maxContextBytes-taskBytes};
+    const context = await collectContext(profile,sourceSettings,options.paths ?? task?.files);
+    if(task) {
+      context.task=task;
+      context.preview.task={id:task.id,sha256:describeCurrentTask(task).sha256,bytes:taskBytes,requirementIds:task.requirements.map(item=>item.id)};
+    }
     result.preview = context.preview;
-    if(await attachReferences(profile.root,config,context))throw new AiFailure('reference-context','A required applicable reference is unavailable, ambiguous, or exceeds remaining context space. No request was sent.');
+    const referencesBlocked=await attachReferences(profile.root,{...config,ai:sourceSettings},context);
+    context.preview.serializedBytes+=taskBytes;
+    if(referencesBlocked)throw new AiFailure('reference-context','A required applicable reference is unavailable, ambiguous, or exceeds remaining context space. No request was sent.');
     const request = buildRequest(context,config.ai,model ?? 'MODEL_NOT_SELECTED');
     result.requestBytes = Buffer.byteLength(JSON.stringify(request));
     // Heuristic only, not a billing quote or token cap. Includes prompt/schema overhead.
@@ -70,7 +88,7 @@ export async function reviewWithAi(target = '.', options: AiReviewOptions = {exe
       // Reuse the same bounded, exclusion-aware, link-rejecting reads. A missing,
       // modified, or newly ineligible file cannot receive a matched citation.
       let current = {files:[],preview:context.preview} as typeof context;
-      try { current = await collectContext(profile,config.ai,context.files.map(file=>file.path)); } catch { /* Fail closed for every citation. */ }
+      try { current = await collectContext(profile,sourceSettings,context.files.map(file=>file.path)); } catch { /* Fail closed for every citation. */ }
       if(context.references) {
         try { current.references=(await loadReferenceResources(profile.root,config,context.files.map(file=>file.path))).snapshots; }
         catch { current.references=[]; }
@@ -91,6 +109,13 @@ export async function reviewWithAi(target = '.', options: AiReviewOptions = {exe
         status:'needs-clarification',evidenceVerification:verifyEvidence(conflict,context,current),
       }));
       const conflictedPaths=new Set((result.referenceConflicts ?? []).flatMap(conflict=>conflict.evidence.map(item=>item.path)));
+      if(task) {
+        result.taskReview=finishTaskReview(task,output,context,current,result.referenceConflicts ?? [],execution==='mock');
+        try {
+          if(!options.reloadTask || describeCurrentTask(await options.reloadTask()).sha256!==result.taskReview.taskHash)invalidateTaskReview(result.taskReview);
+          else result.taskReview.freshness='unchanged';
+        } catch {invalidateTaskReview(result.taskReview);}
+      }
       result.candidates = candidates.map(candidate=>({
         ...candidate, id:`ai/qa:${createHash('sha256').update(JSON.stringify(candidate)).digest('hex').slice(0,16)}`,
         evidenceStatus:'unverified', origin:'ai',
@@ -106,7 +131,7 @@ export async function reviewWithAi(target = '.', options: AiReviewOptions = {exe
   const selectedPaths=result.preview.files.map(file=>file.path);
   const rejectedCandidates=result.candidates.filter(candidate=>candidate.evidenceVerification?.status!=='matched').length;
   result.coverage={state:result.status==='failed'?'failed':result.status==='preview'?'preview':
-    result.preview.limited || result.preview.skipped.length>0 || rejectedCandidates>0 || (result.referenceConflicts?.length ?? 0)>0 || (result.coverage?.outOfScopeCandidates ?? 0)>0?'partial':'complete',
+    result.preview.limited || result.preview.skipped.length>0 || rejectedCandidates>0 || (result.taskReview && result.taskReview.state!=='assessed') || (result.referenceConflicts?.length ?? 0)>0 || (result.coverage?.outOfScopeCandidates ?? 0)>0?'partial':'complete',
     selectedPaths,validResponsePaths:result.status==='completed'?selectedPaths:[],
     failedResponsePaths:result.status==='failed'?selectedPaths:[],skippedPaths:result.preview.skipped.map(file=>file.path),
     matchedCandidates:result.candidates.length-rejectedCandidates,rejectedCandidates,

@@ -35,8 +35,8 @@ export function renderConsoleReport(input: Report): string {
   if(report.currentTask) {
     const task=report.currentTask;
     lines.push('',`Current task: ${text(task.id)} — ${text(task.title)}`,`Task SHA256 (normalized content): ${task.sha256}`,
-      'Task requirements: NOT ASSESSED. Optional AI reviews selected code, not requirement satisfaction.');
-    for(const item of task.requirements)lines.push(`  [INSUFFICIENT EVIDENCE] ${text(item.id)}: ${text(item.text)}`);
+      `Task requirements: ${task.assessment.toUpperCase()}. Supporting evidence is not proof of completion.`);
+    for(const item of task.requirements)lines.push(`  [${item.status.toUpperCase()}] ${text(item.id)}: ${text(item.text)}`);
     for(const nonGoal of task.nonGoals)lines.push(`  Non-goal: ${text(nonGoal)}`);
   }
   if(report.references) {
@@ -107,6 +107,16 @@ export function renderConsoleReport(input: Report): string {
     if (ai.error) lines.push(`AI failure [${text(ai.error.code)}]: ${text(ai.error.message)}`);
     if (ai.status === 'preview') lines.push('Preview only: no QA review was performed.');
     if (ai.status === 'completed') lines.push(`AI candidates: ${ai.candidates.length} — UNVERIFIED${ai.execution === 'mock' ? ' / SYNTHETIC MOCK' : ''}`);
+    if(ai.taskReview) {
+      lines.push('',`Requirement assessments: ${ai.taskReview.state.toUpperCase()}; task freshness: ${ai.taskReview.freshness}; hash: ${ai.taskReview.taskHash}`);
+      for(const item of ai.taskReview.assessments) {
+        lines.push(`  [${item.status.toUpperCase()}] ${text(item.requirementId)}: ${text(item.explanation)}`);
+        if(item.status!==item.proposedStatus)lines.push(`    Original model status: ${item.proposedStatus}`);
+        if(item.relatedRequirementIds.length)lines.push(`    Related criteria: ${item.relatedRequirementIds.map(text).join(', ')}`);
+        if(item.evidenceVerification)lines.push(`    Citation check: ${item.evidenceVerification.status.toUpperCase()}`);
+        for(const evidence of item.evidence)lines.push(`    ${text(evidence.path)}:${evidence.startLine}-${evidence.endLine} — ${text(evidence.excerpt)}`);
+      }
+    }
     for(const conflict of ai.referenceConflicts ?? []) {
       lines.push('',`Reference conflict — NEEDS CLARIFICATION (AI interpretation, unverified): ${text(conflict.explanation)}`,
         `  Citation check: ${conflict.evidenceVerification.status.toUpperCase()}; conflict makes coverage partial.`);

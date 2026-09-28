@@ -8,9 +8,10 @@ import type { AiSettings, AiResult } from './contracts.js';
 import { localImports, resolveLocalImport } from './local-imports.js';
 import {sensitiveName as deniedNames,sensitiveContent as looksSensitive} from '../sensitive-content.js';
 import type {ResourceSnapshot} from '../reference-resources.js';
+import type {CurrentTask} from '../task-file.js';
 
 export type SourceFile = {path: string; content: string};
-export type AiContext = {files: SourceFile[]; preview: AiResult['preview']; references?:ResourceSnapshot[]};
+export type AiContext = {files: SourceFile[]; preview: AiResult['preview']; references?:ResourceSnapshot[]; task?:CurrentTask};
 const extensions = new Set(['.ts','.tsx','.mts','.cts','.js','.jsx','.mjs','.cjs','.py','.go','.rs','.java','.cs','.c','.cpp','.h','.rb','.php','.swift']);
 
 function allowed(path: string) {

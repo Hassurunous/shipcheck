@@ -137,17 +137,17 @@ See `docs/P10_INTENT_POLICIES.md`. CLI integration and source extraction are pen
 - [ ] Evidence-based intent assessments with ambiguity and conflict outcomes
 - [ ] Evaluation corpus for requirement/architecture violations and clean controls
 
-## P11 — Inline current-task auditing (started)
+## P11 — Inline current-task auditing (completed through P13)
 
 See `docs/P11_TASK_AUDITING.md` for the agreed ownership and write boundaries.
 
 - [x] Inline `currentTask` in tool configuration; no additional file required
 - [x] No-file task invocation with normalized task hash and explicitly unassessed criteria
-- [ ] `shipcheck task` assesses that task, preserving explicit task-file support
-- [ ] Per-criterion assessments, evidence and exact task content hash
-- [ ] Document user-authorized developer-agent edits to requirements as accepted risk
-- [ ] No editing capability for Shipcheck/AI reviewers; document external-check risks
-- [ ] Recognized fix-mode guards, validation, tests and user examples
+- [x] `shipcheck task` assesses that task, preserving explicit task-file support (P13)
+- [x] Per-criterion assessments, evidence and normalized task content hash (P13)
+- [x] Document user-authorized developer-agent edits to requirements as accepted risk
+- [x] No editing capability for Shipcheck/AI reviewers; document external-check risks
+- [x] Recognized fix-mode guards, validation, tests and user examples
 
 Issue-tracker connectors, background watching and enforced read-only sandboxes
 remain outside these first implementations unless separately authorized.
@@ -172,14 +172,15 @@ Completes core P8 integration.
 Completion: audits assess code using local specifications with evidence from both
 sources and explicit insufficient-context outcomes.
 
-### P13 — Requirement-aware task audits
+### P13 — Requirement-aware task audits (completed)
 
 Completes the central P10/P11 task-assessment capability.
 
-- [ ] Supply task requirements, description and non-goals to reviewers
-- [ ] Report per-criterion potential violations, supporting evidence, insufficient evidence and clarification needs
-- [ ] Verify code/reference citations and detect task changes during assessment
-- [ ] Keep task assessments separate from general code-quality findings
+- [x] Supply task requirements, description and non-goals to reviewers
+- [x] Report per-criterion potential violations, supporting evidence, insufficient evidence and clarification needs
+- [x] Verify code/reference citations and detect task changes during assessment
+- [x] Keep task assessments separate from general code-quality findings
+- [x] Offline safeguards and five-case live evaluation with explicit semantic labels (docs/P13_EVALUATION.md)
 
 Completion: implemented, violated, ambiguous and unsupported requirements receive
 evidence-backed assessments without treating uncertainty as a pass. Users retain

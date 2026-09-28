@@ -6,6 +6,7 @@ import { reviewWithAi, type AiReviewOptions } from './review.js';
 
 /** Bounded batching; live requests share a durable, explicitly named allowance. */
 export async function reviewWholeRepository(target:string,options:AiReviewOptions):Promise<Report> {
+  if(options.task)throw new Error('Task assessments use selected task files, not whole-repository batching.');
   if(options.execution==='live' && (!options.budget || options.trial)) throw new Error('Whole-repository live AI requires --budget NAME, not the one-time trial.');
   if(options.execution!=='live' && (options.budget || options.trial))throw new Error('Spending authorization requires live AI.');
   if(options.paths) throw new Error('Whole-repository AI cannot be combined with selected paths.');

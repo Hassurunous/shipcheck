@@ -1,4 +1,4 @@
-# P11 — Inline current-task auditing (started)
+# P11 — Inline current-task auditing (completed through P13)
 
 Users will define the current working task in `shipcheck.config.json`, rather than
 maintaining another task file. This milestone extends P5's existing task workflow;
@@ -32,12 +32,10 @@ defaulted fields), plus requirement IDs/text and non-goals. This is not a hash o
 the config file's formatting. Limits: 256 files, 50 requirements, 50 non-goals,
 2,000 characters per criterion/non-goal, and a 4,000-character description.
 
-**Requirement assessment is not implemented yet.** Each criterion currently reports
-`insufficient-evidence` and the task reports `not-assessed`, including under mock
-or live AI. AI reviews selected source for general defects; task text is not yet
-included as requirement-review context. Exit code 0 does not mean task completion.
-Evidence-backed criterion judgments, ambiguity/conflict handling and their evaluation
-corpus remain pending alongside P8/P10 integration.
+**P13 now assesses task requirements with explicit live AI.** Preview/mock and
+deterministic-only runs remain unassessed. See [P13](P13_TASK_ASSESSMENT.md) for
+per-criterion outcomes, source/reference evidence, task freshness and context limits.
+Exit code 0 does not mean task completion; supporting evidence is not proof.
 
 Configured checks reject standalone `--fix`, `--fix-only`, `--unsafe-fixes` and
 `--write` flags, including equals forms. This is a conservative guard, not a sandbox:
@@ -93,8 +91,8 @@ and explicitly requested reports are separate from source edits.
 
 - [x] Strict, bounded inline task schema and explicit current-task command behavior
 - [x] Backward-compatible explicit task-file support
-- [ ] Per-criterion assessments with code/reference evidence and task content hash
+- [x] Per-criterion assessments with code/reference evidence and task content hash (P13)
 - [x] No source/task/config rewriting or AI editing tools
 - [x] Clear external-check write-risk documentation and recognized fix-mode guards
-- [ ] Tests for fulfilled/violated/ambiguous criteria, missing context and changed tasks
+- [x] Tests for fulfilled/violated/ambiguous criteria, missing context and changed tasks (P13)
 - [x] User documentation explaining authorized developer changes and accepted risks

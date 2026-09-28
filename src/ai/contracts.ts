@@ -39,16 +39,26 @@ export const qaOutputSchema = z.object({ candidates: z.array(candidateSchema).ma
 export const referenceConflictSchema=z.object({explanation:z.string().min(1).max(4000),
   evidence:z.array(evidenceSchema).min(2).max(5)}).strict();
 export const referenceQaOutputSchema=qaOutputSchema.extend({referenceConflicts:z.array(referenceConflictSchema).max(10)}).strict();
-export type QaOutput = z.infer<typeof qaOutputSchema> & {referenceConflicts?:z.infer<typeof referenceConflictSchema>[]};
+export const requirementStatusSchema=z.enum(['supporting-evidence','potential-violation','insufficient-evidence','needs-clarification']);
+export const requirementAssessmentSchema=z.object({requirementId:z.string().min(1).max(64),status:requirementStatusSchema,
+  explanation:z.string().min(1).max(4000),relatedRequirementIds:z.array(z.string().min(1).max(64)).max(50),
+  evidence:z.array(evidenceSchema).max(5)}).strict();
+export type QaOutput = z.infer<typeof qaOutputSchema> & {referenceConflicts?:z.infer<typeof referenceConflictSchema>[];
+  taskAssessments?:z.infer<typeof requirementAssessmentSchema>[]};
 const verificationSchema=z.object({status:z.enum(['matched','rejected']),checks:z.array(z.object({
   path:z.string(),status:z.enum(['matched','rejected']),reason:z.string(),
 }))});
+export const taskReviewSchema=z.object({taskHash:z.string(),state:z.enum(['not-assessed','assessed','partial','changed']),
+  freshness:z.enum(['not-checked','unchanged','changed-or-unavailable']),
+  assessments:z.array(requirementAssessmentSchema.extend({proposedStatus:requirementStatusSchema,
+    evidenceVerification:verificationSchema.optional()})).max(50)});
 
 export const contextPreviewSchema = z.object({
   files: z.array(z.object({path: z.string(), bytes: z.number().int(), lines: z.number().int(), sha256: z.string()})),
   skipped: z.array(z.object({path: z.string(), reason: z.string()})),
   serializedBytes: z.number().int().nonnegative(),
   limited: z.boolean(),
+  task:z.object({id:z.string(),sha256:z.string(),bytes:z.number().int(),requirementIds:z.array(z.string())}).optional(),
   references:z.array(z.object({id:z.string(),path:z.string(),sha256:z.string().nullable(),
     status:z.string(),required:z.boolean(),freshness:z.enum(['unchanged','changed-or-unavailable']).optional()})).optional(),
   requestedPaths:z.array(z.string()).optional(),
@@ -84,6 +94,7 @@ export const aiResultSchema = z.object({
   referenceConflicts:z.array(referenceConflictSchema.extend({id:z.string(),
     status:z.literal('needs-clarification'),evidenceVerification:verificationSchema})).max(10).optional(),
   error: z.object({code: z.string(), message: z.string()}).nullable(),
+  taskReview:taskReviewSchema.optional(),
   coverage:z.object({state:z.enum(['preview','complete','partial','failed']),selectedPaths:z.array(z.string()),
     validResponsePaths:z.array(z.string()),failedResponsePaths:z.array(z.string()),
     skippedPaths:z.array(z.string()),matchedCandidates:z.number().int(),rejectedCandidates:z.number().int(),

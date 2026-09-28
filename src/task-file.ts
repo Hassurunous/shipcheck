@@ -17,15 +17,20 @@ export const currentTaskSchema=z.object({
     .refine(items=>new Set(items.map(item=>item.id)).size===items.length,'Requirement IDs must be unique.'),
   nonGoals:z.array(z.string().trim().min(1).max(2000)).max(50).default([]),
 }).strict();
+export type CurrentTask=z.infer<typeof currentTaskSchema>;
 export const currentTaskReportSchema=z.object({id:z.string(),title:z.string(),sha256:z.string(),
-  source:z.literal('configuration'),assessment:z.literal('not-assessed'),
-  requirements:z.array(z.object({id:z.string(),text:z.string(),status:z.literal('insufficient-evidence')})),
+  source:z.enum(['configuration','task-file']),assessment:z.enum(['not-assessed','assessed','partial','changed']),
+  requirements:z.array(z.object({id:z.string(),text:z.string(),status:z.enum(['insufficient-evidence','supporting-evidence','potential-violation','needs-clarification'])})),
   nonGoals:z.array(z.string())});
 export function describeCurrentTask(input:z.input<typeof currentTaskSchema>) {
   const task=currentTaskSchema.parse(input);
   return currentTaskReportSchema.parse({id:task.id,title:task.title,
     sha256:createHash('sha256').update(JSON.stringify(task)).digest('hex'),source:'configuration',assessment:'not-assessed',
     requirements:task.requirements.map(item=>({...item,status:'insufficient-evidence'})),nonGoals:task.nonGoals});
+}
+export function normalizeLegacyTask(task:z.infer<typeof taskSchema>):CurrentTask {
+  return currentTaskSchema.parse({id:'task-file',title:'Task file',files:task.files,
+    requirements:task.criteria.map((text,index)=>({id:`criterion-${index+1}`,text}))});
 }
 export async function loadTask(path:string) {
   const absolute = resolve(path);

@@ -153,7 +153,9 @@ configure document/contract paths and inspect bounded snapshots, hashes and load
 statuses. [P12](docs/P12_REFERENCE_AUDITS.md) integrates local references into bounded AI requests.
 [P11 task auditing](docs/P11_TASK_AUDITING.md)
 documents the inline `currentTask` configuration and `shipcheck task` workflow.
-Task criteria remain explicitly unassessed; requirement-aware AI review is pending.
+[P13](docs/P13_TASK_ASSESSMENT.md) adds per-criterion assessments with
+`shipcheck task --ai live --budget <name> --json`. Supporting evidence is not proof
+of completion; inspect uncertainty, citations and task freshness.
 
 [P9 contract auditing](docs/P9_CONTRACT_AUDITING.md) has started with an exported
 offline OpenAPI operation index. CLI integration and source/contract comparisons

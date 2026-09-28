@@ -20,6 +20,6 @@ export { resourceDefinitionSchema, resourceEvidenceSchema, referencesSchema } fr
 export { indexOpenApi, openApiIndexSchema, type OpenApiIndex } from './openapi-contract.js';
 export { intentPolicySchema, dependencyObservationSchema, assessIntentPolicy } from './intent-policy.js';
 export { taskSchema, loadTask } from './task-file.js';
-export { currentTaskSchema, describeCurrentTask } from './task-file.js';
+export { currentTaskSchema, describeCurrentTask, type CurrentTask } from './task-file.js';
 export { reviewWithAi, type AiReviewOptions } from "./ai/review.js";
 export { aiSettingsSchema, modeSchema, qaOutputSchema, type AiMode, type AiResult } from "./ai/contracts.js";

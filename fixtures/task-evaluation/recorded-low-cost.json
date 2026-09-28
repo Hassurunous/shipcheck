@@ -1,0 +1,738 @@
+{
+  "evaluatedAt": "2026-09-28",
+  "model": "gpt-6-luna",
+  "labels": [
+    {
+      "accepted": true,
+      "requirementId": "FEE",
+      "caseId": "fulfilled"
+    },
+    {
+      "accepted": true,
+      "requirementId": "FEE",
+      "caseId": "violated"
+    },
+    {
+      "accepted": true,
+      "requirementId": "FEE",
+      "caseId": "ambiguous"
+    },
+    {
+      "accepted": true,
+      "requirementId": "FEE_A",
+      "caseId": "conflicting"
+    },
+    {
+      "accepted": true,
+      "requirementId": "FEE_B",
+      "caseId": "conflicting"
+    },
+    {
+      "accepted": true,
+      "requirementId": "UPTIME",
+      "caseId": "runtime-unknown"
+    }
+  ],
+  "runs": [
+    {
+      "unchanged": true,
+      "caseId": "fulfilled",
+      "report": {
+        "schemaVersion": 1,
+        "root": "<temporary evaluation repository>",
+        "findings": [],
+        "inspectionWarnings": [],
+        "ai": {
+          "execution": "live",
+          "status": "completed",
+          "mode": "low-cost",
+          "reviewer": "qa/reliability-v2",
+          "model": "gpt-6-luna",
+          "plannedModel": "gpt-6-luna",
+          "preview": {
+            "files": [
+              {
+                "path": "fee.ts",
+                "bytes": 33,
+                "lines": 2,
+                "sha256": "f7a9574331953f44f4bbd43577fe7380674e8b55610ca684865f65de12f4ca65"
+              }
+            ],
+            "skipped": [],
+            "serializedBytes": 289,
+            "limited": false,
+            "task": {
+              "id": "fulfilled",
+              "sha256": "46f0be51b473d5c746b785a6a61b47f96786330b018106adb4d47a3e5411ef5f",
+              "bytes": 223,
+              "requirementIds": [
+                "FEE"
+              ]
+            },
+            "requestedPaths": [
+              "fee.ts"
+            ],
+            "supportingPaths": [],
+            "dependencies": []
+          },
+          "maxOutputTokens": 2000,
+          "requestBytes": 6086,
+          "estimatedInputTokens": 2029,
+          "estimatedCostUsd": null,
+          "actualCostUsd": null,
+          "retries": 0,
+          "budget": {
+            "name": "p12-validation-20260928",
+            "countedInputTokens": 945,
+            "reservedUsd": 0.00625,
+            "pricedUsageUpperBoundUsd": 0.000168,
+            "usage": {
+              "input_tokens": 945,
+              "output_tokens": 98
+            }
+          },
+          "candidates": [],
+          "error": null,
+          "taskReview": {
+            "taskHash": "46f0be51b473d5c746b785a6a61b47f96786330b018106adb4d47a3e5411ef5f",
+            "state": "assessed",
+            "freshness": "unchanged",
+            "assessments": [
+              {
+                "requirementId": "FEE",
+                "status": "supporting-evidence",
+                "explanation": "The supplied implementation returns the numeric value 7, matching the stated expectation of exactly 7 cents.",
+                "relatedRequirementIds": [],
+                "evidence": [
+                  {
+                    "path": "fee.ts",
+                    "startLine": 1,
+                    "endLine": 1,
+                    "excerpt": "export const feeCents = () => 7;"
+                  }
+                ],
+                "proposedStatus": "supporting-evidence",
+                "evidenceVerification": {
+                  "status": "matched",
+                  "checks": [
+                    {
+                      "path": "fee.ts",
+                      "status": "matched",
+                      "reason": "exact-line-match"
+                    }
+                  ]
+                }
+              }
+            ]
+          },
+          "coverage": {
+            "state": "complete",
+            "selectedPaths": [
+              "fee.ts"
+            ],
+            "validResponsePaths": [
+              "fee.ts"
+            ],
+            "failedResponsePaths": [],
+            "skippedPaths": [],
+            "matchedCandidates": 0,
+            "rejectedCandidates": 0,
+            "outOfScopeCandidates": 0
+          }
+        },
+        "currentTask": {
+          "id": "fulfilled",
+          "title": "Fee task",
+          "sha256": "46f0be51b473d5c746b785a6a61b47f96786330b018106adb4d47a3e5411ef5f",
+          "source": "configuration",
+          "assessment": "assessed",
+          "requirements": [
+            {
+              "id": "FEE",
+              "text": "feeCents must return exactly 7 cents.",
+              "status": "supporting-evidence"
+            }
+          ],
+          "nonGoals": [
+            "No unrelated changes."
+          ]
+        },
+        "workflow": {
+          "kind": "task",
+          "scope": [
+            "fee.ts"
+          ],
+          "baseline": null,
+          "unavailablePaths": [],
+          "criteria": [
+            "feeCents must return exactly 7 cents."
+          ]
+        }
+      }
+    },
+    {
+      "unchanged": true,
+      "caseId": "violated",
+      "report": {
+        "schemaVersion": 1,
+        "root": "<temporary evaluation repository>",
+        "findings": [],
+        "inspectionWarnings": [],
+        "ai": {
+          "execution": "live",
+          "status": "completed",
+          "mode": "low-cost",
+          "reviewer": "qa/reliability-v2",
+          "model": "gpt-6-luna",
+          "plannedModel": "gpt-6-luna",
+          "preview": {
+            "files": [
+              {
+                "path": "fee.ts",
+                "bytes": 33,
+                "lines": 2,
+                "sha256": "ad7e5fec1890ff8221fc48c7b5bff9e7ccdaa3d22f3b86380b7a217b85048f5f"
+              }
+            ],
+            "skipped": [],
+            "serializedBytes": 288,
+            "limited": false,
+            "task": {
+              "id": "violated",
+              "sha256": "6ed3f9ce6cd7f2d96bdb0ef11afad8ee5abcdc7ab1c7af9abdb034854664486d",
+              "bytes": 222,
+              "requirementIds": [
+                "FEE"
+              ]
+            },
+            "requestedPaths": [
+              "fee.ts"
+            ],
+            "supportingPaths": [],
+            "dependencies": []
+          },
+          "maxOutputTokens": 2000,
+          "requestBytes": 6085,
+          "estimatedInputTokens": 2029,
+          "estimatedCostUsd": null,
+          "actualCostUsd": null,
+          "retries": 0,
+          "budget": {
+            "name": "p12-validation-20260928",
+            "countedInputTokens": 946,
+            "reservedUsd": 0.00625,
+            "pricedUsageUpperBoundUsd": 0.000186,
+            "usage": {
+              "input_tokens": 946,
+              "output_tokens": 135
+            }
+          },
+          "candidates": [],
+          "error": null,
+          "taskReview": {
+            "taskHash": "6ed3f9ce6cd7f2d96bdb0ef11afad8ee5abcdc7ab1c7af9abdb034854664486d",
+            "state": "assessed",
+            "freshness": "unchanged",
+            "assessments": [
+              {
+                "requirementId": "FEE",
+                "status": "potential-violation",
+                "explanation": "The stated requirement says feeCents must return exactly 7 cents, but the selected source returns 5.",
+                "relatedRequirementIds": [],
+                "evidence": [
+                  {
+                    "path": "fee.ts",
+                    "startLine": 1,
+                    "endLine": 1,
+                    "excerpt": "export const feeCents = () => 5;"
+                  }
+                ],
+                "proposedStatus": "potential-violation",
+                "evidenceVerification": {
+                  "status": "matched",
+                  "checks": [
+                    {
+                      "path": "fee.ts",
+                      "status": "matched",
+                      "reason": "exact-line-match"
+                    }
+                  ]
+                }
+              }
+            ]
+          },
+          "coverage": {
+            "state": "complete",
+            "selectedPaths": [
+              "fee.ts"
+            ],
+            "validResponsePaths": [
+              "fee.ts"
+            ],
+            "failedResponsePaths": [],
+            "skippedPaths": [],
+            "matchedCandidates": 0,
+            "rejectedCandidates": 0,
+            "outOfScopeCandidates": 0
+          }
+        },
+        "currentTask": {
+          "id": "violated",
+          "title": "Fee task",
+          "sha256": "6ed3f9ce6cd7f2d96bdb0ef11afad8ee5abcdc7ab1c7af9abdb034854664486d",
+          "source": "configuration",
+          "assessment": "assessed",
+          "requirements": [
+            {
+              "id": "FEE",
+              "text": "feeCents must return exactly 7 cents.",
+              "status": "potential-violation"
+            }
+          ],
+          "nonGoals": [
+            "No unrelated changes."
+          ]
+        },
+        "workflow": {
+          "kind": "task",
+          "scope": [
+            "fee.ts"
+          ],
+          "baseline": null,
+          "unavailablePaths": [],
+          "criteria": [
+            "feeCents must return exactly 7 cents."
+          ]
+        }
+      }
+    },
+    {
+      "unchanged": true,
+      "caseId": "ambiguous",
+      "report": {
+        "schemaVersion": 1,
+        "root": "<temporary evaluation repository>",
+        "findings": [],
+        "inspectionWarnings": [],
+        "ai": {
+          "execution": "live",
+          "status": "completed",
+          "mode": "low-cost",
+          "reviewer": "qa/reliability-v2",
+          "model": "gpt-6-luna",
+          "plannedModel": "gpt-6-luna",
+          "preview": {
+            "files": [
+              {
+                "path": "fee.ts",
+                "bytes": 33,
+                "lines": 2,
+                "sha256": "ad7e5fec1890ff8221fc48c7b5bff9e7ccdaa3d22f3b86380b7a217b85048f5f"
+              }
+            ],
+            "skipped": [],
+            "serializedBytes": 343,
+            "limited": false,
+            "task": {
+              "id": "ambiguous",
+              "sha256": "dd7136f862b7ce9bea5daa0bd2cce1ad9196bc9c25d8c71fb596596f51bd3cb9",
+              "bytes": 277,
+              "requirementIds": [
+                "FEE"
+              ]
+            },
+            "requestedPaths": [
+              "fee.ts"
+            ],
+            "supportingPaths": [],
+            "dependencies": []
+          },
+          "maxOutputTokens": 2000,
+          "requestBytes": 6140,
+          "estimatedInputTokens": 2047,
+          "estimatedCostUsd": null,
+          "actualCostUsd": null,
+          "retries": 0,
+          "budget": {
+            "name": "p12-validation-20260928",
+            "countedInputTokens": 955,
+            "reservedUsd": 0.00625,
+            "pricedUsageUpperBoundUsd": 0.000196,
+            "usage": {
+              "input_tokens": 955,
+              "output_tokens": 153
+            }
+          },
+          "candidates": [],
+          "error": null,
+          "taskReview": {
+            "taskHash": "dd7136f862b7ce9bea5daa0bd2cce1ad9196bc9c25d8c71fb596596f51bd3cb9",
+            "state": "partial",
+            "freshness": "unchanged",
+            "assessments": [
+              {
+                "requirementId": "FEE",
+                "status": "needs-clarification",
+                "explanation": "The requirement does not define what fee amount or range is acceptable, so the value of 5 cents cannot be assessed against it.",
+                "relatedRequirementIds": [],
+                "evidence": [
+                  {
+                    "path": "fee.ts",
+                    "startLine": 1,
+                    "endLine": 1,
+                    "excerpt": "export const feeCents = () => 5;"
+                  }
+                ],
+                "proposedStatus": "needs-clarification",
+                "evidenceVerification": {
+                  "status": "matched",
+                  "checks": [
+                    {
+                      "path": "fee.ts",
+                      "status": "matched",
+                      "reason": "exact-line-match"
+                    }
+                  ]
+                }
+              }
+            ]
+          },
+          "coverage": {
+            "state": "partial",
+            "selectedPaths": [
+              "fee.ts"
+            ],
+            "validResponsePaths": [
+              "fee.ts"
+            ],
+            "failedResponsePaths": [],
+            "skippedPaths": [],
+            "matchedCandidates": 0,
+            "rejectedCandidates": 0,
+            "outOfScopeCandidates": 0
+          }
+        },
+        "currentTask": {
+          "id": "ambiguous",
+          "title": "Fee task",
+          "sha256": "dd7136f862b7ce9bea5daa0bd2cce1ad9196bc9c25d8c71fb596596f51bd3cb9",
+          "source": "configuration",
+          "assessment": "partial",
+          "requirements": [
+            {
+              "id": "FEE",
+              "text": "feeCents must charge a reasonable fee. The acceptable amount or range has not been decided.",
+              "status": "needs-clarification"
+            }
+          ],
+          "nonGoals": [
+            "No unrelated changes."
+          ]
+        },
+        "workflow": {
+          "kind": "task",
+          "scope": [
+            "fee.ts"
+          ],
+          "baseline": null,
+          "unavailablePaths": [],
+          "criteria": [
+            "feeCents must charge a reasonable fee. The acceptable amount or range has not been decided."
+          ]
+        }
+      }
+    },
+    {
+      "unchanged": true,
+      "caseId": "conflicting",
+      "report": {
+        "schemaVersion": 1,
+        "root": "<temporary evaluation repository>",
+        "findings": [],
+        "inspectionWarnings": [],
+        "ai": {
+          "execution": "live",
+          "status": "completed",
+          "mode": "low-cost",
+          "reviewer": "qa/reliability-v2",
+          "model": "gpt-6-luna",
+          "plannedModel": "gpt-6-luna",
+          "preview": {
+            "files": [
+              {
+                "path": "fee.ts",
+                "bytes": 33,
+                "lines": 2,
+                "sha256": "ad7e5fec1890ff8221fc48c7b5bff9e7ccdaa3d22f3b86380b7a217b85048f5f"
+              }
+            ],
+            "skipped": [],
+            "serializedBytes": 383,
+            "limited": false,
+            "task": {
+              "id": "conflicting",
+              "sha256": "26d832ea77a50776b144316a7aee2422acc527eec6c091ec97a0f39402d37452",
+              "bytes": 317,
+              "requirementIds": [
+                "FEE_A",
+                "FEE_B"
+              ]
+            },
+            "requestedPaths": [
+              "fee.ts"
+            ],
+            "supportingPaths": [],
+            "dependencies": []
+          },
+          "maxOutputTokens": 2000,
+          "requestBytes": 6188,
+          "estimatedInputTokens": 2063,
+          "estimatedCostUsd": null,
+          "actualCostUsd": null,
+          "retries": 0,
+          "budget": {
+            "name": "p12-validation-20260928",
+            "countedInputTokens": 972,
+            "reservedUsd": 0.00625,
+            "pricedUsageUpperBoundUsd": 0.000263,
+            "usage": {
+              "input_tokens": 972,
+              "output_tokens": 282
+            }
+          },
+          "candidates": [],
+          "error": null,
+          "taskReview": {
+            "taskHash": "26d832ea77a50776b144316a7aee2422acc527eec6c091ec97a0f39402d37452",
+            "state": "partial",
+            "freshness": "unchanged",
+            "assessments": [
+              {
+                "requirementId": "FEE_A",
+                "status": "needs-clarification",
+                "explanation": "FEE_A requires 7 cents, while FEE_B requires 5 cents for every call to the same function. These expectations are incompatible, so the intended value needs clarification.",
+                "relatedRequirementIds": [
+                  "FEE_B"
+                ],
+                "evidence": [
+                  {
+                    "path": "fee.ts",
+                    "startLine": 1,
+                    "endLine": 1,
+                    "excerpt": "export const feeCents = () => 5;"
+                  }
+                ],
+                "proposedStatus": "needs-clarification",
+                "evidenceVerification": {
+                  "status": "matched",
+                  "checks": [
+                    {
+                      "path": "fee.ts",
+                      "status": "matched",
+                      "reason": "exact-line-match"
+                    }
+                  ]
+                }
+              },
+              {
+                "requirementId": "FEE_B",
+                "status": "needs-clarification",
+                "explanation": "FEE_B requires 5 cents, while FEE_A requires 7 cents for every call to the same function. These expectations are incompatible, so the intended value needs clarification.",
+                "relatedRequirementIds": [
+                  "FEE_A"
+                ],
+                "evidence": [
+                  {
+                    "path": "fee.ts",
+                    "startLine": 1,
+                    "endLine": 1,
+                    "excerpt": "export const feeCents = () => 5;"
+                  }
+                ],
+                "proposedStatus": "needs-clarification",
+                "evidenceVerification": {
+                  "status": "matched",
+                  "checks": [
+                    {
+                      "path": "fee.ts",
+                      "status": "matched",
+                      "reason": "exact-line-match"
+                    }
+                  ]
+                }
+              }
+            ]
+          },
+          "coverage": {
+            "state": "partial",
+            "selectedPaths": [
+              "fee.ts"
+            ],
+            "validResponsePaths": [
+              "fee.ts"
+            ],
+            "failedResponsePaths": [],
+            "skippedPaths": [],
+            "matchedCandidates": 0,
+            "rejectedCandidates": 0,
+            "outOfScopeCandidates": 0
+          }
+        },
+        "currentTask": {
+          "id": "conflicting",
+          "title": "Fee task",
+          "sha256": "26d832ea77a50776b144316a7aee2422acc527eec6c091ec97a0f39402d37452",
+          "source": "configuration",
+          "assessment": "partial",
+          "requirements": [
+            {
+              "id": "FEE_A",
+              "text": "Every call to feeCents must return exactly 7 cents.",
+              "status": "needs-clarification"
+            },
+            {
+              "id": "FEE_B",
+              "text": "Every call to feeCents must return exactly 5 cents.",
+              "status": "needs-clarification"
+            }
+          ],
+          "nonGoals": [
+            "No unrelated changes."
+          ]
+        },
+        "workflow": {
+          "kind": "task",
+          "scope": [
+            "fee.ts"
+          ],
+          "baseline": null,
+          "unavailablePaths": [],
+          "criteria": [
+            "Every call to feeCents must return exactly 7 cents.",
+            "Every call to feeCents must return exactly 5 cents."
+          ]
+        }
+      }
+    },
+    {
+      "unchanged": true,
+      "caseId": "runtime-unknown",
+      "report": {
+        "schemaVersion": 1,
+        "root": "<temporary evaluation repository>",
+        "findings": [],
+        "inspectionWarnings": [],
+        "ai": {
+          "execution": "live",
+          "status": "completed",
+          "mode": "low-cost",
+          "reviewer": "qa/reliability-v2",
+          "model": "gpt-6-luna",
+          "plannedModel": "gpt-6-luna",
+          "preview": {
+            "files": [
+              {
+                "path": "fee.ts",
+                "bytes": 33,
+                "lines": 2,
+                "sha256": "f7a9574331953f44f4bbd43577fe7380674e8b55610ca684865f65de12f4ca65"
+              }
+            ],
+            "skipped": [],
+            "serializedBytes": 411,
+            "limited": false,
+            "task": {
+              "id": "runtime-unknown",
+              "sha256": "7d0e19d6586120ced1249b2758ab447129cd5cbaf175856fa1f1385bb4eeacdd",
+              "bytes": 345,
+              "requirementIds": [
+                "UPTIME"
+              ]
+            },
+            "requestedPaths": [
+              "fee.ts"
+            ],
+            "supportingPaths": [],
+            "dependencies": []
+          },
+          "maxOutputTokens": 2000,
+          "requestBytes": 6208,
+          "estimatedInputTokens": 2070,
+          "estimatedCostUsd": null,
+          "actualCostUsd": null,
+          "retries": 0,
+          "budget": {
+            "name": "p12-validation-20260928",
+            "countedInputTokens": 966,
+            "reservedUsd": 0.00625,
+            "pricedUsageUpperBoundUsd": 0.00016,
+            "usage": {
+              "input_tokens": 966,
+              "output_tokens": 78
+            }
+          },
+          "candidates": [],
+          "error": null,
+          "taskReview": {
+            "taskHash": "7d0e19d6586120ced1249b2758ab447129cd5cbaf175856fa1f1385bb4eeacdd",
+            "state": "partial",
+            "freshness": "unchanged",
+            "assessments": [
+              {
+                "requirementId": "UPTIME",
+                "status": "insufficient-evidence",
+                "explanation": "The source defines a constant fee but contains no production uptime measurements or telemetry, so the 30-day uptime expectation cannot be assessed from the supplied evidence.",
+                "relatedRequirementIds": [],
+                "evidence": [],
+                "proposedStatus": "insufficient-evidence"
+              }
+            ]
+          },
+          "coverage": {
+            "state": "partial",
+            "selectedPaths": [
+              "fee.ts"
+            ],
+            "validResponsePaths": [
+              "fee.ts"
+            ],
+            "failedResponsePaths": [],
+            "skippedPaths": [],
+            "matchedCandidates": 0,
+            "rejectedCandidates": 0,
+            "outOfScopeCandidates": 0
+          }
+        },
+        "currentTask": {
+          "id": "runtime-unknown",
+          "title": "Fee task",
+          "sha256": "7d0e19d6586120ced1249b2758ab447129cd5cbaf175856fa1f1385bb4eeacdd",
+          "source": "configuration",
+          "assessment": "partial",
+          "requirements": [
+            {
+              "id": "UPTIME",
+              "text": "The production service must have maintained at least 99.99 percent uptime over the last 30 days. No production measurements or telemetry are supplied.",
+              "status": "insufficient-evidence"
+            }
+          ],
+          "nonGoals": [
+            "No unrelated changes."
+          ]
+        },
+        "workflow": {
+          "kind": "task",
+          "scope": [
+            "fee.ts"
+          ],
+          "baseline": null,
+          "unavailablePaths": [],
+          "criteria": [
+            "The production service must have maintained at least 99.99 percent uptime over the last 30 days. No production measurements or telemetry are supplied."
+          ]
+        }
+      }
+    }
+  ],
+  "reviewer": "Codex assistant manual review against fixture expectations; not independent human scoring"
+}

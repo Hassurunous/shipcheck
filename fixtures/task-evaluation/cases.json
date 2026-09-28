@@ -1,0 +1,7 @@
+[
+  {"id":"fulfilled","source":"export const feeCents = () => 7;\n","requirements":[{"id":"FEE","text":"feeCents must return exactly 7 cents."}],"expected":{"FEE":"supporting-evidence"}},
+  {"id":"violated","source":"export const feeCents = () => 5;\n","requirements":[{"id":"FEE","text":"feeCents must return exactly 7 cents."}],"expected":{"FEE":"potential-violation"}},
+  {"id":"ambiguous","source":"export const feeCents = () => 5;\n","requirements":[{"id":"FEE","text":"feeCents must charge a reasonable fee. The acceptable amount or range has not been decided."}],"expected":{"FEE":"needs-clarification"}},
+  {"id":"conflicting","source":"export const feeCents = () => 5;\n","requirements":[{"id":"FEE_A","text":"Every call to feeCents must return exactly 7 cents."},{"id":"FEE_B","text":"Every call to feeCents must return exactly 5 cents."}],"expected":{"FEE_A":"needs-clarification","FEE_B":"needs-clarification"}},
+  {"id":"runtime-unknown","source":"export const feeCents = () => 7;\n","requirements":[{"id":"UPTIME","text":"The production service must have maintained at least 99.99 percent uptime over the last 30 days. No production measurements or telemetry are supplied."}],"expected":{"UPTIME":"insufficient-evidence"}}
+]

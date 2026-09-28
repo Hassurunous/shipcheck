@@ -255,7 +255,7 @@ as a library API; CLI integration remains pending. See P10_INTENT_POLICIES.md.
 task-file.ts defines bounded currentTask configuration and normalized task identity.
 The no-file CLI task invocation selects currentTask from the working directory's
 configuration; explicit task files retain their existing behavior. Workflow reports
-include unassessed per-criterion statuses. AI requirement assessment is pending.
+include per-criterion summaries; P13 adds AI requirement assessment.
 Checks reject recognized fixing flags; arbitrary external commands are not sandboxed.
 
 ## P12 local reference context
@@ -269,3 +269,14 @@ required conflict array is requested when reference context is present; conflict
 reference citations are verified and make coverage partial. Offline tests and a
 four-case live corpus validate local integration; see P12_REFERENCE_AUDITS.md and
 P12_EVALUATION.md for evidence and quality limitations.
+
+## P13 task assessment
+
+Task workflows pass normalized expectations and a reload callback into reviewWithAi.
+Task bytes reserve space before source/reference selection. Conditional structured
+output requires exactly one assessment per criterion. task-review.ts verifies
+citations, downgrades unsupported outcomes and invalidates changed/unavailable tasks.
+Workflow-level rechecking also catches task mutations by authorized external checks.
+Legacy task-file strings map to positional criterion IDs. AI outcomes remain separate
+from general findings and do not independently change CLI exit codes. See
+P13_TASK_ASSESSMENT.md and P13_EVALUATION.md.
