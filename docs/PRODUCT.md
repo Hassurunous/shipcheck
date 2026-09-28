@@ -56,6 +56,11 @@ External check programs must be trusted and configured for inspection: they run
 with user permissions and are not a read-only sandbox. Budget records and explicitly
 requested report files are separate permitted outputs. See `tasks/backlog.md`.
 
+P12 completes local reference-aware AI requests with bounded selection, cross-file
+citations and explicit reference-conflict outcomes. Its four-case low-cost live
+evaluation passed; see P12_EVALUATION.md for limits. Task requirement assessment
+is still unimplemented and tracked under P13. External reference sources remain P16.
+
 ## Non-goals for the current release
 
 - No web dashboard

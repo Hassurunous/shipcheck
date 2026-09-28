@@ -1,8 +1,8 @@
 # P8 — Reference resources (in progress)
 
 The first slice loads explicitly configured repository-local reference files and
-reports their provenance. It does **not yet send their bodies to AI or audit code
-against them**. `references.evaluation` is always `not-assessed`; `ready` means
+reports their provenance. [P12](P12_REFERENCE_AUDITS.md) now integrates applicable
+references into bounded AI context. `references.evaluation` is always `not-assessed`; `ready` means
 loading succeeded, not that the implementation satisfies a contract.
 
 Add resources to `shipcheck.config.json`:
@@ -65,10 +65,10 @@ range and exact complete-line excerpt, along with submitted and freshly reloaded
 snapshots. It rejects unknown resources, wrong hashes, changed or unavailable
 resources, and mismatched excerpts. Line endings are normalized for comparison.
 Callers must reload snapshots before verification. A match establishes text
-provenance only; it does not validate the diagnosis. This helper is not yet wired
-into AI candidate verification.
+provenance only; it does not validate the diagnosis. P12 integrates this helper
+into AI candidate verification for submitted reference paths.
 
-Remaining P8 work includes scoped AI reference context with cost/coverage
-accounting, integrated cross-resource citations, conflict handling, and explicitly
+P12 completes local reference-aware integration and conflict reporting. Remaining broader
+work includes explicitly
 authorized external-repository or remote snapshot sources. P9 adds semantic
 contract adapters. P11 adds the inline current-task workflow.

@@ -1,0 +1,642 @@
+{
+  "runs": [
+    {
+      "report": {
+        "schemaVersion": 1,
+        "root": "<temporary evaluation repository>",
+        "findings": [],
+        "inspectionWarnings": [],
+        "ai": {
+          "execution": "live",
+          "status": "completed",
+          "mode": "low-cost",
+          "reviewer": "qa/reliability-v2",
+          "model": "gpt-6-luna",
+          "plannedModel": "gpt-6-luna",
+          "preview": {
+            "files": [
+              {
+                "path": "fee.ts",
+                "bytes": 69,
+                "lines": 4,
+                "sha256": "911b24f26da2685d73c394c62256aeb1ce3aab6ec0a23a81e524d89dcfd29e08"
+              }
+            ],
+            "skipped": [
+              {
+                "path": "policy.md",
+                "reason": "excluded-or-not-source"
+              },
+              {
+                "path": "shipcheck.config.json",
+                "reason": "excluded-or-not-source"
+              }
+            ],
+            "serializedBytes": 570,
+            "limited": false,
+            "references": [
+              {
+                "id": "fee-policy",
+                "path": "policy.md",
+                "sha256": "dd484c3dacf214830d7c5899c19cad991156d91fa5da99ef17b5996094bcaca4",
+                "status": "included",
+                "required": true,
+                "freshness": "unchanged"
+              }
+            ],
+            "requestedPaths": [
+              "fee.ts",
+              "policy.md",
+              "shipcheck.config.json"
+            ],
+            "supportingPaths": [],
+            "dependencies": []
+          },
+          "maxOutputTokens": 2000,
+          "requestBytes": 5227,
+          "estimatedInputTokens": 1743,
+          "estimatedCostUsd": null,
+          "actualCostUsd": null,
+          "retries": 0,
+          "budget": {
+            "name": "p12-validation-20260928",
+            "countedInputTokens": 881,
+            "reservedUsd": 0.00625,
+            "pricedUsageUpperBoundUsd": 0.000213,
+            "usage": {
+              "input_tokens": 881,
+              "output_tokens": 205
+            }
+          },
+          "candidates": [
+            {
+              "title": "Fee does not match the documented processing fee",
+              "severity": "error",
+              "explanation": "For every in-range price, feeCents returns 5, but the supplied policy requires exactly 7 cents for integer inputs from 0 through 100000 inclusive.",
+              "suggestedAction": "Return 7 for inputs in the documented domain, or otherwise update the implementation to satisfy the policy.",
+              "evidence": [
+                {
+                  "path": "fee.ts",
+                  "startLine": 1,
+                  "endLine": 3,
+                  "excerpt": "export function feeCents(priceCents: number): number {\n  return 5;\n}"
+                },
+                {
+                  "path": "policy.md",
+                  "startLine": 1,
+                  "endLine": 1,
+                  "excerpt": "For integer priceCents inputs from 0 to 100000 inclusive, feeCents must return the flat processing fee of exactly 7 cents, independently of priceCents. No behavior outside this input domain is specified."
+                }
+              ],
+              "id": "ai/qa:6ed036296cf4dae3",
+              "evidenceStatus": "unverified",
+              "origin": "ai",
+              "referenceConflict": false,
+              "evidenceVerification": {
+                "status": "matched",
+                "checks": [
+                  {
+                    "path": "fee.ts",
+                    "status": "matched",
+                    "reason": "exact-line-match"
+                  },
+                  {
+                    "path": "policy.md",
+                    "status": "matched",
+                    "reason": "exact-line-match"
+                  }
+                ]
+              }
+            }
+          ],
+          "referenceConflicts": [],
+          "error": null,
+          "coverage": {
+            "state": "partial",
+            "selectedPaths": [
+              "fee.ts"
+            ],
+            "validResponsePaths": [
+              "fee.ts"
+            ],
+            "failedResponsePaths": [],
+            "skippedPaths": [
+              "policy.md",
+              "shipcheck.config.json"
+            ],
+            "matchedCandidates": 1,
+            "rejectedCandidates": 0,
+            "outOfScopeCandidates": 0
+          }
+        },
+        "references": {
+          "state": "ready",
+          "evaluation": "not-assessed",
+          "resources": [
+            {
+              "id": "fee-policy",
+              "path": "policy.md",
+              "kind": "document",
+              "authority": "authoritative",
+              "required": true,
+              "appliesTo": [
+                "**"
+              ],
+              "status": "loaded",
+              "sha256": "dd484c3dacf214830d7c5899c19cad991156d91fa5da99ef17b5996094bcaca4",
+              "bytes": 204,
+              "lines": 2
+            }
+          ]
+        },
+        "workflow": {
+          "kind": "audit",
+          "scope": null,
+          "baseline": null,
+          "unavailablePaths": []
+        }
+      },
+      "caseId": "fee-defect"
+    },
+    {
+      "report": {
+        "schemaVersion": 1,
+        "root": "<temporary evaluation repository>",
+        "findings": [],
+        "inspectionWarnings": [],
+        "ai": {
+          "execution": "live",
+          "status": "completed",
+          "mode": "low-cost",
+          "reviewer": "qa/reliability-v2",
+          "model": "gpt-6-luna",
+          "plannedModel": "gpt-6-luna",
+          "preview": {
+            "files": [
+              {
+                "path": "fee.ts",
+                "bytes": 69,
+                "lines": 4,
+                "sha256": "911b24f26da2685d73c394c62256aeb1ce3aab6ec0a23a81e524d89dcfd29e08"
+              }
+            ],
+            "skipped": [
+              {
+                "path": "policy.md",
+                "reason": "excluded-or-not-source"
+              },
+              {
+                "path": "shipcheck.config.json",
+                "reason": "excluded-or-not-source"
+              }
+            ],
+            "serializedBytes": 570,
+            "limited": false,
+            "references": [
+              {
+                "id": "fee-policy",
+                "path": "policy.md",
+                "sha256": "af6c2f0760c807af41bad0da747243bdfb7e05d7e60354b3ba01aed542ff69fb",
+                "status": "included",
+                "required": true,
+                "freshness": "unchanged"
+              }
+            ],
+            "requestedPaths": [
+              "fee.ts",
+              "policy.md",
+              "shipcheck.config.json"
+            ],
+            "supportingPaths": [],
+            "dependencies": []
+          },
+          "maxOutputTokens": 2000,
+          "requestBytes": 5227,
+          "estimatedInputTokens": 1743,
+          "estimatedCostUsd": null,
+          "actualCostUsd": null,
+          "retries": 0,
+          "budget": {
+            "name": "p12-validation-20260928",
+            "countedInputTokens": 887,
+            "reservedUsd": 0.00625,
+            "pricedUsageUpperBoundUsd": 0.00014,
+            "usage": {
+              "input_tokens": 887,
+              "output_tokens": 58
+            }
+          },
+          "candidates": [],
+          "referenceConflicts": [],
+          "error": null,
+          "coverage": {
+            "state": "partial",
+            "selectedPaths": [
+              "fee.ts"
+            ],
+            "validResponsePaths": [
+              "fee.ts"
+            ],
+            "failedResponsePaths": [],
+            "skippedPaths": [
+              "policy.md",
+              "shipcheck.config.json"
+            ],
+            "matchedCandidates": 0,
+            "rejectedCandidates": 0,
+            "outOfScopeCandidates": 0
+          }
+        },
+        "references": {
+          "state": "ready",
+          "evaluation": "not-assessed",
+          "resources": [
+            {
+              "id": "fee-policy",
+              "path": "policy.md",
+              "kind": "document",
+              "authority": "authoritative",
+              "required": true,
+              "appliesTo": [
+                "**"
+              ],
+              "status": "loaded",
+              "sha256": "af6c2f0760c807af41bad0da747243bdfb7e05d7e60354b3ba01aed542ff69fb",
+              "bytes": 204,
+              "lines": 2
+            }
+          ]
+        },
+        "workflow": {
+          "kind": "audit",
+          "scope": null,
+          "baseline": null,
+          "unavailablePaths": []
+        }
+      },
+      "caseId": "fee-clean"
+    },
+    {
+      "report": {
+        "schemaVersion": 1,
+        "root": "<temporary evaluation repository>",
+        "findings": [],
+        "inspectionWarnings": [],
+        "ai": {
+          "execution": "live",
+          "status": "completed",
+          "mode": "low-cost",
+          "reviewer": "qa/reliability-v2",
+          "model": "gpt-6-luna",
+          "plannedModel": "gpt-6-luna",
+          "preview": {
+            "files": [
+              {
+                "path": "fee.ts",
+                "bytes": 69,
+                "lines": 4,
+                "sha256": "911b24f26da2685d73c394c62256aeb1ce3aab6ec0a23a81e524d89dcfd29e08"
+              }
+            ],
+            "skipped": [
+              {
+                "path": "contract.md",
+                "reason": "excluded-or-not-source"
+              },
+              {
+                "path": "policy.md",
+                "reason": "excluded-or-not-source"
+              },
+              {
+                "path": "shipcheck.config.json",
+                "reason": "excluded-or-not-source"
+              }
+            ],
+            "serializedBytes": 855,
+            "limited": false,
+            "references": [
+              {
+                "id": "fee-policy",
+                "path": "policy.md",
+                "sha256": "66e5b591960ff60513320c4e90553b29b483a9a7a6b2dc711b18005387b1024d",
+                "status": "included",
+                "required": true,
+                "freshness": "unchanged"
+              },
+              {
+                "id": "fee-contract",
+                "path": "contract.md",
+                "sha256": "d92575afbca06e750922530715f739c969aade918ebb395f1307c4efc4cac46e",
+                "status": "included",
+                "required": true,
+                "freshness": "unchanged"
+              }
+            ],
+            "requestedPaths": [
+              "contract.md",
+              "fee.ts",
+              "policy.md",
+              "shipcheck.config.json"
+            ],
+            "supportingPaths": [],
+            "dependencies": []
+          },
+          "maxOutputTokens": 2000,
+          "requestBytes": 5711,
+          "estimatedInputTokens": 1904,
+          "estimatedCostUsd": null,
+          "actualCostUsd": null,
+          "retries": 0,
+          "budget": {
+            "name": "p12-validation-20260928",
+            "countedInputTokens": 1035,
+            "reservedUsd": 0.00625,
+            "pricedUsageUpperBoundUsd": 0.000215,
+            "usage": {
+              "input_tokens": 1035,
+              "output_tokens": 170
+            }
+          },
+          "candidates": [],
+          "referenceConflicts": [
+            {
+              "explanation": "The two supplied references specify incompatible required return values for feeCents over the same integer input range: policy.md requires 7 cents, while contract.md requires 5 cents. Clarification is needed before treating either value as the expected behavior.",
+              "evidence": [
+                {
+                  "path": "policy.md",
+                  "startLine": 1,
+                  "endLine": 1,
+                  "excerpt": "For integer priceCents inputs from 0 to 100000 inclusive, feeCents must return exactly 7 cents for every input."
+                },
+                {
+                  "path": "contract.md",
+                  "startLine": 1,
+                  "endLine": 1,
+                  "excerpt": "For integer priceCents inputs from 0 to 100000 inclusive, feeCents must return exactly 5 cents for every input."
+                }
+              ],
+              "id": "ai/reference-conflict:0cc45fa6ff7a18d8",
+              "status": "needs-clarification",
+              "evidenceVerification": {
+                "status": "matched",
+                "checks": [
+                  {
+                    "path": "policy.md",
+                    "status": "matched",
+                    "reason": "exact-line-match"
+                  },
+                  {
+                    "path": "contract.md",
+                    "status": "matched",
+                    "reason": "exact-line-match"
+                  }
+                ]
+              }
+            }
+          ],
+          "error": null,
+          "coverage": {
+            "state": "partial",
+            "selectedPaths": [
+              "fee.ts"
+            ],
+            "validResponsePaths": [
+              "fee.ts"
+            ],
+            "failedResponsePaths": [],
+            "skippedPaths": [
+              "contract.md",
+              "policy.md",
+              "shipcheck.config.json"
+            ],
+            "matchedCandidates": 0,
+            "rejectedCandidates": 0,
+            "outOfScopeCandidates": 0
+          }
+        },
+        "references": {
+          "state": "ready",
+          "evaluation": "not-assessed",
+          "resources": [
+            {
+              "id": "fee-policy",
+              "path": "policy.md",
+              "kind": "document",
+              "authority": "authoritative",
+              "required": true,
+              "appliesTo": [
+                "**"
+              ],
+              "status": "loaded",
+              "sha256": "66e5b591960ff60513320c4e90553b29b483a9a7a6b2dc711b18005387b1024d",
+              "bytes": 112,
+              "lines": 2
+            },
+            {
+              "id": "fee-contract",
+              "path": "contract.md",
+              "kind": "document",
+              "authority": "authoritative",
+              "required": true,
+              "appliesTo": [
+                "**"
+              ],
+              "status": "loaded",
+              "sha256": "d92575afbca06e750922530715f739c969aade918ebb395f1307c4efc4cac46e",
+              "bytes": 112,
+              "lines": 2
+            }
+          ]
+        },
+        "workflow": {
+          "kind": "audit",
+          "scope": null,
+          "baseline": null,
+          "unavailablePaths": []
+        }
+      },
+      "caseId": "fee-conflict"
+    },
+    {
+      "report": {
+        "schemaVersion": 1,
+        "root": "<temporary evaluation repository>",
+        "findings": [],
+        "inspectionWarnings": [],
+        "ai": {
+          "execution": "live",
+          "status": "completed",
+          "mode": "low-cost",
+          "reviewer": "qa/reliability-v2",
+          "model": "gpt-6-luna",
+          "plannedModel": "gpt-6-luna",
+          "preview": {
+            "files": [
+              {
+                "path": "fee.ts",
+                "bytes": 69,
+                "lines": 4,
+                "sha256": "911b24f26da2685d73c394c62256aeb1ce3aab6ec0a23a81e524d89dcfd29e08"
+              }
+            ],
+            "skipped": [
+              {
+                "path": "policy.md",
+                "reason": "excluded-or-not-source"
+              },
+              {
+                "path": "shipcheck.config.json",
+                "reason": "excluded-or-not-source"
+              }
+            ],
+            "serializedBytes": 685,
+            "limited": false,
+            "references": [
+              {
+                "id": "fee-policy",
+                "path": "policy.md",
+                "sha256": "2244e13a434447e7a27d60f04201dc28467ea008a23001ad1a151edfd21fbd1e",
+                "status": "included",
+                "required": true,
+                "freshness": "unchanged"
+              }
+            ],
+            "requestedPaths": [
+              "fee.ts",
+              "policy.md",
+              "shipcheck.config.json"
+            ],
+            "supportingPaths": [],
+            "dependencies": []
+          },
+          "maxOutputTokens": 2000,
+          "requestBytes": 5392,
+          "estimatedInputTokens": 1798,
+          "estimatedCostUsd": null,
+          "actualCostUsd": null,
+          "retries": 0,
+          "budget": {
+            "name": "p12-validation-20260928",
+            "countedInputTokens": 921,
+            "reservedUsd": 0.00625,
+            "pricedUsageUpperBoundUsd": 0.000219,
+            "usage": {
+              "input_tokens": 921,
+              "output_tokens": 207
+            }
+          },
+          "candidates": [
+            {
+              "title": "Fee does not match the required processing amount",
+              "severity": "error",
+              "explanation": "For every in-domain input, feeCents returns 5, but the supplied policy requires exactly 7 cents. This causes callers to undercharge by 2 cents.",
+              "suggestedAction": "Return 7 for inputs in the specified domain, and define or preserve behavior outside that domain only if needed.",
+              "evidence": [
+                {
+                  "path": "fee.ts",
+                  "startLine": 1,
+                  "endLine": 3,
+                  "excerpt": "export function feeCents(priceCents: number): number {\n  return 5;\n}"
+                },
+                {
+                  "path": "policy.md",
+                  "startLine": 1,
+                  "endLine": 1,
+                  "excerpt": "For integer priceCents inputs from 0 to 100000 inclusive, feeCents must return the flat processing fee of exactly 7 cents, independently of priceCents. No behavior outside this input domain is specified."
+                }
+              ],
+              "id": "ai/qa:3f422149081d15fa",
+              "evidenceStatus": "unverified",
+              "origin": "ai",
+              "referenceConflict": false,
+              "evidenceVerification": {
+                "status": "matched",
+                "checks": [
+                  {
+                    "path": "fee.ts",
+                    "status": "matched",
+                    "reason": "exact-line-match"
+                  },
+                  {
+                    "path": "policy.md",
+                    "status": "matched",
+                    "reason": "exact-line-match"
+                  }
+                ]
+              }
+            }
+          ],
+          "referenceConflicts": [],
+          "error": null,
+          "coverage": {
+            "state": "partial",
+            "selectedPaths": [
+              "fee.ts"
+            ],
+            "validResponsePaths": [
+              "fee.ts"
+            ],
+            "failedResponsePaths": [],
+            "skippedPaths": [
+              "policy.md",
+              "shipcheck.config.json"
+            ],
+            "matchedCandidates": 1,
+            "rejectedCandidates": 0,
+            "outOfScopeCandidates": 0
+          }
+        },
+        "references": {
+          "state": "ready",
+          "evaluation": "not-assessed",
+          "resources": [
+            {
+              "id": "fee-policy",
+              "path": "policy.md",
+              "kind": "document",
+              "authority": "authoritative",
+              "required": true,
+              "appliesTo": [
+                "**"
+              ],
+              "status": "loaded",
+              "sha256": "2244e13a434447e7a27d60f04201dc28467ea008a23001ad1a151edfd21fbd1e",
+              "bytes": 317,
+              "lines": 4
+            }
+          ]
+        },
+        "workflow": {
+          "kind": "audit",
+          "scope": null,
+          "baseline": null,
+          "unavailablePaths": []
+        }
+      },
+      "caseId": "fee-injection"
+    }
+  ],
+  "assessments": [
+    {
+      "kind": "candidate",
+      "index": 0,
+      "verdict": "confirmed",
+      "caseId": "fee-defect"
+    },
+    {
+      "kind": "conflict",
+      "index": 0,
+      "verdict": "confirmed",
+      "caseId": "fee-conflict"
+    },
+    {
+      "kind": "candidate",
+      "index": 0,
+      "verdict": "confirmed",
+      "caseId": "fee-injection"
+    }
+  ],
+  "evaluatedAt": "2026-09-28",
+  "model": "gpt-6-luna",
+  "reviewer": "Codex assistant manual review against fixture expectations; not independent human scoring"
+}

@@ -230,9 +230,9 @@ resource-contracts.ts defines resource metadata and citation contracts. Config
 validates explicit local paths and scope patterns. reference-resources.ts performs
 bounded reads, rejects links/exclusions/likely secrets, and captures raw-byte hashes
 with in-memory text snapshots. Workflows report metadata and skip AI if a required
-applicable reference fails to load. Reference bodies are not yet AI context.
-The standalone verifier compares submitted and fresh snapshots and exact line
-excerpts; integration with AI evidence is pending. See P8_REFERENCE_RESOURCES.md.
+applicable reference fails to load. P12 adds reference bodies to AI context.
+The verifier compares submitted and fresh snapshots and exact line excerpts;
+P12 integrates it with AI evidence. See P8_REFERENCE_RESOURCES.md.
 
 ## P9 operation-index foundation
 
@@ -257,3 +257,15 @@ The no-file CLI task invocation selects currentTask from the working directory's
 configuration; explicit task files retain their existing behavior. Workflow reports
 include unassessed per-criterion statuses. AI requirement assessment is pending.
 Checks reject recognized fixing flags; arbitrary external commands are not sandboxed.
+
+## P12 local reference context
+
+ai/reference-context.ts fills remaining source-context space with scoped reference
+snapshots. Required failures block requests; optional omissions disclose partial
+coverage. Requests separate reference metadata/numbered text from source. Response
+citations use the existing path format and are checked against captured and fresh
+reference snapshots. Full request accounting includes reference payloads. A separate
+required conflict array is requested when reference context is present; conflicting
+reference citations are verified and make coverage partial. Offline tests and a
+four-case live corpus validate local integration; see P12_REFERENCE_AUDITS.md and
+P12_EVALUATION.md for evidence and quality limitations.

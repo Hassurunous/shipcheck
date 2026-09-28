@@ -75,3 +75,9 @@ it('shows loaded references as unassessed in console reports',async()=>{
   await writeFile(join(root,'shipcheck.config.json'),JSON.stringify(config));await writeFile(join(root,'contract.md'),'Contract');
   const result=await runCli(['audit',root]);expect(result.exitCode).toBe(0);expect(result.stdout).toContain('READY — NOT ASSESSED');expect(result.stdout).toContain('[LOADED] contract');
 });
+it('excludes Git metadata and environment files independent of declared casing',async()=>{
+  for(const path of ['.git/config','.GIT/config','.Env','.ENV.local']) {
+    const loaded=await loadReferenceResources(root,{resources:[{id:'metadata',path}]});
+    expect(loaded.report.resources[0]!.status).toBe('excluded');expect(loaded.snapshots).toEqual([]);
+  }
+});

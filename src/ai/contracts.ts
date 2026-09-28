@@ -36,13 +36,21 @@ export const candidateSchema = z.object({
   evidence: z.array(evidenceSchema).min(1).max(5),
 }).strict();
 export const qaOutputSchema = z.object({ candidates: z.array(candidateSchema).max(20) }).strict();
-export type QaOutput = z.infer<typeof qaOutputSchema>;
+export const referenceConflictSchema=z.object({explanation:z.string().min(1).max(4000),
+  evidence:z.array(evidenceSchema).min(2).max(5)}).strict();
+export const referenceQaOutputSchema=qaOutputSchema.extend({referenceConflicts:z.array(referenceConflictSchema).max(10)}).strict();
+export type QaOutput = z.infer<typeof qaOutputSchema> & {referenceConflicts?:z.infer<typeof referenceConflictSchema>[]};
+const verificationSchema=z.object({status:z.enum(['matched','rejected']),checks:z.array(z.object({
+  path:z.string(),status:z.enum(['matched','rejected']),reason:z.string(),
+}))});
 
 export const contextPreviewSchema = z.object({
   files: z.array(z.object({path: z.string(), bytes: z.number().int(), lines: z.number().int(), sha256: z.string()})),
   skipped: z.array(z.object({path: z.string(), reason: z.string()})),
   serializedBytes: z.number().int().nonnegative(),
   limited: z.boolean(),
+  references:z.array(z.object({id:z.string(),path:z.string(),sha256:z.string().nullable(),
+    status:z.string(),required:z.boolean(),freshness:z.enum(['unchanged','changed-or-unavailable']).optional()})).optional(),
   requestedPaths:z.array(z.string()).optional(),
   supportingPaths:z.array(z.string()).optional(),
   dependencies:z.array(z.object({from:z.string(),specifier:z.string(),path:z.string().nullable(),
@@ -68,10 +76,13 @@ export const aiResultSchema = z.object({
     usage:z.object({input_tokens:z.number().int(),output_tokens:z.number().int()})}).optional(),
   candidates: z.array(candidateSchema.extend({
     id: z.string(), evidenceStatus: z.literal('unverified'), origin: z.literal('ai'),
+    referenceConflict:z.boolean().optional(),
     evidenceVerification: z.object({status:z.enum(['matched','rejected']),checks:z.array(z.object({
       path:z.string(),status:z.enum(['matched','rejected']),reason:z.string(),
     }))}).optional(),
   })).max(20),
+  referenceConflicts:z.array(referenceConflictSchema.extend({id:z.string(),
+    status:z.literal('needs-clarification'),evidenceVerification:verificationSchema})).max(10).optional(),
   error: z.object({code: z.string(), message: z.string()}).nullable(),
   coverage:z.object({state:z.enum(['preview','complete','partial','failed']),selectedPaths:z.array(z.string()),
     validResponsePaths:z.array(z.string()),failedResponsePaths:z.array(z.string()),

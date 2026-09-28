@@ -41,7 +41,7 @@ export function renderConsoleReport(input: Report): string {
   }
   if(report.references) {
     lines.push('',`Reference loading: ${report.references.state.toUpperCase()} — NOT ASSESSED`,
-      'Reference bodies are not supplied to AI in this P8 slice. Hashes identify loaded bytes; declared versions and authority are user assertions.');
+      'Loading alone is not assessment. See each AI stage for reference inclusion. Hashes identify loaded bytes; declared versions and authority are user assertions.');
     for(const resource of report.references.resources)lines.push(
       `  [${resource.status.toUpperCase()}] ${text(resource.id)}: ${text(resource.path)} (${resource.kind}; ${resource.authority}; ${resource.required?'required':'optional'})`,
       `    Declared version: ${text(resource.version ?? 'unspecified')}; SHA256: ${resource.sha256 ?? 'unavailable'}; bytes: ${resource.bytes}`);
@@ -88,6 +88,7 @@ export function renderConsoleReport(input: Report): string {
       `Planned real model: ${text(ai.plannedModel ?? 'not selected; budget discussion pending')}`,
       `Selected source files: ${ai.preview.files.length}; skipped: ${ai.preview.skipped.length}; limited: ${ai.preview.limited}`);
     for (const file of ai.preview.files) lines.push(`  ${text(file.path)} (${file.bytes} bytes, ${file.lines} lines)`);
+    for(const reference of ai.preview.references ?? [])lines.push(`  Reference [${text(reference.status)}]: ${text(reference.id)} — ${text(reference.path)}; SHA256: ${reference.sha256 ?? 'unavailable'}; freshness: ${reference.freshness ?? 'not-rechecked'}`);
     for (const skipped of ai.preview.skipped) lines.push(`  Skipped: ${text(skipped.path)} — ${text(skipped.reason)}`);
     for (const path of ai.preview.supportingPaths ?? []) lines.push(`  Supporting context: ${text(path)}`);
     for (const dependency of ai.preview.dependencies ?? []) if(dependency.status!=='included')
@@ -106,8 +107,15 @@ export function renderConsoleReport(input: Report): string {
     if (ai.error) lines.push(`AI failure [${text(ai.error.code)}]: ${text(ai.error.message)}`);
     if (ai.status === 'preview') lines.push('Preview only: no QA review was performed.');
     if (ai.status === 'completed') lines.push(`AI candidates: ${ai.candidates.length} — UNVERIFIED${ai.execution === 'mock' ? ' / SYNTHETIC MOCK' : ''}`);
+    for(const conflict of ai.referenceConflicts ?? []) {
+      lines.push('',`Reference conflict — NEEDS CLARIFICATION (AI interpretation, unverified): ${text(conflict.explanation)}`,
+        `  Citation check: ${conflict.evidenceVerification.status.toUpperCase()}; conflict makes coverage partial.`);
+      for(const evidence of conflict.evidence)lines.push(`  ${text(evidence.path)}:${evidence.startLine}-${evidence.endLine} — ${text(evidence.excerpt)}`);
+      for(const check of conflict.evidenceVerification.checks)if(check.status==='rejected')lines.push(`  Rejected: ${text(check.path)} — ${text(check.reason)}`);
+    }
     for (const candidate of ai.candidates) {
       lines.push(`  [${candidate.severity.toUpperCase()}] ${text(candidate.title)}`, `    ${text(candidate.explanation)}`);
+      if(candidate.referenceConflict)lines.push('    Depends on a disputed reference: clarify expectations before changing code.');
       if (candidate.evidenceVerification) {
         lines.push(`    Citation check: ${candidate.evidenceVerification.status.toUpperCase()} (diagnosis remains unverified)`);
         for (const check of candidate.evidenceVerification.checks) if (check.status === 'rejected')

@@ -12,6 +12,7 @@ export const MAX_REFERENCE_BYTES=262144;
 export type ResourceSnapshot={record:ResourceRecord;content:string};
 export type LoadedReferences={report:z.infer<typeof referencesSchema>;snapshots:ResourceSnapshot[]};
 class ResourceFailure extends Error {constructor(public status:ResourceRecord['status']){super(status);}}
+const intrinsicallyExcluded=(path:string)=>path.split('/').some(part=>part.toLowerCase()==='.git' || /^\.env(?:\.|$)/i.test(part));
 async function readResource(root:string,path:string,limit:number,exclude:string[]) {
   let current=root;
   for(const part of path.split('/')) {
@@ -19,7 +20,7 @@ async function readResource(root:string,path:string,limit:number,exclude:string[
     const stat=await fs.lstat(current);
     if(stat.isSymbolicLink())throw new ResourceFailure('linked');
     const actual=relative(root,await fs.realpath(current)).replace(/\\/g,'/');
-    if(actual==='..' || actual.startsWith('../') || isExcluded(actual,exclude))throw new ResourceFailure('excluded');
+    if(actual==='..' || actual.startsWith('../') || intrinsicallyExcluded(actual) || isExcluded(actual,exclude))throw new ResourceFailure('excluded');
   }
   const stat=await fs.lstat(current);
   if(!stat.isFile())throw new ResourceFailure('non-regular');
@@ -46,7 +47,7 @@ export async function loadReferenceResources(target:string,options:ConfigInput={
     const record:ResourceRecord={...resource,status:'loaded',sha256:null,bytes:0,lines:0};
     records.push(record);
     if(paths && !paths.some(path=>resource.appliesTo.some(pattern=>matchesPattern(path,pattern)))) {record.status='not-applicable';continue;}
-    if(isExcluded(resource.path,config.exclude) || resource.path.split('/').some(part=>part==='.git' || /^\.env(?:\.|$)/i.test(part))) {record.status='excluded';continue;}
+    if(isExcluded(resource.path,config.exclude) || intrinsicallyExcluded(resource.path)) {record.status='excluded';continue;}
     if(resource.path.split('/').some(part=>sensitiveName.test(part))) {record.status='sensitive-content';continue;}
     if(consumed>=MAX_REFERENCE_BYTES) {record.status='total-size-limit';continue;}
     try {

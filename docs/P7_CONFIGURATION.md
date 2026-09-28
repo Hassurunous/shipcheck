@@ -131,5 +131,5 @@ not diagnosis correctness. Preview/mock and external checks spend no API credits
 
 Optional `resources` configuration now supports bounded local reference loading.
 See [P8 reference resources](P8_REFERENCE_RESOURCES.md) for schema, examples and
-limits. Loaded references are explicitly **not yet assessed by AI**.
+limits. [P12](P12_REFERENCE_AUDITS.md) describes AI reference selection and citation checks.
 Inline `currentTask` is supported by [P11](P11_TASK_AUDITING.md); requirement assessment remains pending.

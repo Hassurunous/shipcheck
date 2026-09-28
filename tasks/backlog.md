@@ -107,11 +107,12 @@ Remaining P7 work:
 - [x] Explicit local resource configuration and bounded read-only loading
 - [x] In-memory content snapshots, hashes, declared versions and provenance
 - [x] Loading statuses, optional hash pins and standalone citation-verification helper
-- [ ] Report missing, excluded, incompatible and changed references
-- [ ] Cross-resource citation verification without claiming semantic correctness
-- [ ] Scoped reference selection for AI requests with budget/coverage accounting
+- [x] Report missing, excluded and changed local references (P12)
+- [ ] Semantic version compatibility of contracts (P14/P16)
+- [x] Cross-resource citation verification without claiming semantic correctness (P12)
+- [x] Scoped reference selection for AI requests with budget/coverage accounting (P12)
 - [ ] Explicit external-repository roots and approved remote documentation snapshots
-- [ ] Conflicting-source handling and reproducible evidence tests
+- [x] Local conflicting-source outcomes and reproducible evidence tests (P12)
 
 ## P9 — Contract auditing (started)
 
@@ -158,13 +159,15 @@ unfinished requirements into end-to-end capabilities, in execution order.
 Documentation and evaluation should develop alongside implementation, with their
 final integration and release gates in P17/P18.
 
-### P12 — Reference-aware audits
+### P12 — Reference-aware audits (completed for local references)
 
 Completes core P8 integration.
 
-- [ ] Select relevant local reference content within context and spending limits
-- [ ] Supply references to reviewers and verify submitted/current reference citations
-- [ ] Report missing, changed, conflicting and omitted references and actual coverage
+- [x] Select relevant local reference content within context and spending limits
+- [x] Supply references to reviewers and verify submitted/current reference citations
+- [x] Offline integration tests for citations, omissions, changes and batch previews
+- [x] Scored reference-dependent corpus and bounded live evaluation (four low-cost cases; see docs/P12_EVALUATION.md)
+- [x] Report missing, changed, conflicting and omitted references and actual coverage
 
 Completion: audits assess code using local specifications with evidence from both
 sources and explicit insufficient-context outcomes.

@@ -10,6 +10,8 @@ import { requestLiveQa, requestBudgetQa } from './live.js';
 import { budgetNameSchema } from './audit-budget.js';
 import { TRIAL_MODELS } from './trial-budget.js';
 import { verifyEvidence } from './verify-evidence.js';
+import {attachReferences} from './reference-context.js';
+import {loadReferenceResources} from '../reference-resources.js';
 
 export type AiReviewOptions = {
   execution: 'preview' | 'mock' | 'live';
@@ -44,6 +46,7 @@ export async function reviewWithAi(target = '.', options: AiReviewOptions = {exe
   try {
     const context = await collectContext(profile,config.ai,options.paths);
     result.preview = context.preview;
+    if(await attachReferences(profile.root,config,context))throw new AiFailure('reference-context','A required applicable reference is unavailable, ambiguous, or exceeds remaining context space. No request was sent.');
     const request = buildRequest(context,config.ai,model ?? 'MODEL_NOT_SELECTED');
     result.requestBytes = Buffer.byteLength(JSON.stringify(request));
     // Heuristic only, not a billing quote or token cap. Includes prompt/schema overhead.
@@ -68,12 +71,30 @@ export async function reviewWithAi(target = '.', options: AiReviewOptions = {exe
       // modified, or newly ineligible file cannot receive a matched citation.
       let current = {files:[],preview:context.preview} as typeof context;
       try { current = await collectContext(profile,config.ai,context.files.map(file=>file.path)); } catch { /* Fail closed for every citation. */ }
-      const candidates=output.candidates.filter(candidate=>!options.paths || candidate.evidence.some(evidence=>options.paths!.includes(evidence.path)));
+      if(context.references) {
+        try { current.references=(await loadReferenceResources(profile.root,config,context.files.map(file=>file.path))).snapshots; }
+        catch { current.references=[]; }
+        for(const reference of context.references) {
+          const fresh=current.references.find(item=>item.record.id===reference.record.id);
+          const unchanged=fresh?.record.sha256===reference.record.sha256 && fresh?.content===reference.content;
+          const metadata=result.preview.references?.find(item=>item.id===reference.record.id);
+          if(metadata)metadata.freshness=unchanged?'unchanged':'changed-or-unavailable';
+          if(!unchanged)result.preview.limited=true;
+        }
+      }
+      const candidates=output.candidates.filter(candidate=>candidate.evidence.some(evidence=>
+        context.files.some(file=>file.path===evidence.path) && (!options.paths || options.paths.includes(evidence.path))));
       result.coverage={state:'complete',selectedPaths:[],validResponsePaths:[],failedResponsePaths:[],skippedPaths:[],
         matchedCandidates:0,rejectedCandidates:0,outOfScopeCandidates:output.candidates.length-candidates.length};
+      if(context.references)result.referenceConflicts=(output.referenceConflicts ?? []).map(conflict=>({
+        ...conflict,id:`ai/reference-conflict:${createHash('sha256').update(JSON.stringify(conflict)).digest('hex').slice(0,16)}`,
+        status:'needs-clarification',evidenceVerification:verifyEvidence(conflict,context,current),
+      }));
+      const conflictedPaths=new Set((result.referenceConflicts ?? []).flatMap(conflict=>conflict.evidence.map(item=>item.path)));
       result.candidates = candidates.map(candidate=>({
         ...candidate, id:`ai/qa:${createHash('sha256').update(JSON.stringify(candidate)).digest('hex').slice(0,16)}`,
         evidenceStatus:'unverified', origin:'ai',
+        ...(context.references?{referenceConflict:candidate.evidence.some(item=>conflictedPaths.has(item.path))}:{}),
         evidenceVerification:verifyEvidence(candidate,context,current),
       }));
     }
@@ -85,7 +106,7 @@ export async function reviewWithAi(target = '.', options: AiReviewOptions = {exe
   const selectedPaths=result.preview.files.map(file=>file.path);
   const rejectedCandidates=result.candidates.filter(candidate=>candidate.evidenceVerification?.status!=='matched').length;
   result.coverage={state:result.status==='failed'?'failed':result.status==='preview'?'preview':
-    result.preview.limited || result.preview.skipped.length>0 || rejectedCandidates>0 || (result.coverage?.outOfScopeCandidates ?? 0)>0?'partial':'complete',
+    result.preview.limited || result.preview.skipped.length>0 || rejectedCandidates>0 || (result.referenceConflicts?.length ?? 0)>0 || (result.coverage?.outOfScopeCandidates ?? 0)>0?'partial':'complete',
     selectedPaths,validResponsePaths:result.status==='completed'?selectedPaths:[],
     failedResponsePaths:result.status==='failed'?selectedPaths:[],skippedPaths:result.preview.skipped.map(file=>file.path),
     matchedCandidates:result.candidates.length-rejectedCandidates,rejectedCandidates,
