@@ -33,3 +33,10 @@ it('keeps failed and absent runs out of clean evaluation claims',async()=> {
   expect(scoreEvaluation(cases,[run])).toMatchObject({failed:1,completed:0,missedBugs:null,semanticAssessmentComplete:false,costUsd:null});
   expect(()=>scoreEvaluation(cases,[run,run])).toThrow('unique');
 });
+it('does not count a confirmed label with rejected citations as an evidence-backed detection',()=>{
+  const fixture=cases[0]!;
+  const run={caseId:fixture.id,model:'offline',status:'completed' as const,error:null,elapsedMs:0,costUsd:0,
+    candidates:[{title:'Unverified',explanation:'Fabricated citation',verification:'rejected' as const}]};
+  expect(scoreEvaluation([fixture],[run],[{caseId:fixture.id,candidateIndex:0,verdict:'confirmed',bugId:'missing-value-removal'}]))
+    .toMatchObject({detectedBugs:0,semanticAssessmentComplete:false,missedBugs:null});
+});

@@ -1,3 +1,4 @@
+import {auditArchitecture} from './architecture-audit.js';
 import { execFile } from 'node:child_process';
 import { promisify } from 'node:util';
 import { realpath, lstat } from 'node:fs/promises';
@@ -88,11 +89,13 @@ export async function runWorkflow(target:string, kind:'audit'|'diff'|'task', ai?
   }
   const selected = new Set(paths);
   const contracts=await auditContracts(report.root,config,paths);
+  const architecture=await auditArchitecture(report.root,config,paths);
   return reportSchema.parse({...report,
     ...(taskSummary?{currentTask:taskSummary}:{}),
     ...(references?{references}:{}),
     ...(checks.length?{checks}:{}),
     ...(contracts.length?{contracts}:{}),
+    ...(architecture?{architecture}:{}),
     findings:paths ? report.findings.filter(f=>f.evidence.some(e=>selected.has(e.path))) : report.findings,
     workflow:{kind,scope:paths ?? null,baseline:kind==='diff'?'HEAD':null,unavailablePaths,...(task ? {criteria:task.criteria} : {})},
   });

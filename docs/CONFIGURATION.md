@@ -84,3 +84,9 @@ CLI `--mode` overrides `ai.mode`; automatic retries are fixed at zero.
 Live trials use pinned priced models when mappings are null; other mappings
 are rejected for live requests. Configuration cannot increase the trial budget
 or its 5,000 input / 2,000 output token caps. See [live trial](LIVE_TRIAL.md).
+
+## Automatic architecture policies (P15)
+
+Optional `architecture` configuration selects source files, prohibits import directions,
+and checks filename conventions offline. JS/TS, Python, Go, Java, and C# have
+bounded import extraction; unresolved dependencies remain explicit. See [P15 configuration and coverage](P15_ARCHITECTURE.md).

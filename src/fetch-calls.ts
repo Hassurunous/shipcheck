@@ -10,6 +10,8 @@ export function unwrap(node:Node):Node {
 }
 /** Syntax-only extraction. Bindings/aliases anywhere in the file disable direct-fetch inference. */
 export function parseHttpSyntax(content:string,syntax:'javascript'|'typescript'|'tsx'='javascript') {
+  // JS parsers count these separators as lines; Shipcheck's evidence format uses CR/LF.
+  if(/[\u2028\u2029]/.test(content))return {nodes:[],issues:['unsupported-line-endings']};
   let tree:Node;
   try{tree=syntax==='javascript'?parse(content,{ecmaVersion:'latest',sourceType:'module',locations:true})
     :parseTyped(content,{sourceType:'module',attachComment:false,plugins:['estree','typescript',...(syntax==='tsx'?['jsx' as const]:[])]}).program as unknown as Node;}

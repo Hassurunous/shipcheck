@@ -65,7 +65,8 @@ Input shape:
 Supply all six case IDs for a complete score. Missing/failed cases and unassessed
 candidates prevent a complete semantic score. Human review labels candidates as
 confirmed, false-positive or uncertain; confirmed labels must reference a known
-bug. Matching citations alone do not count as detections. Scores include detected
+bug. A confirmed label with rejected citations cannot count as an evidence-backed
+detection and leaves the score incomplete. Matching citations alone do not count as detections. Scores include detected
 and missed bugs, false positives, citation acceptance and cost when supplied.
 Compare modes by recording and scoring the same cases separately. Replay elapsed
 times measure local decoding, not original provider latency. Recorded costs are

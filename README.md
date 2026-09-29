@@ -27,6 +27,11 @@ Use `npm run audit`, not `npm audit` (which is npm's dependency security command
 
 ## Commands
 
+For a repeatable offline implementation check, run `npm run verify` (typecheck,
+tests, build and CLI acceptance), or `npm run test:cli` for executable checks only.
+See the [P1-P15 audit and test matrix](docs/P1_P15_AUDIT.md) for expected behavior,
+installed-package verification and remaining limits.
+
 ```powershell
 shipcheck audit .
 shipcheck diff . --json
@@ -176,3 +181,9 @@ complete language or runtime integration validation.
 [P10 intent policies](docs/P10_INTENT_POLICIES.md) now provides a library foundation
 for requirement identities and forbidden dependency boundaries. It evaluates
 supplied observations only; automatic source extraction and CLI integration are pending.
+
+## Automatic architecture policies (P15)
+
+Optional `architecture` configuration selects source files, prohibits import directions,
+and checks filename conventions offline. JS/TS, Python, Go, Java, and C# have
+bounded import extraction; unresolved dependencies remain explicit. See [P15 configuration and coverage](docs/P15_ARCHITECTURE.md).

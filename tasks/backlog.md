@@ -79,7 +79,8 @@
 
 ## P7 — Multi-language checks and developer-agent feedback
 
-In progress after P6/P6.1; this work does not expand the P6 release requirements.
+Delivered for the documented command/adapter subset; installed-tool and cross-platform
+qualification remain P18. This does not expand the historical P6 release requirements.
 
 First slice delivered:
 - [x] Root config for language-independent commands and AI credential environment references
@@ -114,28 +115,31 @@ Remaining P7 work:
 - [ ] Explicit external-repository roots and approved remote documentation snapshots
 - [x] Local conflicting-source outcomes and reproducible evidence tests (P12)
 
-## P9 — Contract auditing (started)
+## P9 — Contract auditing (local OpenAPI delivered through P14; external/SDK work in P16)
 
 - [x] Offline OpenAPI JSON operation index with provenance and explicit partial coverage
-- [ ] Integrate the index with CLI reports and consumer-call comparisons
+- [x] Integrate the index with CLI reports and consumer-call comparisons (P14-P14.2)
 
 See `docs/P9_CONTRACT_AUDITING.md`; P8 remains partially implemented.
 
-- [ ] OpenAPI and installed TypeScript SDK declaration adapters
-- [ ] Version-aware call/contract comparisons with consumer/provider evidence
+- [x] OpenAPI JSON adapter and supported multilingual HTTP-call comparisons (P14-P14.2)
+- [ ] Installed TypeScript SDK declaration adapters (P16)
+- [x] Exact version-pin mismatch and consumer/provider evidence (P14)
+- [ ] Broader semantic version compatibility and external comparisons (P16)
 - [ ] Cross-repository interface comparisons and missing-contract outcomes
 
-## P10 — Requirements and architectural policies (started)
+## P10 — Requirements and architectural policies (documented scope delivered through P13/P15)
 
 - [x] Pure policy schemas with stable requirement/boundary IDs and content hash
 - [x] Evaluate supplied dependency observations against forbidden directory boundaries
 - [x] Offline violation/clean controls and explicit unassessed requirement outcomes
 
-See `docs/P10_INTENT_POLICIES.md`. CLI integration and source extraction are pending.
+See `docs/P10_INTENT_POLICIES.md`. Task assessment is delivered through P13;
+automatic architecture checks are delivered through P15 within documented limits.
 
-- [ ] Requirement IDs, architecture/dependency-direction policies and conventions
-- [ ] Evidence-based intent assessments with ambiguity and conflict outcomes
-- [ ] Evaluation corpus for requirement/architecture violations and clean controls
+- [x] Requirement IDs, architecture/dependency-direction policies and conventions (P11/P13/P15)
+- [x] Evidence-based intent assessments with ambiguity and conflict outcomes (P13; not semantic proof)
+- [x] Bounded evaluation corpus for requirement/architecture violations and clean controls (P13/P15; broader qualification P18)
 
 ## P11 — Inline current-task auditing (completed through P13)
 
@@ -154,8 +158,9 @@ remain outside these first implementations unless separately authorized.
 
 ## Remaining implementation milestones
 
-P8–P11 remain partial foundations. The following milestones organize their
-unfinished requirements into end-to-end capabilities, in execution order.
+P12-P15 deliver local reference, task, contract and architecture integration on the
+P8-P11 foundations. Remaining external-resource/interface work is P16; operating
+guides and release qualification are P17/P18, in execution order.
 Documentation and evaluation should develop alongside implementation, with their
 final integration and release gates in P17/P18.
 
@@ -220,23 +225,29 @@ See docs/P14_1_MULTILINGUAL_CONTRACTS.md for exact patterns and exclusions.
 - [x] Extend coverage for Python HTTPX/Sessions and JavaScript/TypeScript Axios
 - [x] Prioritize Rust reqwest, Ruby Net::HTTP, then PHP cURL for subsequent adapter work
 
-See docs/P14_2_ADDITIONAL_LANGUAGES.md. P15 remains the next core milestone.
+See docs/P14_2_ADDITIONAL_LANGUAGES.md. P15 follows this adapter milestone.
 
 Prefer deterministic offline extraction and reuse the comparison/report contracts.
 AI may supplement unsupported complexity with separate evidence-backed candidates;
 it must not erase incomplete offline coverage or require spending for existing checks.
 Shipcheck remains read-only. SDK resolution and external resources remain P16.
 
-### P15 — Automatic architecture-policy checks
+### P15 — Automatic architecture-policy checks (completed for documented import subset)
 
 Completes deterministic P10 integration.
 
-- [ ] Configure policies and report them through the CLI
-- [ ] Extract dependencies and resolve supported imports/aliases
-- [ ] Evaluate dependency boundaries and precise convention rules
-- [ ] Disclose unsupported resolution and incomplete coverage
+- [x] Configure policies and report them through the CLI
+- [x] Extract dependencies and resolve supported imports/aliases
+- [x] Evaluate dependency boundaries and precise convention rules
+- [x] Disclose unsupported resolution and incomplete coverage
 
 Completion: repository boundary checks run without manually supplied observations.
+
+Implementation: optional `architecture` configuration, automatic glob selection,
+parser-based JS/TS/Python/Go/Java/C# import extraction, explicit aliases, prohibited
+directions, filename styles, hashed evidence, console/JSON/Markdown output and
+exit-code integration. Partial and unsupported resolution remains visible.
+See docs/P15_ARCHITECTURE.md for limits and packaged fixture.
 
 ### P16 — External contracts and broader interface support
 
@@ -269,3 +280,9 @@ Includes remaining P7 validation obligations.
 
 Completion: repeatable tests and bounded live experiments establish the supported
 workflows and their practical limitations.
+
+## P1-P15 implementation audit
+
+See `docs/P1_P15_AUDIT.md` for standards, evidence, corrected defects and deferred
+requirements. Run `npm run verify` for typecheck, regression tests, build and offline
+CLI acceptance; `npm run test:cli` runs only the executable acceptance suite.

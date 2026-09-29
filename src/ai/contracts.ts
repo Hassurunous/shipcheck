@@ -54,7 +54,8 @@ export const taskReviewSchema=z.object({taskHash:z.string(),state:z.enum(['not-a
     evidenceVerification:verificationSchema.optional()})).max(50)});
 
 export const contextPreviewSchema = z.object({
-  files: z.array(z.object({path: z.string(), bytes: z.number().int(), lines: z.number().int(), sha256: z.string()})),
+  files: z.array(z.object({path: z.string(), bytes: z.number().int(), lines: z.number().int(), sha256: z.string(),
+    freshness:z.enum(['unchanged','changed-or-unavailable']).optional()})),
   skipped: z.array(z.object({path: z.string(), reason: z.string()})),
   serializedBytes: z.number().int().nonnegative(),
   limited: z.boolean(),

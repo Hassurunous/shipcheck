@@ -28,6 +28,12 @@ Models can produce different results on another run. Coverage remains separately
 reported; files outside selected AI source can be skipped even when the reference
 fixture expectation is met.
 
+The P1-P15 audit strengthened replay scoring: limited/stale source or reference
+context and synthetic mock execution cannot score as successful controls. The
+recorded four cases still meet these checks. Partial coverage caused solely by
+non-source exclusions or the expected reference conflict remains distinct from
+unusable reference/source context.
+
 ## Cost and limits
 
 3,724 input tokens and 640 output tokens were recorded. The ledger's conservative

@@ -89,6 +89,13 @@ export async function reviewWithAi(target = '.', options: AiReviewOptions = {exe
       // modified, or newly ineligible file cannot receive a matched citation.
       let current = {files:[],preview:context.preview} as typeof context;
       try { current = await collectContext(profile,sourceSettings,context.files.map(file=>file.path)); } catch { /* Fail closed for every citation. */ }
+      // A no-candidate response still describes the submitted snapshot, not later edits.
+      for(const source of context.files) {
+        const unchanged=current.files.find(file=>file.path===source.path)?.content===source.content;
+        const metadata=result.preview.files.find(file=>file.path===source.path)!;
+        metadata.freshness=unchanged?'unchanged':'changed-or-unavailable';
+        if(!unchanged)result.preview.limited=true;
+      }
       if(context.references) {
         try { current.references=(await loadReferenceResources(profile.root,config,context.files.map(file=>file.path))).snapshots; }
         catch { current.references=[]; }

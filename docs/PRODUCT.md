@@ -38,7 +38,7 @@ and support every reported finding with evidence.
 
 P6 remains focused on release preparation for the current implementation.
 P6.1 strengthens citation/context reliability and evaluation of the current reviewer.
-P7 is in progress: configurable external commands and whole-repository AI batching
+P7 is delivered for its documented subset: configurable external commands and whole-repository AI batching
 with explicit named budgets are implemented; see P7_CONFIGURATION.md for limits.
 P7 now provides ESLint/Ruff JSON adapters, language-based check selection and
 severity thresholds for a developer-agent feedback workflow: a separate developer process edits code, invokes Shipcheck, consumes
@@ -80,3 +80,13 @@ offline analysis without converting unsupported patterns into deterministic pass
 - No automated code modification
 - No pull request integration
 - No payment system
+
+## Automatic architecture policies (P15)
+
+Optional `architecture` configuration selects source files, prohibits import directions,
+and checks filename conventions offline. JS/TS, Python, Go, Java, and C# have
+bounded import extraction; unresolved dependencies remain explicit. See [P15 configuration and coverage](P15_ARCHITECTURE.md).
+
+Current milestone conformance and reproducible checks are recorded in
+[P1-P15 audit](P1_P15_AUDIT.md). Completion means the documented bounded scope,
+not exhaustive defect detection or semantic proof.

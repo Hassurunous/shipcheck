@@ -1,0 +1,7 @@
+{
+  "architecture": {
+    "files": ["core/**/*.ts"],
+    "boundaries": [{"id": "core-ui", "from": "core", "to": "ui", "reason": "Core must not depend on UI."}],
+    "conventions": [{"id": "names", "within": "core", "style": "kebab-case", "reason": "Use kebab-case filenames."}]
+  }
+}

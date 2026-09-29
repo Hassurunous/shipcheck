@@ -36,6 +36,11 @@ it('ignores comments and string contents, detects aliases and invalid syntax',()
   expect(extractFetchCalls('const request=fetch; request("x");').issues).toContain('fetch-binding-or-alias-unresolved');
   expect(extractFetchCalls('const : =')).toEqual({calls:[],issues:['unsupported-or-invalid-javascript']});
 });
+it.each(['\u2028','\u2029'])('discloses unsupported JS line separator %j without inventing citations',async separator=>{
+  const result=await audit('// comment'+separator+"fetch('https://service.test/v1/unknown');");
+  expect(result.state).toBe('partial');expect(result.calls).toEqual([]);
+  expect(result.issues.join(' ')).toContain('unsupported-line-endings');
+});
 it('does not mistake another service or base prefix for a mismatch',async()=>{
   const result=await audit("fetch('https://elsewhere.test/v1/users');fetch('https://service.test/v10/users');");
   expect(result.state).toBe('partial');expect(result.calls.every(c=>c.status==='outside-service')).toBe(true);

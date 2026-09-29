@@ -1,6 +1,6 @@
 # Architecture
 
-## Current implementation (P3 with bounded live trial)
+## Current implementation through P15
 
 `src/cli.ts` is the executable entry point, with command dispatch in
 `src/cli-command.ts`. `audit` performs configured review; help/version explain
@@ -50,8 +50,8 @@ Deterministic inspection writes no files and makes no network calls.
 
 TypeScript uses strict NodeNext ESM settings with explicit `.js` import paths.
 One configuration checks source and tests and emits them under `dist/`; the
-executable is `dist/src/cli.js`. The package file list includes only `dist/src`
-and the README, so compiled tests are not part of the planned package contents.
+executable is `dist/src/cli.js`. The package allowlist includes `dist/src`, README, documentation, selected fixtures,
+roadmap/task examples and the CLI acceptance script. Compiled tests are excluded.
 
 ## Findings and reporting
 
@@ -79,7 +79,7 @@ Console output escapes control characters in repository-controlled text and
 states the limited rule scope. JSON preserves the report contract and evidence.
 Neither renderer executes code, writes files, sets exit status, nor calls AI.
 Evidence is captured during inspection; it is not reverified against disk at
-report time. P4 will address evidence verification. See `docs/RULES.md` for rules.
+report time. P4 verifies AI citations separately. See `docs/RULES.md` for rules.
 
 ## Configurable rules
 
@@ -97,10 +97,10 @@ and avoid excluded or uncertain filesystem locations. No shell parsing,
 dependency resolution, build execution, or general module resolution occurs.
 
 Evidence may include an optional one-based line and excerpt for the heuristic
-FIXME comment rule. No language AST is parsed; multiline strings can resemble
-comments. See `docs/CONFIGURATION.md` for configuration precedence and patterns.
+FIXME comment rule. This marker rule does not parse a language AST; multiline strings can resemble
+comments. P14/P15 use parsers for their separate call/import analyses. See `docs/CONFIGURATION.md` for configuration precedence and patterns.
 
-## Near-term direction
+## Processing structure
 
 ```text
 CLI
@@ -111,7 +111,7 @@ Structured repository profile
  ↓
 Deterministic findings
  ↓
-Future specialist AI reviewers
+Optional QA/reliability AI reviewer
  ↓
 Evidence verification
  ↓
@@ -137,8 +137,10 @@ Exit codes are 0 for completed reviews without error-level findings, 1 for
 error-level findings, and 2 for usage/configuration/inspection failures. Warnings
 alone do not fail the command. The no-argument and explicit-path readiness
 entry points remain for bootstrap compatibility; named targets should be passed
-to `audit`. This is a deterministic review command, not the planned AI audit,
-Git diff, or task workflow.
+to `audit`. These were the original P2.5 semantics. Current workflows add opt-in AI, diff,
+task, external checks, contract and architecture assessments; incomplete contract
+or architecture analysis exits 2, observed violations exit 1. Partial AI coverage
+and uncertain task assessments remain report fields rather than automatic failures.
 
 ## P2.5 audit follow-up implementation
 
@@ -173,7 +175,9 @@ LIVE_TRIAL.md for allowance limits and observed three-mode results.
 
 ai/verify-evidence.ts compares citations against submitted and freshly read
 source. ai/review.ts reuses bounded context collection after the response and
-attaches per-candidate verification results. Deterministic createReport remains
+attaches per-candidate verification results. Every submitted source snapshot is
+rechecked even when no candidates are returned; changed/unavailable source makes
+coverage partial and is identified in preview metadata. Deterministic createReport remains
 pure. See P4_VERIFICATION.md for matching rules, failures, and limitations.
 
 ## P5 workflow composition
@@ -248,7 +252,8 @@ intent-policy.ts validates requirements and forbidden dependency directions,
 hashes normalized policy content and evaluates caller-supplied dependency
 observations. It performs no I/O and does not verify evidence or assess natural
 language. Results explicitly disclose observation-only coverage. It is exported
-as a library API; CLI integration remains pending. See P10_INTENT_POLICIES.md.
+as a library API; P13 integrates task assessment and P15 integrates automatic
+source extraction and architecture policies. See P10_INTENT_POLICIES.md.
 
 ## P11 inline task selection
 
@@ -314,3 +319,9 @@ HTTPX and fresh Session/Client bindings with conservative mutation/scope checks.
 Report observationKind separates constructions from request-call syntax. Adapter
 IDs for JS/TS/Python now end in -http to reflect multiple clients. See
 P14_2_ADDITIONAL_LANGUAGES.md for exact limitations and packaged validation.
+
+## Automatic architecture policies (P15)
+
+Optional `architecture` configuration selects source files, prohibits import directions,
+and checks filename conventions offline. JS/TS, Python, Go, Java, and C# have
+bounded import extraction; unresolved dependencies remain explicit. See [P15 configuration and coverage](P15_ARCHITECTURE.md).

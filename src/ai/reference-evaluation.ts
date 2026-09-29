@@ -35,7 +35,11 @@ export function scoreReferenceEvaluation(cases:Case[],runs:Run[],assessments:Ass
       });
     }
     const observedCandidates=ai?.candidates.length ?? 0,observedConflicts=ai?.referenceConflicts?.length ?? 0;
-    const supported=ai?.status==='completed' && unassessed===0 && rejectedCitations===0 && falsePositives===0;
+    const contextUsable=ai && !ai.preview.limited
+      && !ai.preview.files.some(file=>file.freshness==='changed-or-unavailable')
+      && !ai.preview.references?.some(ref=>!['included','not-applicable'].includes(ref.status) || ref.freshness==='changed-or-unavailable');
+    const supported=ai?.status==='completed' && ['live','injected'].includes(ai.execution) && contextUsable
+      && unassessed===0 && rejectedCitations===0 && falsePositives===0;
     const passed=Boolean(supported && (fixture.expected==='defect'?confirmedCandidates>0 && observedConflicts===0
       :fixture.expected==='conflict'?confirmedConflicts>0 && observedCandidates===0
       :observedCandidates===0 && observedConflicts===0));

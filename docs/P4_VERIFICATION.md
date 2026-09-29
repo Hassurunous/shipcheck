@@ -6,6 +6,12 @@ initial selection. Missing, linked, unreadable, oversized, or newly excluded
 source cannot pass. The complete decoded file must match the submitted source;
 changes elsewhere in that file also reject stale citations.
 
+Every submitted source is rechecked even when the response contains no candidates.
+The report's `ai.preview.files[].freshness` distinguishes `unchanged` from
+`changed-or-unavailable`; the latter makes coverage partial. Preview-only runs
+leave freshness absent because no post-response check occurred. This check is
+snapshot-relative, not an atomic guarantee against subsequent file changes.
+
 Each citation must refer to a submitted file, use a valid one-based inclusive
 line range, and quote every complete line in that range exactly. Only newline
 conventions are normalized; whitespace, spelling, indentation, and punctuation

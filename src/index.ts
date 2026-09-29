@@ -27,3 +27,6 @@ export { taskSchema, loadTask } from './task-file.js';
 export { currentTaskSchema, describeCurrentTask, type CurrentTask } from './task-file.js';
 export { reviewWithAi, type AiReviewOptions } from "./ai/review.js";
 export { aiSettingsSchema, modeSchema, qaOutputSchema, type AiMode, type AiResult } from "./ai/contracts.js";
+
+export {auditArchitecture} from './architecture-audit.js';
+export {architectureSchema,architectureResultSchema} from './architecture-contracts.js';

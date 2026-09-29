@@ -40,8 +40,8 @@ Local shortcuts:
   npm run audit -- . --json
   npm run shipcheck -- help
 
-Exit codes: 0 completed, 1 error-level findings/check failures/contract mismatches,
-2 usage/configuration/inspection failure or incomplete contract comparison.
+Exit codes: 0 completed, 1 error-level findings/check failures/contract mismatches/architecture violations,
+2 usage/configuration/inspection failure or incomplete contract/architecture assessment.
 Warnings alone do not change the exit code. Live AI requires --trial or --budget and initialized allowance.
 Mock candidates are synthetic and unverified, not diagnosed defects.
 Running with no arguments or an explicit path (such as . or ./repo) retains the readiness smoke test.`;
@@ -135,12 +135,15 @@ export async function runCli(args: readonly string[]): Promise<CliResult> {
     const checkError=report.checks?.some(check=>check.status==='error');
     const referenceError=report.references?.state==='incomplete';
     const checkFailed=report.checks?.some(check=>check.status==='failed');
+    const architectureError=report.architecture?.state==='partial';
+    const architectureFailed=report.architecture && [...report.architecture.boundaries,...report.architecture.conventions].some(p=>p.status==='violation');
+    const architectureWarning=architectureError?'Shipcheck: Architecture assessment is incomplete; inspect unresolved imports and coverage issues. ':'';
     const contractError=report.contracts?.some(item=>item.state!=='checked');
     const contractFailed=report.contracts?.some(item=>item.calls.some(call=>call.status==='mismatch'));
     const contractWarning=contractError?'Shipcheck: Contract comparison is incomplete; inspect contract states, file statuses and unresolved calls. ':'';
     return { stdout: json ? renderJsonReport(report) : markdown ? renderMarkdownReport(report) : renderConsoleReport(report),
-      stderr: contractWarning+(aiFailed ? `Shipcheck: AI stage failed (${errorCode})${failedBatchIndex>=0 ? ` in batch ${failedBatchIndex+1}` : ''}.${errorDetail} Deterministic results are retained.` : referenceError ? 'Shipcheck: Required reference resources could not be loaded; AI was not run. See reference statuses in the report.' : checkError ? 'Shipcheck: A configured check could not complete; see the report.' : ''),
-      exitCode: aiFailed || checkError || referenceError || contractError ? 2 : checkFailed || contractFailed || report.findings.some(f => f.severity === 'error') ? 1 : 0 };
+      stderr: architectureWarning+contractWarning+(aiFailed ? `Shipcheck: AI stage failed (${errorCode})${failedBatchIndex>=0 ? ` in batch ${failedBatchIndex+1}` : ''}.${errorDetail} Deterministic results are retained.` : referenceError ? 'Shipcheck: Required reference resources could not be loaded; AI was not run. See reference statuses in the report.' : checkError ? 'Shipcheck: A configured check could not complete; see the report.' : ''),
+      exitCode: aiFailed || checkError || referenceError || contractError || architectureError ? 2 : checkFailed || contractFailed || architectureFailed || report.findings.some(f => f.severity === 'error') ? 1 : 0 };
   } catch (error) {
     return fail(error instanceof Error ? error.message : String(error));
   }

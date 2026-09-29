@@ -10,6 +10,14 @@ it('scores clean controls and distinguishes missing or failed runs',()=>{
   expect(scoreReferenceEvaluation(cases,[],[]).passed).toBe(0);
   expect(scoreReferenceEvaluation(cases,[{caseId:'clean',report:{...report,ai:{...report.ai!,status:'failed'}}}],[]).passed).toBe(0);
 });
+it.each(['limited','stale-source','stale-reference','mock'] as const)('does not score %s context as a successful clean control',kind=>{
+  const changed=structuredClone(report);
+  if(kind==='limited')changed.ai!.preview.limited=true;
+  if(kind==='stale-source')changed.ai!.preview.files=[{path:'a.ts',bytes:1,lines:1,sha256:'snapshot',freshness:'changed-or-unavailable'}];
+  if(kind==='stale-reference')changed.ai!.preview.references=[{id:'spec',path:'spec.md',sha256:'snapshot',status:'included',required:true,freshness:'changed-or-unavailable'}];
+  if(kind==='mock')changed.ai!.execution='mock';
+  expect(scoreReferenceEvaluation(cases,[{caseId:'clean',report:changed}],[]).passed).toBe(0);
+});
 it('rejects invalid labels and duplicate or unknown runs',()=>{
   expect(()=>scoreReferenceEvaluation(cases,[{caseId:'unknown',report}],[])).toThrow();
   expect(()=>scoreReferenceEvaluation(cases,[{caseId:'clean',report},{caseId:'clean',report}],[])).toThrow();

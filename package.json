@@ -6,7 +6,7 @@
   "type": "module",
   "main": "./dist/src/index.js",
   "bin": { "shipcheck": "./dist/src/cli.js" },
-  "files": ["dist/src", "README.md", "docs", "fixtures/demo", "fixtures/contracts", "fixtures/contracts-expanded", "tasks/example.json", "tasks/backlog.md"],
+  "files": ["dist/src", "README.md", "docs", "scripts/cli-acceptance.mjs", "fixtures/demo", "fixtures/contracts", "fixtures/contracts-expanded", "fixtures/architecture", "tasks/example.json", "tasks/backlog.md"],
   "engines": { "node": ">=22" },
   "scripts": {
     "dev": "tsx src/cli.ts",
@@ -15,6 +15,8 @@
     "build": "tsc",
     "prepack": "npm run build",
     "test": "vitest run",
+    "test:cli": "npm run build --silent && node scripts/cli-acceptance.mjs",
+    "verify": "npm run typecheck && npm test && npm run test:cli",
     "test:watch": "vitest",
     "evaluate": "npm run build --silent && node scripts/evaluate.mjs",
     "typecheck": "tsc --noEmit"

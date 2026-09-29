@@ -8,6 +8,10 @@ Shipcheck can compare direct JavaScript `fetch` calls with a locally configured
 OpenAPI JSON document. This deterministic stage needs no AI, credentials or spending.
 It reads snapshots and parses syntax; it never executes the client or sends requests.
 
+JavaScript/TypeScript U+2028/U+2029 line separators are explicitly unsupported:
+parser line numbering differs from Shipcheck's CR/LF evidence format. They produce
+partial coverage without invented citations. Ordinary Unicode text remains supported.
+
 Add these fields to `shipcheck.config.json`:
 
 ```json

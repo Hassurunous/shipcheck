@@ -54,7 +54,8 @@ export function scoreEvaluation(cases:EvaluationCase[],runs:EvaluationRun[],asse
     const label=labels.get(`${run.caseId}:${index}`);
     if(!label || label.verdict==='uncertain')unassessed++;
     else if(label.verdict==='false-positive')falsePositives++;
-    else {confirmed++;detected.add(`${run.caseId}:${label.bugId}`);}
+    else if(run.status==='completed' && candidate.verification==='matched') {confirmed++;detected.add(`${run.caseId}:${label.bugId}`);}
+    else unassessed++;
   });
   const expected=cases.reduce((sum,c)=>sum+c.expectedBugs.length,0);
   const incomplete=runs.length!==cases.length || runs.some(r=>r.status==='failed') || unassessed>0;

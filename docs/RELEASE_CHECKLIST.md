@@ -35,16 +35,22 @@ toolchain at runtime. Packing invokes prepack to build from source first.
 
 ## Known limits and release decisions
 
-Live AI is a bounded development trial, not an ongoing usage product. The
-development allowance is exhausted and its pricing approval expires October 3,
-2026 UTC. Do not reset the ledger to obtain more attempts. A general spending
-policy needs separate design and approval before normal paid use.
+The original one-time development trial is separate from P7 named persistent
+allowances for subsequent opt-in live audits. Both retain fail-closed pricing
+expiry and reservation controls; no ledger may be reset to obtain extra attempts.
+See P7_LIVE_AUDITS.md. This audit uses no paid requests.
 
-Most deterministic rules concern Node package manifests. No project scripts,
-linters or tests are executed. Multi-language check integration and developer-agent
-feedback are P7. Citation matching is not semantic verification. Task acceptance
-criteria require human judgment; diff reviews whole current files rather than
-patch hunks. No release claim should imply broader coverage.
+Deterministic checks include package rules, bounded multilingual HTTP contract
+checks and architecture policies. External inspection tools execute only with
+explicit --run-checks authorization; they are trusted programs, not sandboxed.
+AI/task assessments and partial coverage require report inspection. Citation
+matching is not semantic verification; diff reviews current files, not patch hunks.
+Installed ESLint/Ruff qualification and other-platform validation remain P18.
+
+Run `npm run verify` for the current checkout. After local installation, run
+`node .release-check/install/node_modules/shipcheck/scripts/cli-acceptance.mjs`
+to assert expected executable behavior without a TypeScript development toolchain.
+See [P1-P15 audit](P1_P15_AUDIT.md) for the requirement/test matrix and limitations.
 
 Before any public publication: explicitly approve publication, review the package
 name/version and license/ownership metadata, decide the supported platforms and

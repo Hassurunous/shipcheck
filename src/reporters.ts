@@ -47,6 +47,16 @@ export function renderConsoleReport(input: Report): string {
       `  [${resource.status.toUpperCase()}] ${text(resource.id)}: ${text(resource.path)} (${resource.kind}; ${resource.authority}; ${resource.required?'required':'optional'})`,
       `    Declared version: ${text(resource.version ?? 'unspecified')}; SHA256: ${resource.sha256 ?? 'unavailable'}; bytes: ${resource.bytes}`);
   }
+  if(report.architecture) {
+    const a=report.architecture;
+    lines.push('',`Architecture: ${a.state.toUpperCase()} — ${a.coverage}`,`  Policy SHA256: ${a.policySha256}`);
+    for(const issue of a.issues)lines.push(`  Limitation: ${text(issue)}`);
+    for(const file of a.files)lines.push(`  Source: ${text(file.path)} [${text(file.status)}]; SHA256: ${file.sha256 ?? 'unavailable'}`);
+    for(const edge of a.dependencies)lines.push(`  [${edge.status.toUpperCase()}] ${text(edge.from)}:${edge.line} -> ${text(edge.to ?? edge.specifier ?? '(dynamic)')}: ${text(edge.reason)}`,`    ${text(edge.excerpt)}`);
+    for(const rule of a.boundaries)lines.push(`  [${rule.status.toUpperCase()}] ${text(rule.id)}: ${text(rule.reason)}; ${rule.evidence.length} prohibited imports`);
+    for(const rule of a.conventions)lines.push(`  [${rule.status.toUpperCase()}] ${text(rule.id)}: ${text(rule.reason)}; paths: ${rule.evidence.map(text).join(', ') || '(none)'}`);
+    lines.push('  Import declarations only; no-observed-violation is not proof of architectural correctness. Unmapped external modules are outside the local graph.');
+  }
   for(const contract of report.contracts ?? []) {
     lines.push('',`Contract ${text(contract.id)}: ${contract.state.toUpperCase()} — ${contract.scope==='literal-javascript-fetch-only'?'literal JavaScript fetch only':'literal HTTP calls; adapter-specific coverage'}`,
       `  Provider: ${text(contract.reference?.path ?? contract.resourceId)}; SHA256: ${contract.reference?.sha256 ?? 'unavailable'}; version: ${text(contract.reference?.apiVersion ?? 'unknown')}`);
@@ -99,7 +109,7 @@ export function renderConsoleReport(input: Report): string {
       `Reviewer: ${ai.reviewer}; model: ${text(ai.model ?? 'not selected')}`,
       `Planned real model: ${text(ai.plannedModel ?? 'not selected; budget discussion pending')}`,
       `Selected source files: ${ai.preview.files.length}; skipped: ${ai.preview.skipped.length}; limited: ${ai.preview.limited}`);
-    for (const file of ai.preview.files) lines.push(`  ${text(file.path)} (${file.bytes} bytes, ${file.lines} lines)`);
+    for (const file of ai.preview.files) lines.push(`  ${text(file.path)} (${file.bytes} bytes, ${file.lines} lines); freshness: ${file.freshness ?? 'not-rechecked'}`);
     for(const reference of ai.preview.references ?? [])lines.push(`  Reference [${text(reference.status)}]: ${text(reference.id)} — ${text(reference.path)}; SHA256: ${reference.sha256 ?? 'unavailable'}; freshness: ${reference.freshness ?? 'not-rechecked'}`);
     for (const skipped of ai.preview.skipped) lines.push(`  Skipped: ${text(skipped.path)} — ${text(skipped.reason)}`);
     for (const path of ai.preview.supportingPaths ?? []) lines.push(`  Supporting context: ${text(path)}`);

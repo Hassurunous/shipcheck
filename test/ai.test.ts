@@ -34,6 +34,20 @@ function candidate(path = 'src/math.ts') { return {title:'Example candidate',sev
 const body = (candidates: unknown[] = [candidate()]) => JSON.stringify({status:'completed',output:[{type:'message',content:[{type:'output_text',text:JSON.stringify({candidates})}]}]});
 const response = (value: string, status = 200): ResponseTransport => async()=>({status,body:value});
 
+it.each(['changed','deleted','unchanged'] as const)('checks source freshness for an empty AI response: %s',async change=>{
+  await write('src/math.ts');
+  const transport:ResponseTransport=async()=>{
+    if(change==='changed')await write('src/math.ts','export const changed = true;');
+    if(change==='deleted')await fs.unlink(join(root,'src/math.ts'));
+    return {status:200,body:body([])};
+  };
+  const report=await reviewWithAi(root,{execution:'mock',config},{transport,apiKey:'offline-fixture'});
+  expect(report.ai?.status).toBe('completed');expect(report.ai?.candidates).toEqual([]);
+  expect(report.ai?.coverage?.state).toBe(change==='unchanged'?'complete':'partial');
+  expect(report.ai?.preview.files[0]).toHaveProperty('freshness',change==='unchanged'?'unchanged':'changed-or-unavailable');
+  if(change!=='unchanged')expect(renderConsoleReport(report)).toContain('changed-or-unavailable');
+});
+
 it('keeps normal review offline with no AI field even when AI settings exist', async()=> {
   await write('src/math.ts');
   const report = await reviewRepository(root,config);

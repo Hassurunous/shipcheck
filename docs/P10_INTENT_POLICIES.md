@@ -1,9 +1,10 @@
 # P10 — Requirements and architecture policies (started)
 
-P10 captures intended behavior and architecture, then assesses evidence against
-those expectations. The initial implementation is an exported pure library API;
-it is not yet part of CLI configuration or audit reports. P8/P9 integration and
-inline P11 task configuration remain separate, unfinished work.
+P10 introduced the pure policy evaluator below. P15 now integrates automatic
+bounded import extraction, dependency resolution, boundary and naming checks into
+CLI configuration and reports; see [P15](P15_ARCHITECTURE.md). Natural-language
+task configuration and assessment are implemented separately in P11/P13.
+The pure API remains caller-supplied and does not claim verified observations.
 
 ```js
 import { assessIntentPolicy } from 'shipcheck';
@@ -41,9 +42,7 @@ The normalized policy receives a SHA-256 identifier. It identifies the current
 policy, not user approval, immutability, or historical intent. Authorized developer
 agents may change expectations; Shipcheck does not write them or edit code.
 
-Remaining P10 work includes bounded source/dependency extraction, CLI configuration
-and reporting, verified reference evidence, natural-language requirement assessment,
-explicit ambiguity/conflict outcomes, conventions, and a broader evaluation corpus.
-Current tests cover forbidden dependencies, allowed direction/prefix controls,
+P15 completes the automatic architecture slice with explicit coverage limits.
+The pure API tests retain forbidden dependencies, allowed direction/prefix controls,
 unassessed requirements, policy identity, deduplication and validation errors.
-No AI requests, new dependencies or source-editing capabilities were introduced.
+Neither API authorizes source editing.

@@ -1,3 +1,4 @@
+import {architectureSchema} from './architecture-contracts.js';
 import { readBoundedConfig, validateRoot } from "./filesystem-policy.js";
 import { join } from "node:path";
 import { z } from "zod";
@@ -34,6 +35,7 @@ const pattern = z.string().min(1).refine(value =>
 export const configSchema = z.object({
   version: z.literal(1).default(1),
   currentTask:currentTaskSchema.optional(),
+  architecture:architectureSchema.optional(),
   contracts:z.array(contractBindingSchema).max(20).default([]).refine(items=>new Set(items.map(item=>item.id)).size===items.length,'Contract binding IDs must be unique.'),
   exclude: z.array(pattern).default([]),
   rules: rulesSchema.default({}),
