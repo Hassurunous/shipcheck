@@ -1,6 +1,6 @@
 # Architecture
 
-## Current implementation through P15
+## Current implementation through P17
 
 `src/cli.ts` is the executable entry point, with command dispatch in
 `src/cli-command.ts`. `audit` performs configured review; help/version explain
@@ -325,3 +325,26 @@ P14_2_ADDITIONAL_LANGUAGES.md for exact limitations and packaged validation.
 Optional `architecture` configuration selects source files, prohibits import directions,
 and checks filename conventions offline. JS/TS, Python, Go, Java, and C# have
 bounded import extraction; unresolved dependencies remain explicit. See [P15 configuration and coverage](P15_ARCHITECTURE.md).
+
+## P16 external contracts
+
+reference-access.ts validates runtime-only root/origin grants. reference-resources.ts
+applies existing bounded reads to authorized roots and uses remote-reference.ts
+for pinned, bounded public HTTPS snapshots. Virtual paths and origin identities
+extend evidence provenance and AI freshness verification. version-policy.ts uses
+semver for optional OpenAPI/SDK ranges and preserves exact version pins.
+sdk-audit.ts loads explicit package manifests/declarations without importing code;
+sdk-syntax.ts compares the documented named-function subset using existing parsers.
+SDK results are separate optional report fields and participate in contract exit
+semantics. No new service, credential store or source-writing capability is added.
+See [P16 boundaries and verification](P16_EXTERNAL_CONTRACTS.md).
+
+## P17 operating contract
+
+USER_GUIDE.md, AGENT_GUIDE.md and REPORT_CONTRACT.md consolidate setup, stage/exit
+interpretation, compatibility policy and a bounded caller-controlled development
+loop. examples/capture-audit.mjs invokes the CLI without a shell, validates its
+report/root and preserves exit codes with bounded runtime/output. It writes no
+files and grants no checks, external access or AI spending. Shipcheck remains a
+reviewer; developer editing/orchestration stays outside its runtime. CLI acceptance
+tests exercise the packaged example through clean, defect and failure outcomes.

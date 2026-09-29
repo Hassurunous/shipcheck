@@ -1,11 +1,12 @@
 import type {Config} from '../config.js';
 import {loadReferenceResources,type ResourceSnapshot} from '../reference-resources.js';
 import type {AiContext} from './context.js';
+import type {ReferenceAccess} from '../reference-access.js';
 
 /** Fill remaining context space with complete references, never silently truncate. */
-export async function attachReferences(root:string,config:Config,context:AiContext) {
+export async function attachReferences(root:string,config:Config,context:AiContext,access:ReferenceAccess={}) {
   if(!config.resources.length)return;
-  const loaded=await loadReferenceResources(root,config,context.files.map(file=>file.path));
+  const loaded=await loadReferenceResources(root,config,context.files.map(file=>file.path),access);
   context.references=[];
   context.preview.references=[];
   let blocked=false;

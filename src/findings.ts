@@ -1,4 +1,5 @@
 import {architectureResultSchema} from './architecture-contracts.js';
+import {sdkResultSchema} from './sdk-contracts.js';
 import { z } from "zod";
 import { repositoryProfileSchema, type RepositoryProfile } from "./repository-profile.js";
 import { configSchema, isExcluded, ruleLevel, type ConfigInput, type RuleId } from "./config.js";
@@ -35,6 +36,7 @@ export const reportSchema = z.object({
   references:referencesSchema.optional(),
   contracts:z.array(contractResultSchema).optional(),
   architecture:architectureResultSchema.optional(),
+  sdkContracts:z.array(sdkResultSchema).optional(),
   currentTask:currentTaskReportSchema.optional(),
   aiAudit:z.object({scope:z.literal('whole-repository'),batches:z.array(aiResultSchema),
     budgetName:z.string().optional(),stoppedReason:z.string().optional(),

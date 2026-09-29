@@ -1,0 +1,5 @@
+{
+  "resources": [{"id":"api","rootId":"provider","path":"api.json","kind":"openapi"}],
+  "contracts": [{"id":"http","resourceId":"api","files":["client.ts"],"baseUrl":"https://api.example.test","versionRange":"^1.0.0"}],
+  "sdkContracts": [{"id":"sdk","package":"example-sdk","rootId":"provider","packageRoot":".","files":["client.ts"],"versionRange":"^1.0.0"}]
+}

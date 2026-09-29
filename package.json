@@ -5,9 +5,26 @@
   "private": true,
   "type": "module",
   "main": "./dist/src/index.js",
-  "bin": { "shipcheck": "./dist/src/cli.js" },
-  "files": ["dist/src", "README.md", "docs", "scripts/cli-acceptance.mjs", "fixtures/demo", "fixtures/contracts", "fixtures/contracts-expanded", "fixtures/architecture", "tasks/example.json", "tasks/backlog.md"],
-  "engines": { "node": ">=22" },
+  "bin": {
+    "shipcheck": "./dist/src/cli.js"
+  },
+  "files": [
+    "dist/src",
+    "README.md",
+    "docs",
+    "scripts/cli-acceptance.mjs",
+    "examples/capture-audit.mjs",
+    "fixtures/demo",
+    "fixtures/contracts",
+    "fixtures/contracts-expanded",
+    "fixtures/architecture",
+    "fixtures/integrations",
+    "tasks/example.json",
+    "tasks/backlog.md"
+  ],
+  "engines": {
+    "node": ">=22"
+  },
   "scripts": {
     "dev": "tsx src/cli.ts",
     "shipcheck": "tsx src/cli.ts",
@@ -33,10 +50,12 @@
     "@lezer/common": "1.5.3",
     "@lezer/python": "1.1.19",
     "acorn": "8.18.0",
+    "semver": "7.8.5",
     "zod": "^4.6.5"
   },
   "devDependencies": {
     "@types/node": "^26.6.3",
+    "@types/semver": "7.8.0",
     "tsx": "^4.23.15",
     "typescript": "^7.0.2",
     "vitest": "^5.0.2"

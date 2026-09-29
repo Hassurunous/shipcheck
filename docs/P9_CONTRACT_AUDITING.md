@@ -44,5 +44,6 @@ unresolved references, duplicate identities and partial coverage.
 P14 now supplies consumer call extraction, explicit service mapping, version pins,
 and CLI comparisons with evidence on both sides for literal JavaScript fetch calls;
 see [P14 contract checks](P14_CONTRACT_CHECKS.md). The standalone index retains its
-not-compared assessment. Installed SDK declarations and cross-repository contracts
-remain P16. P9 itself introduced no dependencies or paid calls; P14 uses Acorn.
+not-compared assessment. [P16](P16_EXTERNAL_CONTRACTS.md) adds installed SDK
+declarations and cross-repository contracts for its documented subset.
+P9 itself introduced no dependencies or paid calls; P14 uses Acorn.

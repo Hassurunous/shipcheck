@@ -1,4 +1,5 @@
 import {auditArchitecture} from './architecture-audit.js';
+import {auditSdkContracts} from './sdk-audit.js';
 import { execFile } from 'node:child_process';
 import { promisify } from 'node:util';
 import { realpath, lstat } from 'node:fs/promises';
@@ -15,8 +16,9 @@ import { reviewWholeRepository } from './ai/whole-repository.js';
 import { inspectRepository } from './inspect-repository.js';
 import { loadReferenceResources } from './reference-resources.js';
 import {auditContracts} from './contract-audit.js';
+import type {ReferenceAccess} from './reference-access.js';
 
-export type WorkflowOptions={runChecks?:boolean;wholeRepository?:boolean;currentTask?:boolean};
+export type WorkflowOptions={runChecks?:boolean;wholeRepository?:boolean;currentTask?:boolean;referenceAccess?:ReferenceAccess};
 
 const exec = promisify(execFile);
 async function git(root:string, args:string[]) {
@@ -69,10 +71,11 @@ export async function runWorkflow(target:string, kind:'audit'|'diff'|'task', ai?
   }
   if (task && unavailablePaths.length) throw new Error('Task selects missing, linked, or non-regular files. Correct the task file before review.');
   const config=inlineConfig ?? (ai?.config===undefined?await loadConfig(target):configSchema.parse(ai.config));
+  const referenceAccess=options.referenceAccess ?? ai?.referenceAccess ?? {};
   const whole=kind==='audit' && (options.wholeRepository || config.ai.scope==='whole-repository');
-  const references=config.resources.length?(await loadReferenceResources(target,config,paths)).report:undefined;
-  const report = ai && paths?.length !== 0 && references?.state!=='incomplete' ? whole ? await reviewWholeRepository(target,{...ai,config})
-    : await reviewWithAi(target,{...ai,config,...(taskDefinition?{task:taskDefinition,reloadTask}:{}),...(paths ? {paths} : {})}) : await reviewRepository(target,config);
+  const references=config.resources.length?(await loadReferenceResources(target,config,paths,referenceAccess)).report:undefined;
+  const report = ai && paths?.length !== 0 && references?.state!=='incomplete' ? whole ? await reviewWholeRepository(target,{...ai,config,referenceAccess})
+    : await reviewWithAi(target,{...ai,config,referenceAccess,...(taskDefinition?{task:taskDefinition,reloadTask}:{}),...(paths ? {paths} : {})}) : await reviewRepository(target,config);
   const languages=options.runChecks && config.checks.some(check=>check.languages)
     ? Object.keys((await inspectRepository(report.root,{exclude:config.exclude})).languages):undefined;
   const checks=await runChecks(report.root,config.checks,options.runChecks===true,config.ai.apiKeyEnv,languages);
@@ -88,13 +91,15 @@ export async function runWorkflow(target:string, kind:'audit'|'diff'|'task', ai?
     for(const requirement of taskSummary.requirements)requirement.status=report.ai?.taskReview?.assessments.find(item=>item.requirementId===requirement.id)?.status ?? 'insufficient-evidence';
   }
   const selected = new Set(paths);
-  const contracts=await auditContracts(report.root,config,paths);
+  const contracts=await auditContracts(report.root,config,paths,referenceAccess);
+  const sdkContracts=await auditSdkContracts(report.root,config,paths,referenceAccess);
   const architecture=await auditArchitecture(report.root,config,paths);
   return reportSchema.parse({...report,
     ...(taskSummary?{currentTask:taskSummary}:{}),
     ...(references?{references}:{}),
     ...(checks.length?{checks}:{}),
     ...(contracts.length?{contracts}:{}),
+    ...(sdkContracts.length?{sdkContracts}:{}),
     ...(architecture?{architecture}:{}),
     findings:paths ? report.findings.filter(f=>f.evidence.some(e=>selected.has(e.path))) : report.findings,
     workflow:{kind,scope:paths ?? null,baseline:kind==='diff'?'HEAD':null,unavailablePaths,...(task ? {criteria:task.criteria} : {})},

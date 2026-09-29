@@ -30,3 +30,6 @@ export { aiSettingsSchema, modeSchema, qaOutputSchema, type AiMode, type AiResul
 
 export {auditArchitecture} from './architecture-audit.js';
 export {architectureSchema,architectureResultSchema} from './architecture-contracts.js';
+export {auditSdkContracts} from './sdk-audit.js';
+export {sdkBindingSchema,sdkResultSchema,type SdkResult} from './sdk-contracts.js';
+export {referenceAccessSchema,type ReferenceAccess} from './reference-access.js';

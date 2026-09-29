@@ -4,6 +4,8 @@ import {indexOpenApi} from './openapi-contract.js';
 import type {CallObservation} from './contract-adapter-types.js';
 import {contractAdapterFor} from './contract-adapters.js';
 import {type ContractResult} from './contract-contracts.js';
+import type {ReferenceAccess} from './reference-access.js';
+import {versionIssue} from './version-policy.js';
 
 const object=(v:unknown):v is Record<string,unknown>=>!!v && typeof v==='object' && !Array.isArray(v);
 const pointer=(v:string)=>v.replace(/~/g,'~0').replace(/\//g,'~1');
@@ -59,7 +61,7 @@ function compare(call:CallObservation,baseUrl:string,paths:Record<string,unknown
   return outcome('matched','Method, route and supported required query-name presence match; values, bodies, responses and authentication are not assessed.',[at+'/'+method]);
 }
 
-export async function auditContracts(root:string,input:ConfigInput={},scope?:readonly string[]):Promise<ContractResult[]> {
+export async function auditContracts(root:string,input:ConfigInput={},scope?:readonly string[],access:ReferenceAccess={}):Promise<ContractResult[]> {
   const config=configSchema.parse(input),results:ContractResult[]=[];
   for(const binding of config.contracts) {
     const files=[...new Set(binding.files)].filter(path=>!scope || scope.includes(path));
@@ -69,14 +71,16 @@ export async function auditContracts(root:string,input:ConfigInput={},scope?:rea
     const resource=config.resources.find(item=>item.id===binding.resourceId);
     if(!resource || resource.kind!=='openapi'){result.state='unavailable';result.issues.push('Binding requires a configured OpenAPI resource.');continue;}
     if(files.some(path=>!resource.appliesTo.some(pattern=>matchesPattern(path,pattern)))){result.state='unavailable';result.issues.push('Mapped files are outside reference appliesTo scope.');continue;}
-    const references=await loadReferenceResources(root,{exclude:config.exclude,resources:[resource]},files);
+    const references=await loadReferenceResources(root,{exclude:config.exclude,resources:[resource]},files,access);
     const snapshot=references.snapshots[0];
-    result.reference={path:resource.path,sha256:references.report.resources[0]!.sha256};
+    const provider=references.report.resources[0]!;
+    result.reference={path:provider.path,sha256:provider.sha256,...(provider.origin?{origin:provider.origin}:{})};
     if(!snapshot){result.state='unavailable';result.issues.push('Contract '+references.report.resources[0]!.status);continue;}
     const index=indexOpenApi(snapshot);
     if(index.apiVersion!==undefined)result.reference.apiVersion=index.apiVersion;
     if(index.status!=='indexed'){result.state='unavailable';result.issues.push('Contract index '+index.status,...index.issues.map(issue=>issue.pointer+': '+issue.reason));continue;}
-    if(binding.expectedVersion!==undefined && binding.expectedVersion!==index.apiVersion){result.state='version-mismatch';result.issues.push('Expected info.version '+binding.expectedVersion+'; received '+index.apiVersion);continue;}
+    const versionProblem=versionIssue(index.apiVersion,binding.expectedVersion,binding.versionRange,resource.version);
+    if(versionProblem){result.state='version-mismatch';result.issues.push(versionProblem);continue;}
     const document=JSON.parse(snapshot.content) as {paths:Record<string,unknown>};
     const loaded=await loadReferenceResources(root,{exclude:config.exclude,resources:files.map((path,i)=>({id:'source'+i,path,kind:'source' as const}))});
     for(const record of loaded.report.resources) {

@@ -90,3 +90,13 @@ or its 5,000 input / 2,000 output token caps. See [live trial](LIVE_TRIAL.md).
 Optional `architecture` configuration selects source files, prohibits import directions,
 and checks filename conventions offline. JS/TS, Python, Go, Java, and C# have
 bounded import extraction; unresolved dependencies remain explicit. See [P15 configuration and coverage](P15_ARCHITECTURE.md).
+
+## External references and SDK contracts (P16)
+
+Resources may specify `rootId` or a hash-pinned HTTPS `url`; runtime CLI/API grants
+authorize access separately. `contracts` accepts `versionRange`, and `sdkContracts`
+maps JS/TS consumers to installed or externally mapped package declarations.
+See [P16 configuration, permissions, examples and limits](P16_EXTERNAL_CONTRACTS.md).
+Explicit SDK mappings can read declarations under `node_modules`, which ordinary
+inspection still skips. Authorized remote references may be fetched in AI-offline
+runs; ordinary configuration alone never enables network execution.

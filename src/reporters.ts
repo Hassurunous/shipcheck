@@ -43,9 +43,12 @@ export function renderConsoleReport(input: Report): string {
     // Resource loading and contract comparison are separate stages.
     lines.push('',`Reference loading: ${report.references.state.toUpperCase()} — NOT ASSESSED`,
       'Loading alone is not assessment. See each AI stage for reference inclusion. Hashes identify loaded bytes; declared versions and authority are user assertions.');
-    for(const resource of report.references.resources)lines.push(
+    for(const resource of report.references.resources) {
+      lines.push(
       `  [${resource.status.toUpperCase()}] ${text(resource.id)}: ${text(resource.path)} (${resource.kind}; ${resource.authority}; ${resource.required?'required':'optional'})`,
       `    Declared version: ${text(resource.version ?? 'unspecified')}; SHA256: ${resource.sha256 ?? 'unavailable'}; bytes: ${resource.bytes}`);
+      if(resource.origin)lines.push(`    Origin: ${resource.origin.kind}; ${text(resource.origin.url ?? resource.origin.rootId ?? '')}; source path: ${text(resource.origin.path)}; root identity: ${resource.origin.rootSha256 ?? 'not applicable'}`);
+    }
   }
   if(report.architecture) {
     const a=report.architecture;
@@ -56,6 +59,19 @@ export function renderConsoleReport(input: Report): string {
     for(const rule of a.boundaries)lines.push(`  [${rule.status.toUpperCase()}] ${text(rule.id)}: ${text(rule.reason)}; ${rule.evidence.length} prohibited imports`);
     for(const rule of a.conventions)lines.push(`  [${rule.status.toUpperCase()}] ${text(rule.id)}: ${text(rule.reason)}; paths: ${rule.evidence.map(text).join(', ') || '(none)'}`);
     lines.push('  Import declarations only; no-observed-violation is not proof of architectural correctness. Unmapped external modules are outside the local graph.');
+  }
+  for(const sdk of report.sdkContracts ?? []) {
+    lines.push('',`SDK ${text(sdk.id)}: ${sdk.state.toUpperCase()} — ${text(sdk.package)}; ${sdk.scope}`);
+    if(sdk.provider)lines.push(`  Package: ${text(sdk.provider.manifestPath)}; SHA256: ${sdk.provider.manifestSha256 ?? 'unavailable'}; version: ${text(sdk.provider.version ?? 'unknown')}`,
+      `  Declarations: ${text(sdk.provider.declarationPath ?? 'unavailable')}; SHA256: ${sdk.provider.declarationSha256 ?? 'unavailable'}`);
+    if(sdk.provider?.rootId)lines.push(`  External root: ${text(sdk.provider.rootId)}; identity: ${sdk.provider.rootSha256 ?? 'unavailable'}`);
+    for(const issue of sdk.issues)lines.push(`  Limitation: ${text(issue)}`);
+    for(const file of sdk.files)lines.push(`  Consumer: ${text(file.path)} [${text(file.status)}]; SHA256: ${file.sha256 ?? 'unavailable'}`);
+    for(const call of sdk.calls) {
+      lines.push(`  [${call.status.toUpperCase()}] ${text(call.path)}:${call.line} ${text(call.symbol)} — ${text(call.reason)}`,`    ${text(call.excerpt)}`);
+      for(const evidence of call.providerEvidence)lines.push(`    Declaration:${evidence.line} ${text(evidence.excerpt)}`);
+    }
+    lines.push('  Mapped declarations only; no SDK execution, installation, compiler resolution or runtime compatibility proof.');
   }
   for(const contract of report.contracts ?? []) {
     lines.push('',`Contract ${text(contract.id)}: ${contract.state.toUpperCase()} — ${contract.scope==='literal-javascript-fetch-only'?'literal JavaScript fetch only':'literal HTTP calls; adapter-specific coverage'}`,
@@ -121,7 +137,7 @@ export function renderConsoleReport(input: Report): string {
         : ai.trial ? 'Live trial: $0.50 allowance; one attempt per mode; no retries. See shipcheck trial status.'
         : 'Live request failed; inspect the selected allowance for any retained reservation.'
         : 'Live cost estimate: unavailable in offline mode.');
-    if (ai.execution === 'preview' || ai.execution === 'mock') lines.push('Offline only: no model ran, no network request, $0 API spend.');
+    if (ai.execution === 'preview' || ai.execution === 'mock') lines.push('AI offline: no model ran; no AI API request; $0 AI API spend. Explicitly authorized HTTPS references may be fetched.');
     if (ai.trial) lines.push(`Counted input: ${ai.trial.countedInputTokens}; usage: ${ai.trial.usage.input_tokens} input / ${ai.trial.usage.output_tokens} output tokens`,
       `Reserved: $${ai.trial.reservedUsd.toFixed(6)}; priced usage upper bound: $${ai.trial.pricedUsageUpperBoundUsd.toFixed(6)} (not an invoice).`);
     if(ai.budget)lines.push(`Counted input: ${ai.budget.countedInputTokens}; usage: ${ai.budget.usage.input_tokens} input / ${ai.budget.usage.output_tokens} output tokens`,

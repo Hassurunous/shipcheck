@@ -249,25 +249,33 @@ directions, filename styles, hashed evidence, console/JSON/Markdown output and
 exit-code integration. Partial and unsupported resolution remains visible.
 See docs/P15_ARCHITECTURE.md for limits and packaged fixture.
 
-### P16 — External contracts and broader interface support
+### P16 — External contracts and broader interface support (completed for documented subset)
 
 Completes broader P8/P9 resource scope.
 
-- [ ] Explicitly authorized secondary repository roots and controlled remote snapshots
-- [ ] Installed TypeScript SDK declaration support
-- [ ] Cross-repository consumer/provider comparisons with version/conflict handling
+- [x] Explicitly authorized secondary repository roots and controlled remote snapshots
+- [x] Installed TypeScript SDK declaration support
+- [x] Cross-repository consumer/provider comparisons with version/conflict handling
 
 Completion: supported external integrations have reproducible contract evidence
 and explicit access boundaries.
 
-### P17 — User and developer-agent integration
+See docs/P16_EXTERNAL_CONTRACTS.md for runtime grants, pinned HTTPS snapshots,
+direct named SDK function checks, semver handling and explicit coverage limits.
 
-- [ ] Consolidated user setup and agent operating guides
-- [ ] Report schema/compatibility contract, exit codes and partial/failure handling
-- [ ] Reference development loop with iteration, spending and no-progress limits
-- [ ] Examples for source edits, requirement edits and human decisions
+### P17 — User and developer-agent integration (completed)
+
+- [x] Consolidated user setup and agent operating guides
+- [x] Report schema/compatibility contract, exit codes and partial/failure handling
+- [x] Reference development loop with iteration, spending and no-progress limits
+- [x] Examples for source edits, requirement edits and human decisions
 
 Completion: users and developer agents operate Shipcheck from documentation alone.
+
+See docs/USER_GUIDE.md, docs/AGENT_GUIDE.md and docs/REPORT_CONTRACT.md. The packaged
+examples/capture-audit.mjs demonstrates bounded offline JSON capture. Loop limits
+are caller-enforced; no code-writing agent or autonomous fixer was added. Real
+developer-agent effectiveness experiments remain P18.
 
 ### P18 — Adversarial validation and release qualification
 

@@ -15,6 +15,7 @@ import {loadReferenceResources} from '../reference-resources.js';
 import {currentTaskSchema,describeCurrentTask,type CurrentTask} from '../task-file.js';
 import {pendingTaskReview,finishTaskReview,invalidateTaskReview} from './task-review.js';
 import {sensitiveContent} from '../sensitive-content.js';
+import type {ReferenceAccess} from '../reference-access.js';
 
 export type AiReviewOptions = {
   execution: 'preview' | 'mock' | 'live';
@@ -25,6 +26,7 @@ export type AiReviewOptions = {
   config?: ConfigInput;
   task?:CurrentTask;
   reloadTask?:()=>Promise<CurrentTask>;
+  referenceAccess?:ReferenceAccess;
 };
 /** Offline test seam: caller supplies transport and dummy credentials. */
 export type InjectedClient = {transport:ResponseTransport; apiKey?:string};
@@ -62,7 +64,7 @@ export async function reviewWithAi(target = '.', options: AiReviewOptions = {exe
       context.preview.task={id:task.id,sha256:describeCurrentTask(task).sha256,bytes:taskBytes,requirementIds:task.requirements.map(item=>item.id)};
     }
     result.preview = context.preview;
-    const referencesBlocked=await attachReferences(profile.root,{...config,ai:sourceSettings},context);
+    const referencesBlocked=await attachReferences(profile.root,{...config,ai:sourceSettings},context,options.referenceAccess);
     context.preview.serializedBytes+=taskBytes;
     if(referencesBlocked)throw new AiFailure('reference-context','A required applicable reference is unavailable, ambiguous, or exceeds remaining context space. No request was sent.');
     const request = buildRequest(context,config.ai,model ?? 'MODEL_NOT_SELECTED');
@@ -97,7 +99,7 @@ export async function reviewWithAi(target = '.', options: AiReviewOptions = {exe
         if(!unchanged)result.preview.limited=true;
       }
       if(context.references) {
-        try { current.references=(await loadReferenceResources(profile.root,config,context.files.map(file=>file.path))).snapshots; }
+        try { current.references=(await loadReferenceResources(profile.root,config,context.files.map(file=>file.path),options.referenceAccess)).snapshots; }
         catch { current.references=[]; }
         for(const reference of context.references) {
           const fresh=current.references.find(item=>item.record.id===reference.record.id);

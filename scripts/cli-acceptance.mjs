@@ -168,6 +168,58 @@ try {
     }
     assert.equal(json(['audit',join(fixtures,'architecture')],1).architecture.boundaries[0].status,'violation');
   });
+  await check('cross-repository HTTP and SDK checks require explicit grants',()=>{
+    const fixtures=fileURLToPath(new URL('../fixtures/integrations/',import.meta.url));
+    const target=join(fixtures,'consumer');
+    const denied=json(['audit',target],2);assert.equal(denied.references.resources[0].status,'access-denied');
+    const allowed=json(['audit',target,'--reference-root','provider='+join(fixtures,'provider')]);
+    assert.equal(allowed.contracts[0].calls[0].status,'matched');assert.equal(allowed.sdkContracts[0].calls[0].status,'matched');
+    assert.equal(allowed.references.resources[0].origin.rootId,'provider');
+  });
+  await check('installed SDK declarations check types, versions and incomplete calls',async()=>{
+    await write('node_modules/example-sdk/package.json',JSON.stringify({name:'example-sdk',version:'1.2.3',types:'index.d.ts'}));
+    await write('node_modules/example-sdk/index.d.ts','export declare function getUser(id: string): string;');
+    await write('node_modules/example-sdk/index.js','throw Error("Do not execute SDK code");');
+    const sdk={id:'sdk',package:'example-sdk',files:['sdk-client.ts'],versionRange:'^1.0.0'};
+    await configure({sdkContracts:[sdk]});await write('sdk-client.ts','import {getUser} from "example-sdk";getUser("x");');
+    assert.equal(json(['audit',repo]).sdkContracts[0].calls[0].status,'matched');
+    await write('sdk-client.ts','import {getUser} from "example-sdk";getUser(1);');assert.equal(json(['audit',repo],1).sdkContracts[0].calls[0].status,'mismatch');
+    await write('sdk-client.ts','import {getUser} from "example-sdk";getUser(value);');assert.equal(json(['audit',repo],2).sdkContracts[0].state,'partial');
+    await configure({sdkContracts:[{...sdk,versionRange:'^2'}]});assert.equal(json(['audit',repo],2).sdkContracts[0].state,'version-mismatch');await configure({});
+  });
+  await check('HTTPS configuration cannot authorize network access by itself',async()=>{
+    await configure({resources:[{id:'remote',path:'spec.md',url:'https://docs.example.test/spec.md',expectedSha256:'0'.repeat(64)}]});
+    assert.equal(json(['audit',repo],2).references.resources[0].status,'access-denied');
+    command(['audit',repo,'--allow-reference-origin','https://docs.example.test/path'],2);
+    await configure({resources:[{id:'remote',path:'spec.md',url:'https://docs.example.test/spec.md'}]});command(['audit',repo],2);await configure({});
+  });
+  await check('agent capture preserves clean, defect and incomplete reports; rejects missing reports',async()=>{
+    const example=fileURLToPath(new URL('../examples/capture-audit.mjs',import.meta.url));
+    const capture=expected=>{
+      const result=spawnSync(process.execPath,[example,repo],{env,encoding:'utf8',timeout:30000,maxBuffer:4*1024*1024,windowsHide:true});
+      assert.equal(result.error,undefined);assert.equal(result.signal,null);assert.equal(result.status,expected,result.stderr);
+      return result;
+    };
+    await write('package.json','{}');await configure({});
+    const before=await snapshot();
+    let output=capture(0);assert.equal(JSON.parse(output.stdout).cliExitCode,0);assert.deepEqual(await snapshot(),before);
+    await write('package.json','{"scripts":[]}');
+    output=capture(1);assert.equal(JSON.parse(output.stdout).report.findings[0].ruleId,'package/invalid-scripts');
+    await write('package.json','{}');
+    await configure({resources:[{id:'missing',path:'missing-spec.md'}]});
+    output=capture(2);assert.equal(JSON.parse(output.stdout).report.references.state,'incomplete');assert.ok(output.stderr.includes('Required reference'));
+    await write('shipcheck.config.json','{');output=capture(2);assert.equal(output.stdout,'');assert.ok(output.stderr.includes('Capture failed'));
+    await configure({});
+  });
+  await check('user guide configuration supports inline task and preview commands',async()=>{
+    const guide=await readFile(new URL('../docs/USER_GUIDE.md',import.meta.url),'utf8');
+    const example=JSON.parse(guide.match(/```json\r?\n([\s\S]*?)\r?\n```/)[1]);
+    await write('src/client.ts','export function getUser() { return {kind: "not-found"}; }');
+    await configure(example);
+    const task=json(['task']);assert.equal(task.currentTask.id,'client-errors');assert.equal(task.currentTask.assessment,'not-assessed');
+    const preview=json(['task','--ai','preview']);assert.equal(preview.ai.status,'preview');assert.equal(preview.ai.preview.task.id,'client-errors');
+    await configure({});
+  });
   await check('no network attempts occurred',async()=>{await assert.rejects(readFile(networkMarker),{code:'ENOENT'});});
   console.log(`\n${results.length} CLI acceptance groups passed; zero API spend. Synthetic target files verified unchanged during read-only checks.`);
 } finally {

@@ -27,6 +27,11 @@ Use `npm run audit`, not `npm audit` (which is npm's dependency security command
 
 ## Commands
 
+Start with the [user setup guide](docs/USER_GUIDE.md),
+[developer-agent operating guide](docs/AGENT_GUIDE.md), and
+[JSON report/exit contract](docs/REPORT_CONTRACT.md). These include a bounded
+development loop and a runnable offline report-capture example.
+
 For a repeatable offline implementation check, run `npm run verify` (typecheck,
 tests, build and CLI acceptance), or `npm run test:cli` for executable checks only.
 See the [P1-P15 audit and test matrix](docs/P1_P15_AUDIT.md) for expected behavior,
@@ -83,7 +88,7 @@ and bounds reads; .gitignore is not generally interpreted.
 
 ## AI and evidence
 
-Preview shows source selection metadata without transmitting it. Mock generates
+Preview shows source selection metadata without sending it to a model. Mock generates
 explicitly synthetic candidates, with no API key or network required. Citation
 checks re-read selected source and compare files, ranges and exact excerpts;
 matching citations do not establish that the diagnosis is correct.
@@ -180,10 +185,25 @@ complete language or runtime integration validation.
 
 [P10 intent policies](docs/P10_INTENT_POLICIES.md) now provides a library foundation
 for requirement identities and forbidden dependency boundaries. It evaluates
-supplied observations only; automatic source extraction and CLI integration are pending.
+supplied observations; P15 adds automatic source extraction and CLI integration.
 
 ## Automatic architecture policies (P15)
 
 Optional `architecture` configuration selects source files, prohibits import directions,
 and checks filename conventions offline. JS/TS, Python, Go, Java, and C# have
 bounded import extraction; unresolved dependencies remain explicit. See [P15 configuration and coverage](docs/P15_ARCHITECTURE.md).
+
+## External contracts and SDK checks (P16)
+
+[P16 configuration and limits](docs/P16_EXTERNAL_CONTRACTS.md) covers explicitly
+authorized secondary repositories, hash-pinned HTTPS references and installed
+TypeScript SDK declarations. SDK checks compare direct named function calls,
+argument counts and supported literal types; they do not execute packages.
+
+```powershell
+shipcheck audit fixtures/integrations/consumer --reference-root provider=fixtures/integrations/provider --json
+```
+
+This offline example reports one HTTP match and one SDK match. HTTPS references
+require a separate `--allow-reference-origin` grant, including in preview/mock
+runs. Configuration cannot authorize external-root access or network requests.

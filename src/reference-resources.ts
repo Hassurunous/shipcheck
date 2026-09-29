@@ -6,6 +6,8 @@ import {configSchema,isExcluded,matchesPattern,type ConfigInput} from './config.
 import {validateRoot} from './filesystem-policy.js';
 import {sensitiveName,sensitiveContent} from './sensitive-content.js';
 import {referencesSchema,resourceEvidenceSchema,type ResourceRecord} from './resource-contracts.js';
+import {referenceAccessSchema,type ReferenceAccess} from './reference-access.js';
+import {readRemoteReference} from './remote-reference.js';
 
 export const MAX_RESOURCE_BYTES=65536;
 export const MAX_REFERENCE_BYTES=262144;
@@ -39,19 +41,42 @@ async function readResource(root:string,path:string,limit:number,exclude:string[
   } finally {await handle.close();}
 }
 
-/** Local files only; returns in-memory snapshots, never writes or fetches resources. */
-export async function loadReferenceResources(target:string,options:ConfigInput={},paths?:readonly string[]):Promise<LoadedReferences> {
+/** In-memory snapshots only; external reads require separate runtime authorization. */
+export async function loadReferenceResources(target:string,options:ConfigInput={},paths?:readonly string[],access:ReferenceAccess={}):Promise<LoadedReferences> {
   const root=await validateRoot(target);const config=configSchema.parse(options);
+  const grants=referenceAccessSchema.parse(access);
   const records:ResourceRecord[]=[];const snapshots:ResourceSnapshot[]=[];let consumed=0;
   for(const resource of config.resources) {
     const record:ResourceRecord={...resource,status:'loaded',sha256:null,bytes:0,lines:0};
+    if(resource.rootId || resource.url) {
+      record.path=`@references/${resource.id}/${resource.path}`;
+      record.origin={kind:resource.rootId?'external-root':'https',path:resource.path,
+        ...(resource.rootId?{rootId:resource.rootId}:{}),...(resource.url?{url:resource.url}:{})};
+    }
     records.push(record);
     if(paths && !paths.some(path=>resource.appliesTo.some(pattern=>matchesPattern(path,pattern)))) {record.status='not-applicable';continue;}
     if(isExcluded(resource.path,config.exclude) || intrinsicallyExcluded(resource.path)) {record.status='excluded';continue;}
     if(resource.path.split('/').some(part=>sensitiveName.test(part))) {record.status='sensitive-content';continue;}
     if(consumed>=MAX_REFERENCE_BYTES) {record.status='total-size-limit';continue;}
     try {
-      const read=await readResource(root,resource.path,Math.min(MAX_RESOURCE_BYTES,MAX_REFERENCE_BYTES-consumed),config.exclude);
+      let sourceRoot=root;
+      const limit=Math.min(MAX_RESOURCE_BYTES,MAX_REFERENCE_BYTES-consumed);
+      if(resource.rootId) {
+        const granted=Object.hasOwn(grants.roots,resource.rootId)?grants.roots[resource.rootId]:undefined;
+        if(!granted)throw new ResourceFailure('access-denied');
+        sourceRoot=await validateRoot(granted);
+        record.origin!.rootSha256=createHash('sha256').update(sourceRoot).digest('hex');
+      }
+      let read;
+      if(resource.url) {
+        if(!grants.origins.includes(new URL(resource.url).origin))throw new ResourceFailure('access-denied');
+        let bytes:Buffer;
+        try {bytes=await readRemoteReference(resource.url,limit);}catch{throw new ResourceFailure('remote-failed');}
+        if(bytes.length>limit)throw new ResourceFailure('file-size-limit');
+        if(bytes.includes(0))throw new ResourceFailure('invalid-text');
+        let content:string;try{content=new TextDecoder('utf-8',{fatal:true}).decode(bytes);}catch{throw new ResourceFailure('invalid-text');}
+        read={content,bytes:bytes.length,sha256:createHash('sha256').update(bytes).digest('hex')};
+      } else read=await readResource(sourceRoot,resource.path,limit,config.exclude);
       consumed+=read.bytes;
       if(sensitiveContent.test(read.content)) {record.status='sensitive-content';continue;}
       record.sha256=read.sha256;record.bytes=read.bytes;record.lines=read.content.split(/\r\n|\n|\r/).length;
@@ -76,6 +101,7 @@ export function verifyResourceEvidence(evidence:z.infer<typeof resourceEvidenceS
   else if(!fresh)reason='resource-unavailable';
   else if(fresh.record.sha256!==original.record.sha256 || fresh.content!==original.content || fresh.record.path!==original.record.path
     || fresh.record.version!==original.record.version || fresh.record.authority!==original.record.authority)reason='resource-changed';
+  else if(JSON.stringify(fresh.record.origin)!==JSON.stringify(original.record.origin))reason='resource-origin-changed';
   else {
     const lines=fresh.content.split(/\r\n|\n|\r/);
     if(item.endLine<item.startLine || item.endLine>lines.length)reason='invalid-line-range';

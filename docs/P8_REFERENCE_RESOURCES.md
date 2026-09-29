@@ -68,7 +68,7 @@ Callers must reload snapshots before verification. A match establishes text
 provenance only; it does not validate the diagnosis. P12 integrates this helper
 into AI candidate verification for submitted reference paths.
 
-P12 completes local reference-aware integration and conflict reporting. Remaining broader
-work includes explicitly
-authorized external-repository or remote snapshot sources. P9 adds semantic
+P12 completes local reference-aware integration and conflict reporting.
+[P16](P16_EXTERNAL_CONTRACTS.md) adds explicitly authorized external-repository
+and pinned remote snapshot sources. P9 adds semantic
 contract adapters. P11 adds the inline current-task workflow.

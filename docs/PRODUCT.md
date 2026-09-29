@@ -90,3 +90,11 @@ bounded import extraction; unresolved dependencies remain explicit. See [P15 con
 Current milestone conformance and reproducible checks are recorded in
 [P1-P15 audit](P1_P15_AUDIT.md). Completion means the documented bounded scope,
 not exhaustive defect detection or semantic proof.
+
+P16 provides explicitly granted secondary repository references, pinned HTTPS
+snapshots, cross-repository OpenAPI comparisons and narrow installed TypeScript
+SDK declaration checks. Version constraints, provider hashes and unsupported
+coverage remain explicit. See [P16 scope](P16_EXTERNAL_CONTRACTS.md). User/agent
+operating guides and the report compatibility policy are delivered in P17; see
+USER_GUIDE.md, AGENT_GUIDE.md and REPORT_CONTRACT.md. Broader release qualification
+and real developer-agent experiments remain P18.

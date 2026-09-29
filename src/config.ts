@@ -1,4 +1,5 @@
 import {architectureSchema} from './architecture-contracts.js';
+import {sdkBindingSchema} from './sdk-contracts.js';
 import { readBoundedConfig, validateRoot } from "./filesystem-policy.js";
 import { join } from "node:path";
 import { z } from "zod";
@@ -36,12 +37,13 @@ export const configSchema = z.object({
   version: z.literal(1).default(1),
   currentTask:currentTaskSchema.optional(),
   architecture:architectureSchema.optional(),
+  sdkContracts:z.array(sdkBindingSchema).max(20).default([]).refine(items=>new Set(items.map(item=>item.id)).size===items.length,'SDK binding IDs must be unique.'),
   contracts:z.array(contractBindingSchema).max(20).default([]).refine(items=>new Set(items.map(item=>item.id)).size===items.length,'Contract binding IDs must be unique.'),
   exclude: z.array(pattern).default([]),
   rules: rulesSchema.default({}),
   ai: aiSettingsSchema.prefault({}),
   checks: checksSchema,
-  resources:z.array(resourceDefinitionSchema.extend({appliesTo:z.array(pattern).min(1).default(['**'])})).max(32).default([])
+  resources:z.array(resourceDefinitionSchema.safeExtend({appliesTo:z.array(pattern).min(1).default(['**'])})).max(32).default([])
     .refine(resources=>new Set(resources.map(resource=>resource.id)).size===resources.length,'Resource IDs must be unique.'),
   overrides: z.array(z.object({
     files: z.array(pattern).min(1), rules: rulesSchema,

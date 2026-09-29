@@ -5,6 +5,7 @@ import { initializeTrial, trialStatus } from './ai/trial-budget.js';
 import { initializeBudget, budgetStatus, budgetNameSchema, parseAllowanceUsd, settleBudgetAttempt } from './ai/audit-budget.js';
 import { runWorkflow } from './workflows.js';
 import { renderMarkdownReport } from './markdown-report.js';
+import {rootIdSchema,referenceOriginSchema} from './reference-access.js';
 
 const help = `Shipcheck v0.1
 
@@ -26,8 +27,10 @@ Audit, diff, and task options:
   --json           Print the report as JSON
   --markdown       Print a Markdown report (exclusive with --json)
   --run-checks     Execute trusted configured checks (whole repository)
+  --reference-root <id=path> Authorize one external resource root (repeatable)
+  --allow-reference-origin <https://host> Authorize pinned HTTPS references (repeatable)
   --whole-repository Batch all eligible source for audit --ai preview/mock/live
-  --ai preview     Preview bounded AI input metadata without sending anything
+  --ai preview     Preview bounded AI input metadata without contacting a model
   --ai mock        Exercise the QA reviewer with a synthetic offline response
   --ai live --trial Run one approved trial attempt for the selected mode
   --ai live --budget <name> Use an existing allowance for live auditing
@@ -89,6 +92,7 @@ export async function runCli(args: readonly string[]): Promise<CliResult> {
   let trial = false;
   let budget:string|undefined;
   let runChecks = false;
+  const referenceRoots:Record<string,string>={};const referenceOrigins:string[]=[];
   let wholeRepository = false;
   let mode: string | undefined;
   for (let index = 1; index < args.length; index++) {
@@ -104,6 +108,15 @@ export async function runCli(args: readonly string[]): Promise<CliResult> {
       budget=value;continue;
     }
     if (!literal && arg === '--run-checks') { runChecks = true; continue; }
+    if(!literal && arg==='--reference-root') {
+      const value=args[++index] ?? '',at=value.indexOf('='),id=value.slice(0,at),path=value.slice(at+1);
+      if(at<1 || !rootIdSchema.safeParse(id).success || !path || Object.hasOwn(referenceRoots,id) || Object.keys(referenceRoots).length>=16)return fail('Use distinct --reference-root id=path grants (maximum 16).');
+      referenceRoots[id]=path;continue;
+    }
+    if(!literal && arg==='--allow-reference-origin') {
+      const value=args[++index];if(!referenceOriginSchema.safeParse(value).success || referenceOrigins.length>=16)return fail('Use --allow-reference-origin https://host with an exact origin (maximum 16).');
+      referenceOrigins.push(value!);continue;
+    }
     if (!literal && arg === '--whole-repository') { wholeRepository = true; continue; }
     if (!literal && arg === '--ai') {
       const value = args[++index];
@@ -126,7 +139,8 @@ export async function runCli(args: readonly string[]): Promise<CliResult> {
   if ((ai === 'live') !== Boolean(trial || budget)) return fail('Live AI requires --trial or --budget; spending authorization is only valid with --ai live.');
   try {
     const aiOptions = ai ? {execution:ai,trial,...(budget?{budget}:{}),...(mode ? {mode:modeSchema.parse(mode)} : {})} : undefined;
-    const report = await runWorkflow(target ?? process.cwd(),command,aiOptions,{runChecks,wholeRepository,currentTask:command==='task' && target===undefined});
+    const report = await runWorkflow(target ?? process.cwd(),command,aiOptions,{runChecks,wholeRepository,currentTask:command==='task' && target===undefined,
+      referenceAccess:{roots:referenceRoots,origins:referenceOrigins}});
     const aiFailed = report.ai?.status === 'failed' || report.aiAudit?.state==='failed';
     const failedBatchIndex=report.aiAudit?.batches.findIndex(batch=>batch.status==='failed') ?? -1;
     const aiError=report.ai?.error ?? (failedBatchIndex>=0 ? report.aiAudit?.batches[failedBatchIndex]?.error : undefined);
@@ -138,8 +152,8 @@ export async function runCli(args: readonly string[]): Promise<CliResult> {
     const architectureError=report.architecture?.state==='partial';
     const architectureFailed=report.architecture && [...report.architecture.boundaries,...report.architecture.conventions].some(p=>p.status==='violation');
     const architectureWarning=architectureError?'Shipcheck: Architecture assessment is incomplete; inspect unresolved imports and coverage issues. ':'';
-    const contractError=report.contracts?.some(item=>item.state!=='checked');
-    const contractFailed=report.contracts?.some(item=>item.calls.some(call=>call.status==='mismatch'));
+    const contractError=report.contracts?.some(item=>item.state!=='checked') || report.sdkContracts?.some(item=>item.state!=='checked');
+    const contractFailed=report.contracts?.some(item=>item.calls.some(call=>call.status==='mismatch')) || report.sdkContracts?.some(item=>item.calls.some(call=>call.status==='mismatch'));
     const contractWarning=contractError?'Shipcheck: Contract comparison is incomplete; inspect contract states, file statuses and unresolved calls. ':'';
     return { stdout: json ? renderJsonReport(report) : markdown ? renderMarkdownReport(report) : renderConsoleReport(report),
       stderr: architectureWarning+contractWarning+(aiFailed ? `Shipcheck: AI stage failed (${errorCode})${failedBatchIndex>=0 ? ` in batch ${failedBatchIndex+1}` : ''}.${errorDetail} Deterministic results are retained.` : referenceError ? 'Shipcheck: Required reference resources could not be loaded; AI was not run. See reference statuses in the report.' : checkError ? 'Shipcheck: A configured check could not complete; see the report.' : ''),
