@@ -9,6 +9,10 @@ paid AI separately when needed.
 
 Use Node.js 22+ and npm. In the downloaded Shipcheck repository:
 
+Qualification currently covers Windows x64 with Node.js 22 only. macOS and Linux
+still require installation, CLI, native-parser and process-cleanup testing;
+compatibility on those operating systems is unverified.
+
 ```powershell
 npm ci
 npm run build

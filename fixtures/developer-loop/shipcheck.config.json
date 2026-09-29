@@ -1,0 +1,12 @@
+{
+  "version": 1,
+  "resources": [{"id":"users","path":"api.json","kind":"openapi","authority":"authoritative"}],
+  "contracts": [{"id":"users-client","resourceId":"users","files":["client.mjs"],"baseUrl":"https://api.example.test","expectedVersion":"1.0.0"}],
+  "currentTask": {
+    "id":"list-users",
+    "title":"Read users from the documented endpoint",
+    "files":["client.mjs"],
+    "requirements":[{"id":"get-users","text":"listUsers calls GET https://api.example.test/users and returns its parsed JSON result."}],
+    "nonGoals":["Do not change the provider contract or weaken tests."]
+  }
+}

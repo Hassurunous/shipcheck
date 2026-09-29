@@ -1,6 +1,13 @@
 # Shipcheck
 
 Shipcheck is a local review tool for AI-assisted software development.
+
+**Platform qualification: Windows x64 with Node.js 22 only.** macOS and Linux
+still need installation, CLI, native-parser and process-cleanup testing. Their
+compatibility is not yet verified.
+
+See [P18 qualification evidence and release limitations](docs/P18_QUALIFICATION.md)
+for installed-tool results, the supervised developer-loop exercise and test limits.
 **Status: pre-alpha, local v0.1 release preparation.** It provides configurable
 repository checks, audit/diff/task workflows, console/JSON/Markdown reports,
 and optional AI review with citation checks. Most deterministic checks currently

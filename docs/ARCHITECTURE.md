@@ -348,3 +348,13 @@ report/root and preserves exit codes with bounded runtime/output. It writes no
 files and grants no checks, external access or AI spending. Shipcheck remains a
 reviewer; developer editing/orchestration stays outside its runtime. CLI acceptance
 tests exercise the packaged example through clean, defect and failure outcomes.
+
+## P18 qualification harnesses
+
+scripts/qualify-release.mjs scores deterministic seeded defect/clean/incomplete
+cases using real installed ESLint/Ruff and internal contract/architecture checks.
+scripts/qualify-processes.mjs exercises OS-process ledger contention, crash retention
+and check descendant cleanup with disposable state. These are explicit development
+qualification tools; they add no product runtime behavior or external-tool dependency.
+The developer-loop fixture supports a supervised source-only repair exercise.
+See P18_QUALIFICATION.md for measurements and remaining release decisions.

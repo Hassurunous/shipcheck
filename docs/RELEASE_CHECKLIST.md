@@ -45,7 +45,10 @@ checks and architecture policies. External inspection tools execute only with
 explicit --run-checks authorization; they are trusted programs, not sandboxed.
 AI/task assessments and partial coverage require report inspection. Citation
 matching is not semantic verification; diff reviews current files, not patch hunks.
-Installed ESLint/Ruff qualification and other-platform validation remain P18.
+P18 now qualifies installed ESLint/Ruff on Windows and documents the remaining
+platform/release limitations in [P18 qualification](P18_QUALIFICATION.md). The owner
+accepted Windows-only qualification for now. macOS/Linux testing is still needed
+and is disclosed in the README and user guide; public publication is not authorized.
 
 Run `npm run verify` for the current checkout. After local installation, run
 `node .release-check/install/node_modules/shipcheck/scripts/cli-acceptance.mjs`

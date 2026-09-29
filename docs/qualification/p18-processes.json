@@ -1,0 +1,10 @@
+{
+  "platform": "win32",
+  "node": "v22.23.3",
+  "crossProcessContention": "blocked",
+  "hardKilledReservation": "durable-and-blocked",
+  "reservedUsd": 0.00625,
+  "timeoutDescendant": "terminated",
+  "apiSpendUsd": 0,
+  "limits": "Synthetic local ledger; ordinary child tree only, not malicious detached-process containment."
+}

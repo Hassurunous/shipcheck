@@ -1,0 +1,116 @@
+{
+  "kind": "deterministic-seeded-corpus",
+  "versions": {
+    "node": "v22.23.3",
+    "platform": "win32",
+    "arch": "x64",
+    "eslint": "v10.11.0",
+    "ruff": "ruff 0.16.9"
+  },
+  "cases": [
+    {
+      "id": "eslint-defect",
+      "expected": "violation",
+      "actual": "violation",
+      "exitCode": 1,
+      "elapsedMs": 1127
+    },
+    {
+      "id": "eslint-clean",
+      "expected": "clean",
+      "actual": "clean",
+      "exitCode": 0,
+      "elapsedMs": 1007
+    },
+    {
+      "id": "ruff-defect",
+      "expected": "violation",
+      "actual": "violation",
+      "exitCode": 1,
+      "elapsedMs": 83
+    },
+    {
+      "id": "ruff-clean",
+      "expected": "clean",
+      "actual": "clean",
+      "exitCode": 0,
+      "elapsedMs": 70
+    },
+    {
+      "id": "http-defect",
+      "expected": "violation",
+      "actual": "violation",
+      "exitCode": 1,
+      "elapsedMs": 39
+    },
+    {
+      "id": "http-clean",
+      "expected": "clean",
+      "actual": "clean",
+      "exitCode": 0,
+      "elapsedMs": 24
+    },
+    {
+      "id": "http-dynamic",
+      "expected": "incomplete",
+      "actual": "incomplete",
+      "exitCode": 2,
+      "elapsedMs": 33
+    },
+    {
+      "id": "sdk-defect",
+      "expected": "violation",
+      "actual": "violation",
+      "exitCode": 1,
+      "elapsedMs": 53
+    },
+    {
+      "id": "sdk-clean",
+      "expected": "clean",
+      "actual": "clean",
+      "exitCode": 0,
+      "elapsedMs": 28
+    },
+    {
+      "id": "sdk-dynamic",
+      "expected": "incomplete",
+      "actual": "incomplete",
+      "exitCode": 2,
+      "elapsedMs": 24
+    },
+    {
+      "id": "architecture-defect",
+      "expected": "violation",
+      "actual": "violation",
+      "exitCode": 1,
+      "elapsedMs": 163
+    },
+    {
+      "id": "architecture-clean",
+      "expected": "clean",
+      "actual": "clean",
+      "exitCode": 0,
+      "elapsedMs": 96
+    },
+    {
+      "id": "architecture-dynamic",
+      "expected": "incomplete",
+      "actual": "incomplete",
+      "exitCode": 2,
+      "elapsedMs": 26
+    }
+  ],
+  "score": {
+    "cases": 13,
+    "correct": 13,
+    "defects": 5,
+    "cleanControls": 5,
+    "incompleteControls": 3
+  },
+  "apiSpendUsd": 0,
+  "limitations": [
+    "Handwritten supported-pattern fixtures, not real-world precision/recall.",
+    "External-tool versions and this operating system only.",
+    "No live-model behavior measured."
+  ]
+}

@@ -277,14 +277,25 @@ examples/capture-audit.mjs demonstrates bounded offline JSON capture. Loop limit
 are caller-enforced; no code-writing agent or autonomous fixer was added. Real
 developer-agent effectiveness experiments remain P18.
 
-### P18 — Adversarial validation and release qualification
+### P18 — Adversarial validation and release qualification (completed for documented Windows-only scope)
 
 Includes remaining P7 validation obligations.
 
-- [ ] Installed ESLint/Ruff validation and supported-platform installation/process cleanup
-- [ ] Scored defect/clean-control corpus and real developer-agent loop experiments
-- [ ] Prompt-injection, stale-evidence, interrupted-request, budget-concurrency and malformed-output tests
-- [ ] Published quality/cost measurements, limitations and release gates
+Local Windows qualification is implemented: installed ESLint/Ruff, a 13-case
+deterministic corpus, cross-process budget/crash checks, descendant cleanup,
+offline adversarial tests and one supervised developer-agent repair loop. A fresh
+four-case low-cost live evaluation scored 4/4 under an approved $1 allowance;
+the priced usage upper bound was $0.000770 and permanent reservations were $0.025.
+See docs/P18_QUALIFICATION.md for evidence, reproduction and open decisions.
+The owner accepted Windows-only qualification for now. macOS/Linux testing remains
+future work, prominently disclosed in README.md and docs/USER_GUIDE.md. The small
+corpus and supervised loop establish only their documented outcomes; broader
+effectiveness claims and public-release approval remain separate decisions.
+
+- [x] Installed ESLint/Ruff validation and Windows installation/process cleanup
+- [x] Scored defect/clean-control corpus and one supervised developer-agent loop (documented limited scope)
+- [x] Prompt-injection, stale-evidence, interrupted-request, budget-concurrency and malformed-output tests (offline safeguards and a four-case live smoke test)
+- [x] Published quality/cost measurements, limitations and release gates (local results; open gates disclosed)
 
 Completion: repeatable tests and bounded live experiments establish the supported
 workflows and their practical limitations.
