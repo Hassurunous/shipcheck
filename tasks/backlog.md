@@ -1,4 +1,9 @@
-# Backlog
+# Milestone record and follow-ups
+
+P0–P18 are delivered for their documented bounded scope. See
+[qualification](../docs/P18_QUALIFICATION.md) for Windows-only evidence and
+[user guidance](../docs/USER_GUIDE.md) for current operation. Historical milestone
+completion does not imply exhaustive detection or support for every platform.
 
 ## P0 — Bootstrap
 - [x] Project skeleton
@@ -53,7 +58,9 @@
 - [x] Validate evidence files
 - [x] Validate line ranges
 - [x] Validate excerpts
-- [ ] Future semantic evidence verification
+
+Citation verification does not establish semantic correctness; general semantic
+verification is not an implemented capability.
 
 ## P5 — Workflows
 - [x] Audit
@@ -74,22 +81,22 @@
 - [x] Prioritize related local imports and disclose missing context
 - [x] Report selected, skipped, failed and rejected coverage clearly
 - [x] Define and test canonical ancestor/root-link policy
-- [x] Add repeatable isolated/mixed bug and clean-control evaluation with human semantic scoring
+- [x] Add repeatable isolated/mixed bug and clean-control evaluation with explicit reviewer semantic labels
 - [x] Run a bounded low-cost live evaluation and record limitations
 
 ## P7 — Multi-language checks and developer-agent feedback
 
-Delivered for the documented command/adapter subset; installed-tool and cross-platform
-qualification remain P18. This does not expand the historical P6 release requirements.
+Delivered for the documented command/adapter subset. P18 qualified installed tools
+on Windows; macOS/Linux remain unverified.
 
-First slice delivered:
+Initial capabilities:
 - [x] Root config for language-independent commands and AI credential environment references
 - [x] Command opt-in, direct-child timeout/output limits, and separate tool statuses
 - [x] Whole-repository preview/mock batches with bounded requests and disclosed skips
 - [x] Configurable AI concerns including race conditions and code smells
 - [x] Configuration examples and baseline-to-diff developer workflow documentation
 
-Remaining P7 work:
+Additional delivered capabilities:
 - [x] Persistent aggregate spending limits and live whole-repository batch execution
 - [x] Best-effort descendant cleanup (Windows tree tested; POSIX group implementation awaits platform validation)
 
@@ -101,7 +108,7 @@ Remaining P7 work:
 - [x] Document a developer-agent loop: implement, invoke Shipcheck, read JSON results, fix, repeat
 - [x] Improve rule/configuration discoverability and include detailed documentation and language examples in distributed packages
 - [x] Add offline integration fixtures and tests for multiple languages and execution failures
-- [ ] Validate adapters against installed ESLint/Ruff versions and cleanup on POSIX before cross-platform release claims
+- [x] Validate installed ESLint/Ruff and process cleanup on Windows (P18); POSIX validation remains a follow-up
 
 ## P8 — Reference resources and evidence
 
@@ -109,24 +116,25 @@ Remaining P7 work:
 - [x] In-memory content snapshots, hashes, declared versions and provenance
 - [x] Loading statuses, optional hash pins and standalone citation-verification helper
 - [x] Report missing, excluded and changed local references (P12)
-- [ ] Semantic version compatibility of contracts (P14/P16)
+- [x] Exact version pins and semver range/conflict checks (P14/P16), not behavioral compatibility proof
 - [x] Cross-resource citation verification without claiming semantic correctness (P12)
 - [x] Scoped reference selection for AI requests with budget/coverage accounting (P12)
-- [ ] Explicit external-repository roots and approved remote documentation snapshots
+- [x] Explicit external-repository roots and approved remote documentation snapshots (P16)
 - [x] Local conflicting-source outcomes and reproducible evidence tests (P12)
 
-## P9 — Contract auditing (local OpenAPI delivered through P14; external/SDK work in P16)
+## P9 — Contract auditing (local OpenAPI delivered through P14; external/SDK subset delivered in P16)
 
 - [x] Offline OpenAPI JSON operation index with provenance and explicit partial coverage
 - [x] Integrate the index with CLI reports and consumer-call comparisons (P14-P14.2)
 
-See `docs/P9_CONTRACT_AUDITING.md`; P8 remains partially implemented.
+See [contract indexing](../docs/P9_CONTRACT_AUDITING.md) and
+[external interfaces](../docs/P16_EXTERNAL_CONTRACTS.md) for supported scope.
 
 - [x] OpenAPI JSON adapter and supported multilingual HTTP-call comparisons (P14-P14.2)
-- [ ] Installed TypeScript SDK declaration adapters (P16)
+- [x] Narrow installed TypeScript SDK declaration adapter (P16)
 - [x] Exact version-pin mismatch and consumer/provider evidence (P14)
-- [ ] Broader semantic version compatibility and external comparisons (P16)
-- [ ] Cross-repository interface comparisons and missing-contract outcomes
+- [x] Semver range checks and bounded external comparisons (P16), not general semantic compatibility
+- [x] Supported cross-repository OpenAPI comparisons and missing-contract outcomes (P16)
 
 ## P10 — Requirements and architectural policies (documented scope delivered through P13/P15)
 
@@ -156,13 +164,11 @@ See `docs/P11_TASK_AUDITING.md` for the agreed ownership and write boundaries.
 Issue-tracker connectors, background watching and enforced read-only sandboxes
 remain outside these first implementations unless separately authorized.
 
-## Remaining implementation milestones
+## Integration and qualification milestones
 
-P12-P15 deliver local reference, task, contract and architecture integration on the
-P8-P11 foundations. Remaining external-resource/interface work is P16; operating
-guides and release qualification are P17/P18, in execution order.
-Documentation and evaluation should develop alongside implementation, with their
-final integration and release gates in P17/P18.
+P12–P15 integrated local references, tasks, contracts and architecture on the
+P8–P11 foundations. P16 added external resources/interfaces; P17 and P18 delivered
+operating guides and bounded Windows qualification.
 
 ### P12 — Reference-aware audits (completed for local references)
 
@@ -225,12 +231,13 @@ See docs/P14_1_MULTILINGUAL_CONTRACTS.md for exact patterns and exclusions.
 - [x] Extend coverage for Python HTTPX/Sessions and JavaScript/TypeScript Axios
 - [x] Prioritize Rust reqwest, Ruby Net::HTTP, then PHP cURL for subsequent adapter work
 
-See docs/P14_2_ADDITIONAL_LANGUAGES.md. P15 follows this adapter milestone.
+See docs/P14_2_ADDITIONAL_LANGUAGES.md.
 
 Prefer deterministic offline extraction and reuse the comparison/report contracts.
 AI may supplement unsupported complexity with separate evidence-backed candidates;
 it must not erase incomplete offline coverage or require spending for existing checks.
-Shipcheck remains read-only. SDK resolution and external resources remain P16.
+Shipcheck remains read-only. P16 implements external resources and narrow SDK
+declaration checks; general SDK resolution is not supported.
 
 ### P15 — Automatic architecture-policy checks (completed for documented import subset)
 
@@ -274,12 +281,12 @@ Completion: users and developer agents operate Shipcheck from documentation alon
 
 See docs/USER_GUIDE.md, docs/AGENT_GUIDE.md and docs/REPORT_CONTRACT.md. The packaged
 examples/capture-audit.mjs demonstrates bounded offline JSON capture. Loop limits
-are caller-enforced; no code-writing agent or autonomous fixer was added. Real
-developer-agent effectiveness experiments remain P18.
+are caller-enforced; no code-writing agent or autonomous fixer was added. P18
+records a supervised developer repair loop, not broad effectiveness evidence.
 
 ### P18 — Adversarial validation and release qualification (completed for documented Windows-only scope)
 
-Includes remaining P7 validation obligations.
+Includes installed-tool and Windows process validation from P7.
 
 Local Windows qualification is implemented: installed ESLint/Ruff, a 13-case
 deterministic corpus, cross-process budget/crash checks, descendant cleanup,
@@ -302,6 +309,18 @@ workflows and their practical limitations.
 
 ## P1-P15 implementation audit
 
-See `docs/P1_P15_AUDIT.md` for standards, evidence, corrected defects and deferred
-requirements. Run `npm run verify` for typecheck, regression tests, build and offline
+See the historical [P1-P15 audit](../docs/P1_P15_AUDIT.md) for its standards, evidence
+and corrected defects, and [P18 qualification](../docs/P18_QUALIFICATION.md) for
+current qualification and limits. Run `npm run verify` for typecheck, regression tests, build and offline
 CLI acceptance; `npm run test:cli` runs only the executable acceptance suite.
+
+## Follow-ups beyond the completed scope
+
+- [ ] General semantic evidence verification beyond citation matching (unscheduled).
+- [ ] Qualify macOS/Linux installation, CLI, native parsers and process cleanup.
+- [ ] Add Rust reqwest, Ruby Net::HTTP and PHP cURL adapters in that priority order.
+- [ ] Evaluate representative external projects and independently scored developer loops.
+- [ ] Resolve public-distribution metadata, platform support and publication approval.
+
+Live pricing maintenance remains necessary before its documented expiry. These
+follow-ups have no assigned new milestone; they do not expand the completed scope.

@@ -48,7 +48,9 @@ trusted process before configuring the resource. For example:
   "expectedSha256":"REPLACE_WITH_64_LOWERCASE_HEX_CHARACTERS"}]}
 ```
 
-Authorize separately with `--allow-reference-origin https://docs.example.com`.
+Replace the illustrative URL and hash marker before use; the marker is intentionally
+not a valid hash. Authorize separately with
+`--allow-reference-origin https://docs.example.com` for that example origin.
 The grant must be the exact normalized origin, with no trailing slash or path.
 Up to 16 origins are supported. Each configured URL is HTTPS with no credentials,
 query or fragment. Literal IP hosts, private/reserved DNS results, redirects,
@@ -126,4 +128,5 @@ failures. Transport tests mock DNS and HTTPS to exercise public-address filterin
 connection pinning, rejection, byte limits and deadlines without network access.
 They do not establish compatibility with every live HTTPS server. Package tests
 exercise the installed Windows launcher and bundled consumer/provider fixture.
-Broader platform and adversarial release qualification remains P18.
+[P18 qualification](P18_QUALIFICATION.md) records adversarial checks and Windows
+validation. macOS/Linux qualification remains outstanding.

@@ -1,8 +1,7 @@
 # P11 — Inline current-task auditing (completed through P13)
 
-Users will define the current working task in `shipcheck.config.json`, rather than
-maintaining another task file. This milestone extends P5's existing task workflow;
-the new configuration and no-argument task invocation are now implemented.
+Define the current working task in `shipcheck.config.json` to use the task
+workflow without maintaining a separate task file.
 
 ## Current implementation
 
@@ -62,7 +61,7 @@ agents may update `currentTask`; Shipcheck does not add a requirement approval g
 lock, or requirement-immutability policy. A task hash identifies assessed content;
 it neither proves user approval nor prevents the developer from changing criteria.
 If code and requirements change together, an audit checks their present consistency,
-not whether the original intent was preserved. Documentation must state that risk.
+not whether the original intent was preserved.
 
 Shipcheck itself never applies fixes or rewrites source, requirements, or configuration
 during an audit. AI reviewers return structured reports, with no editing tools or
@@ -71,16 +70,16 @@ execute commands, increase spending, or expand filesystem access.
 
 External checks are a separate trust boundary: user-configured programs run with
 the user's permissions and can write files. They must be configured for inspection
-only. Reject recognized fixing modes where practical and explain that arbitrary
-commands cannot be guaranteed read-only without isolation. A true read-only sandbox
-is a separate future capability, not a promise of P11. Shipcheck-owned budget state
-and explicitly requested reports are separate from source edits.
+only. Shipcheck rejects recognized fixing modes, but arbitrary commands cannot
+be guaranteed read-only without isolation. Shipcheck does not provide that sandbox.
+Shipcheck-owned budget state and explicitly requested reports are separate from
+source edits.
 
-## Risks to document
+## Operational risks
 
 - A stale current task can assess the wrong expectations; show its ID/title clearly.
 - One shared current task can conflict with parallel work; separate worktrees or
-  later named-task support can address that workflow.
+  explicit task files can address that workflow.
 - Changes to code and requirements together may move the acceptance criteria.
 - Invalid configuration must stop clearly before dependent execution.
 - Sensitive task text may be sent with explicit live AI requests; disclose selection

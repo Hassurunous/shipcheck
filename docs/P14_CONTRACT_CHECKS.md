@@ -94,14 +94,15 @@ file and 256 KiB total source bytes per binding, plus one bounded contract snaps
 Extraction stops at 128 direct calls per file; source excerpts above 2,048 characters
 are omitted with a partial-coverage issue. Forbidden Fetch methods and unnormalized
 custom method spellings are unresolved.
-No network or source writes are performed. File checks are not an atomic snapshot
+Local contract comparison performs no network requests or source writes.
+Explicitly granted HTTPS reference loading follows [P16 access rules](P16_EXTERNAL_CONTRACTS.md). File checks are not an atomic snapshot
 or protection against a hostile process racing filesystem changes. Opt-in external
 checks retain their existing execution permissions and are not sandboxed.
 
 The tests seed incorrect routes/methods/query names, clean controls, unsupported
 calls, version conflicts, scoped reads, and CLI exit/report behavior. No paid API
 calls are needed to validate this milestone. P14.2 adds further offline language
-and client patterns; external roots and SDK interfaces remain P16.
+and client patterns; [P16](P16_EXTERNAL_CONTRACTS.md) adds external roots and narrow SDK interfaces.
 
 Validation on 2026-09-28: all 269 tests passed (18 P14 tests), typecheck and build
 passed. A freshly packed tarball installed with runtime dependencies in an isolated

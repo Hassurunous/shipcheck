@@ -28,7 +28,7 @@ findings or affect exit codes. Mock candidates remain explicitly synthetic.
 This stage verifies AI citations. Deterministic findings retain their captured
 observations and existing contract; pure createReport still performs no I/O.
 The existing provider boundary continues to reject malformed or out-of-context
-citations before this stage. Semantic verification is future work.
+citations before this stage. Citation matching does not establish semantic correctness.
 
 The check assumes a stable local tree and does not guarantee a snapshot against
 hostile concurrent filesystem changes. All P4 tests run offline; no new trial

@@ -4,24 +4,31 @@ import { join } from 'node:path';
 import { z } from 'zod';
 import { AiFailure } from './client.js';
 import { modeSchema, type AiMode } from './contracts.js';
-import { TRIAL_MODELS, usageMicroUsd } from './trial-budget.js';
+import { TRIAL_MODELS, usageMicroUsd as legacyUsageMicroUsd } from './trial-budget.js';
 
-// Standard short-context pricing checked 2026-09-27. No tools or premium tier.
+// Immutable policy versions: retain legacy rates for historical receipts.
+// Standard short-context pricing rechecked 2026-09-30; no tools/premium tier.
+export const AUDIT_MODELS={
+  'low-cost':{model:'gpt-6-luna',input:0.125,output:0.5},
+  balanced:{model:'gpt-6-sol',input:2.5,output:10},
+  'high-quality':{model:'gpt-6-astra',input:12.5,output:50},
+} as const;
+export const auditUsageMicroUsd=(mode:AiMode,input:number,output:number)=>Math.ceil(input*AUDIT_MODELS[mode].input+output*AUDIT_MODELS[mode].output);
 export const AUDIT_INPUT_LIMIT=32000;
 export const AUDIT_OUTPUT_LIMIT=2000;
-export const PRICING_EXPIRES='2026-10-03T00:00:00.000Z';
-const PRICING_START='2026-09-27T00:00:00.000Z';
+export const PRICING_EXPIRES='2026-10-30T00:00:00.000Z';
+const PRICING_START='2026-09-30T00:00:00.000Z';
 const MAX_ATTEMPTS=1000;
 export const budgetNameSchema=z.string().regex(/^[a-z][a-z0-9-]{0,47}$/).refine(
   value=>! /^(con|prn|aux|nul|com[1-9]|lpt[1-9])$/.test(value),'Reserved name.');
 export const auditUsageSchema=z.object({input_tokens:z.number().int().min(0).max(AUDIT_INPUT_LIMIT),
   output_tokens:z.number().int().min(0).max(AUDIT_OUTPUT_LIMIT)});
 type Usage=z.infer<typeof auditUsageSchema>;
-export const auditReservationMicroUsd=(mode:AiMode)=>Math.ceil(usageMicroUsd(mode,AUDIT_INPUT_LIMIT,AUDIT_OUTPUT_LIMIT)*1.25);
+export const auditReservationMicroUsd=(mode:AiMode)=>Math.ceil(auditUsageMicroUsd(mode,AUDIT_INPUT_LIMIT,AUDIT_OUTPUT_LIMIT)*1.25);
 export const budgetDirectory=(name:string)=>join(homedir(),'.shipcheck','budgets',budgetNameSchema.parse(name));
-const policySchema=z.object({version:z.literal(1),name:budgetNameSchema,
+const policySchema=z.object({version:z.union([z.literal(1),z.literal(2)]),name:budgetNameSchema,
   allowanceMicroUsd:z.number().int().min(10000).max(100000000).multipleOf(10000),
-  expires:z.literal(PRICING_EXPIRES)}).strict();
+  expires:z.string()}).strict().refine(policy=>policy.expires===(policy.version===1?'2026-10-03T00:00:00.000Z':PRICING_EXPIRES));
 const attemptSchema=z.object({mode:modeSchema,model:z.string(),reservedMicroUsd:z.number().int().positive(),
   requestHash:z.string().regex(/^[a-f0-9]{64}$/)}).strict();
 const receiptSchema=z.object({usage:auditUsageSchema,pricedUsageUpperBoundMicroUsd:z.number().int().nonnegative()}).strict();
@@ -59,7 +66,7 @@ export function parseAllowanceUsd(value:string):number {
 export async function initializeBudget(name:string,allowanceUsd:number,directory=budgetDirectory(name),now=Date.now()) {
   const allowanceMicroUsd=Math.round(allowanceUsd*1e6);
   if(!Number.isFinite(allowanceUsd) || Math.abs(allowanceMicroUsd/1e6-allowanceUsd)>1e-10)throw new Error('Invalid allowance.');
-  const policy=policySchema.parse({version:1,name,allowanceMicroUsd,expires:PRICING_EXPIRES});
+  const policy=policySchema.parse({version:2,name,allowanceMicroUsd,expires:PRICING_EXPIRES});
   if(now<Date.parse(PRICING_START) || now>=Date.parse(PRICING_EXPIRES))throw new AiFailure('pricing-expired','Refresh the shipped pricing policy before creating a new budget.');
   try {
     await fs.mkdir(join(directory,'..'),{recursive:true});
@@ -84,11 +91,14 @@ export async function budgetStatus(name:string,directory=budgetDirectory(name)) 
       const id=String(index+1).padStart(6,'0');
       if(file!==`${id}.attempt.json`)throw stateError();
       const attempt=attemptSchema.parse(await readJson(join(directory,file)));
-      if(attempt.model!==TRIAL_MODELS[attempt.mode].model || attempt.reservedMicroUsd!==auditReservationMicroUsd(attempt.mode))throw stateError();
+      const models=policy.version===1?TRIAL_MODELS:AUDIT_MODELS;
+      const price=policy.version===1?legacyUsageMicroUsd:auditUsageMicroUsd;
+      const reservation=Math.ceil(price(attempt.mode,AUDIT_INPUT_LIMIT,AUDIT_OUTPUT_LIMIT)*1.25);
+      if(attempt.model!==models[attempt.mode].model || attempt.reservedMicroUsd!==reservation)throw stateError();
       const receipt=names.includes(`${id}.receipt.json`)?receiptSchema.parse(await readJson(join(directory,`${id}.receipt.json`))):null;
       const settlement=names.includes(`${id}.settlement.json`)?settlementSchema.parse(await readJson(join(directory,`${id}.settlement.json`))):null;
       if(settlement && (receipt || settlement.chargedMicroUsd!==attempt.reservedMicroUsd))throw stateError();
-      if(receipt && (receipt.pricedUsageUpperBoundMicroUsd!==usageMicroUsd(attempt.mode,receipt.usage.input_tokens,receipt.usage.output_tokens)
+      if(receipt && (receipt.pricedUsageUpperBoundMicroUsd!==price(attempt.mode,receipt.usage.input_tokens,receipt.usage.output_tokens)
         || receipt.pricedUsageUpperBoundMicroUsd>attempt.reservedMicroUsd))throw stateError();
       attempts.push({id,...attempt,receipt,settlement});
     }
@@ -125,20 +135,22 @@ export async function withAuditReservation<T>(name:string,mode:AiMode,requestHas
     modeSchema.parse(mode);
     const before=await budgetStatus(name,directory);
     if(before.locked || before.unresolved)throw stateError();
-    if(now<Date.parse(PRICING_START) || now>=Date.parse(PRICING_EXPIRES))throw new AiFailure('pricing-expired','Shipped pricing approval has expired; no request was sent.');
+    if(now<Date.parse(PRICING_START) || now>=Date.parse(PRICING_EXPIRES) || now>=Date.parse(before.expires))throw new AiFailure('pricing-expired','Pricing approval expired; historical budgets remain readable. A new budget requires a separately approved allowance; no request was sent.');
     lock=await fs.open(join(directory,'lock'),'wx',0o600);
     const state=await budgetStatus(name,directory);
     if(state.unresolved)throw stateError();
+    const policy=policySchema.parse(await readJson(join(directory,'policy.json')));
+    if(policy.version!==2)throw new AiFailure('pricing-expired','Legacy pricing policy is retired. Inspect the old ledger; explicitly approve a new named budget to continue.');
     const reservedMicroUsd=auditReservationMicroUsd(mode);
     if(state.attempts.length>=MAX_ATTEMPTS || Math.round(state.remainingUsd*1e6)<reservedMicroUsd)
       throw new AiFailure('budget-exhausted','Remaining allowance cannot reserve another request. Completed batches are retained.');
     const id=String(state.attempts.length+1).padStart(6,'0');
-    await writeExclusive(join(directory,`${id}.attempt.json`),attemptSchema.parse({mode,model:TRIAL_MODELS[mode].model,reservedMicroUsd,requestHash}));
+    await writeExclusive(join(directory,`${id}.attempt.json`),attemptSchema.parse({mode,model:AUDIT_MODELS[mode].model,reservedMicroUsd,requestHash}));
     // Full worst-case reservation remains consumed even after a successful receipt.
     // Crashes/failures leave uncertainty durable and block this allowance.
     const result=await execute();
     const usage=auditUsageSchema.parse(result.usage);
-    await writeExclusive(join(directory,`${id}.receipt.json`),{usage,pricedUsageUpperBoundMicroUsd:usageMicroUsd(mode,usage.input_tokens,usage.output_tokens)});
+    await writeExclusive(join(directory,`${id}.receipt.json`),{usage,pricedUsageUpperBoundMicroUsd:auditUsageMicroUsd(mode,usage.input_tokens,usage.output_tokens)});
     return result.value;
   } catch(error) {if(error instanceof AiFailure)throw error;throw stateError();}
   finally {if(lock){await lock.close();await fs.unlink(join(directory,'lock'));}}

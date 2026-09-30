@@ -1,6 +1,6 @@
-# P8 — Reference resources (in progress)
+# P8 — Local reference resources
 
-The first slice loads explicitly configured repository-local reference files and
+The local reference loader reads explicitly configured repository-local files and
 reports their provenance. [P12](P12_REFERENCE_AUDITS.md) now integrates applicable
 references into bounded AI context. `references.evaluation` is always `not-assessed`; `ready` means
 loading succeeded, not that the implementation satisfies a contract.
@@ -57,7 +57,8 @@ Limits and failures:
   before spending. Deterministic results remain; explicitly authorized external
   checks still follow their normal execution policy. Optional failures stay visible.
 - Readers assume a stable local tree. They do not provide a sandbox against a
-  hostile process racing filesystem checks. No resource fetching or writing occurs.
+  hostile process racing filesystem checks. Local reads do not fetch remote content
+  or write files; explicitly authorized HTTPS loading is documented in P16.
 
 The exported `loadReferenceResources` returns report metadata plus in-memory
 snapshots. `verifyResourceEvidence` accepts a resource ID, snapshot SHA-256, line
@@ -70,5 +71,6 @@ into AI candidate verification for submitted reference paths.
 
 P12 completes local reference-aware integration and conflict reporting.
 [P16](P16_EXTERNAL_CONTRACTS.md) adds explicitly authorized external-repository
-and pinned remote snapshot sources. P9 adds semantic
-contract adapters. P11 adds the inline current-task workflow.
+and pinned remote snapshot sources. [P9](P9_CONTRACT_AUDITING.md) documents the
+OpenAPI index used by supported contract comparisons, not semantic correctness
+proof. P11 adds the inline current-task workflow.

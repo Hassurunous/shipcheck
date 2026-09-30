@@ -15,7 +15,8 @@ shipcheck task --ai mock --json
 shipcheck task --ai live --budget development --json
 ```
 
-Live requires credentials and an initialized allowance. Preview sends nothing.
+Live requires credentials and an initialized allowance. Preview makes no model request; explicitly granted HTTPS references can still be
+fetched under [P16 access rules](P16_EXTERNAL_CONTRACTS.md).
 Mock produces synthetic insufficient-evidence outcomes. Without `--ai`, task
 selection/deterministic findings work as before and requirements remain unassessed.
 `shipcheck task tasks/example.json --ai preview --json` preserves explicit task-file
@@ -71,8 +72,8 @@ Numbered wrappers, schema and prompts add request overhead covered by full live
 token counting and spending reservations. Large tasks may exceed context or output
 limits; reduce their scope instead of treating a failed response as completion.
 
-The normalized task hash is checked after AI review and again after authorized
-external checks. Changed, missing or invalid task definitions invalidate effective
+Authorized external checks run before review snapshots. The normalized task hash
+is checked after AI review and again before assembling the workflow report. Changed, missing or invalid task definitions invalidate effective
 assessments. Explicit task-file repository changes also invalidate results. This is
 change detection over a stable local workspace, not atomic locking or protection
 against a change-and-revert race. Formatting/default normalization is not a semantic
@@ -90,5 +91,6 @@ to establish freshness; missing reload capability invalidates task assessments.
 Offline tests cover identity completeness, fake/changed evidence, task changes,
 excluded files, uncertain outcomes, reference conflicts, task-size/credential guards,
 post-check mutation and legacy compatibility. [P13 evaluation](P13_EVALUATION.md)
-records five live fixtures and reproducible scoring. Broad quality claims and
-developer-agent-loop validation remain P18.
+records five live fixtures and reproducible scoring. [P18 qualification](P18_QUALIFICATION.md)
+adds a supervised developer loop and adversarial fixtures. Neither evaluation
+establishes broad diagnosis accuracy or autonomous-agent effectiveness.

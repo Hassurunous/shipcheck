@@ -93,6 +93,6 @@ escape ordinary process-tree cleanup. Review commands before granting execution.
 Offline tests cover both tool schemas, absent locations, duplicate IDs, path escapes,
 stderr separation, language/exclusion selection, thresholds, malformed output, and
 CLI statuses. A real temporary parent/child process validates timeout cleanup on
-the current Windows host. Tests use fixture output rather than installing ESLint
-or Ruff into this repository. POSIX cleanup and actual linter-version compatibility
-still require platform/tool validation before broader release claims.
+the Windows qualification host. Unit tests use fixture output; [P18 qualification](P18_QUALIFICATION.md)
+also exercised installed ESLint 10.11.0 and Ruff 0.16.9 on Windows. Other tool
+versions and POSIX cleanup require validation before broader compatibility claims.

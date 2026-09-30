@@ -1,6 +1,6 @@
 # Configuration
 
-For `contracts` mappings from JavaScript clients to local OpenAPI resources, see
+For `contracts` mappings from supported HTTP clients to OpenAPI resources, see
 [P14 contract checks](P14_CONTRACT_CHECKS.md). These deterministic checks run in
 audit/diff/task workflows without enabling AI or external commands.
 Mappings may mix JavaScript, TypeScript/TSX, Python, Go, C# and Java source paths;
@@ -52,9 +52,10 @@ exclusions also exclude descendants. Other glob syntax, absolute paths, `..`,
 backslashes, and negation are unsupported and rejected.
 
 Exclusions are applied before file reading/traversal. `.git` and `node_modules`
-remain unconditionally skipped. `.gitignore` is not interpreted. No exclusions
-are implicit beyond those two names; this repository's config excludes `dist`
-and `coverage`. Missing-target rules skip targets under excluded locations.
+are skipped during general repository inspection. Explicit SDK mappings can read
+installed declarations under [P16 rules](P16_EXTERNAL_CONTRACTS.md). `.gitignore`
+is not interpreted. Other inspection exclusions must be configured explicitly.
+Missing-target rules skip targets under excluded locations.
 
 For explicit API configuration, `reviewRepository(target, config)` replaces
 disk configuration. The lower-level `inspectRepository(target, { exclude })`
@@ -69,8 +70,8 @@ remove unrelated unreadable-file/directory or skipped-content warnings.
 
 The report schema remains version 1 with optional evidence line/excerpt fields.
 New profile fields default to empty arrays for older serialized profiles;
-reinspect to populate references and directory inventory. The P2.5 review CLI
-returns 1 for error-level findings and 2 for usage or operational failures.
+reinspect to populate references and directory inventory. See the
+[report contract](REPORT_CONTRACT.md) for current CLI exit semantics.
 
 ## P3 AI settings
 
@@ -81,9 +82,10 @@ settings unless the caller explicitly requests AI execution. A config cannot
 enable network execution. Unknown settings and out-of-range limits are rejected.
 CLI `--mode` overrides `ai.mode`; automatic retries are fixed at zero.
 
-Live trials use pinned priced models when mappings are null; other mappings
-are rejected for live requests. Configuration cannot increase the trial budget
-or its 5,000 input / 2,000 output token caps. See [live trial](LIVE_TRIAL.md).
+Live requests use pinned priced models when mappings are null; other mappings
+are rejected. Configuration cannot increase allowance or live token ceilings;
+see [named budget limits](P7_LIVE_AUDITS.md) and the separate historical
+[live trial](LIVE_TRIAL.md).
 
 ## Automatic architecture policies (P15)
 

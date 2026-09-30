@@ -1,4 +1,4 @@
-# P3 — offline AI review foundation
+# AI review modes and context (P3 foundation)
 
 P3 supports offline previews/mocks and an explicitly gated live trial. The
 approved $0.50 three-mode trial completed successfully. See [live controls and
@@ -15,7 +15,8 @@ shipcheck audit . --ai mock --mode high-quality --json
 
 Without a linked command, use `npm run audit -- . --ai mock`. Rebuild after
 source changes when using the linked command. `--mode` requires `--ai`.
-`--ai live` requires `--trial` and an initialized, unexhausted allowance.
+`--ai live` requires `--budget <name>` (or the legacy `--trial`) and an initialized,
+unexhausted allowance. See [live audit budgets](P7_LIVE_AUDITS.md).
 Ordinary `shipcheck audit .` remains deterministic and does not prepare AI
 context. Configuration alone never enables an AI run.
 
@@ -55,17 +56,18 @@ Optional `ai` configuration in `shipcheck.config.json`:
 CLI mode overrides configuration. Model mappings can be specified for offline
 adapter tests/previews but never enable network execution. There is no claim
 that a named mode is better based on the tiny smoke test. Live model mappings
-are pinned to the priced trial models; config cannot substitute another model.
+are pinned to the priced live models; config cannot substitute another model.
 
 Hard configurable ranges: files 1–64, file bytes 128–65,536, serialized context
 bytes 256–262,144, output tokens 128–4,096, timeout 10–60,000 ms. Request size
 includes additional instructions/schema overhead beyond the context limit.
-Input tokens are estimated as request bytes / 3, rounded up, not counted with
-a model tokenizer. They are not a strict token ceiling or billing quote.
+Preview input tokens are estimated as request bytes / 3, rounded up, not counted
+with a model tokenizer. This is not a strict token ceiling or billing quote.
+Live execution separately counts input tokens before generation.
 Preview/mock actual API cost is zero. Live actualCostUsd remains null because
-usage pricing is not an invoice; trial.pricedUsageUpperBoundUsd reports a
-conservative calculation. Persistent trial reservations enforce the approved
-$0.50 allowance. Retries are fixed at zero.
+usage pricing is not an invoice; budget/trial priced-usage fields report a
+conservative calculation. Persistent reservations enforce the chosen allowance;
+see [budget controls](P7_LIVE_AUDITS.md). Retries are fixed at zero.
 
 ## Context and trust boundaries
 
@@ -77,12 +79,12 @@ suggesting secrets/keys/credentials/tokens/passwords, and configured exclusions.
 It additionally skips source containing recognizable credential assignments,
 private-key headers, or common key patterns. These heuristics cannot guarantee
 that arbitrary code is secret-free. Review the selected source before any
-future external transmission.
+live transmission.
 
-Only selected source paths and content go in the request. The full repository
-profile, absolute root, environment, marker excerpts, config, and deterministic
-report are not sent. Whole files are skipped rather than truncated; source line
-numbers remain usable. File-count/byte/read limitations are reported. Symlinks
+Requests contain selected source, eligible reference snapshots and, in task mode,
+normalized task expectations. The full repository profile, absolute root,
+environment, entire configuration and deterministic report are not sent. Whole
+files are skipped rather than truncated; source line numbers remain usable. File-count/byte/read limitations are reported. Symlinks
 are rechecked component by component before bounded reads. Like the inspector,
 this assumes a stable tree, not hostile concurrent path replacement. Input
 limits apply to AI context, not the preceding full deterministic inspection.
@@ -108,9 +110,10 @@ Responses are limited to 128 KiB at the adapter boundary. Structured candidates
 have bounded text and evidence counts. Citation paths must be relative and
 belong to selected files; line ranges must fit the supplied content. Unexpected
 fields, malformed citations, or incomplete results reject the AI stage as a
-whole. Excerpt accuracy, current disk contents, and semantic validity remain
-P4 work. All accepted candidates carry `evidenceStatus: unverified` and AI
-origin; mode, model, execution type, and reviewer version identify provenance.
+whole. [Citation verification](P4_VERIFICATION.md) then checks current source and
+exact excerpts. Accepted candidates retain AI origin and `evidenceStatus: unverified`;
+separate verification fields describe citation results without proving semantic
+validity. Mode, model, execution type and reviewer version identify provenance.
 
 The report retains schemaVersion 1 and adds an optional `ai` section; existing
 deterministic reports are unchanged. AI candidates remain separate from
@@ -121,17 +124,18 @@ There are no retries or silent fallback to another model.
 
 CLI exit 2 means an AI stage failed; the partial report still goes to stdout
 and a short diagnostic to stderr. Exit 1 remains for deterministic error-level
-findings. Unverified AI candidates do not change exit status in this milestone.
+findings and other deterministic violations. AI candidates do not independently
+change exit status. See the [full exit contract](REPORT_CONTRACT.md).
 
 ## Live trial status
 
 All three approved generation requests completed. Each identified the seeded
 defect without flagging the clean control. The allowance is exhausted by its
 request count, with conservative priced usage totaling $0.014746. Further
-spending requires a new policy decision; see [trial record](LIVE_TRIAL.md).
+requests use separately authorized [named budgets](P7_LIVE_AUDITS.md); see the
+[historical trial record](LIVE_TRIAL.md) for those original results.
 
 ## P4 extension
 
-The P3 history above describes its initial boundary. AI candidates now receive
-fresh-source and exact-excerpt checks after response validation; see
+AI candidates receive fresh-source and exact-excerpt checks after response validation; see
 [P4 verification](P4_VERIFICATION.md). Semantic validity remains unverified.

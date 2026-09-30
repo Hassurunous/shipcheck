@@ -1,6 +1,6 @@
 # Architecture
 
-## Current implementation through P17
+## Current implementation through P18
 
 `src/cli.ts` is the executable entry point, with command dispatch in
 `src/cli-command.ts`. `audit` performs configured review; help/version explain
@@ -9,7 +9,7 @@ remains unchanged. The exported `inspectRepository`
 API performs repository inspection. `createReport` evaluates captured facts and
 returns deterministic findings with separate inspection warnings.
 `renderConsoleReport` and `renderJsonReport` return report strings without I/O.
-AI citation verification is implemented; semantic verification remains future work. Opt-in AI
+AI citation verification is implemented; it does not establish semantic correctness. Opt-in AI
 context previews and mocked QA review are implemented separately from the
 ordinary deterministic path; see `docs/P3_AI.md`.
 
@@ -119,10 +119,10 @@ Reporters
 ```
 
 Inspection, deterministic findings, and console/JSON reporters are implemented;
-QA review supports offline execution and an explicitly gated live trial;
-semantic verification remains planned. Introduce small modules
-only as their milestones require them. Prefer deterministic analysis before AI
-analysis, structured data contracts, and evidence-backed findings. Execution is
+QA review supports offline previews/mocks and explicitly authorized live calls
+under persistent allowances. Citation matching does not prove a diagnosis.
+The design favors deterministic analysis before AI analysis, structured data
+contracts and evidence-backed findings. Execution is
 local-first with minimal persistent state and no server requirement for v0.1.
 
 ## P2.5 command interface
@@ -166,7 +166,7 @@ mock. It has no default HTTP implementation. `ai/review.ts` composes these after
 deterministic inspection, preserving deterministic results on AI-stage failure.
 The optional report.ai section separates unverified candidates from findings.
 No SDK or retry was introduced. The separate ai/live.ts module implements
-bounded HTTP for explicit --ai live --trial execution. ai/trial-budget.ts
+bounded HTTP for explicit --ai live with --budget or legacy --trial execution. ai/trial-budget.ts
 persists reservations and receipts outside repositories and locks concurrent
 requests. Only live execution reads the configured ai.apiKeyEnv (default SHIPCHECK_API_KEY). See
 LIVE_TRIAL.md for allowance limits and observed three-mode results.
@@ -186,14 +186,14 @@ workflows.ts composes existing review functions for audit, HEAD-relative changed
 file review and structured tasks. task-file.ts validates bounded JSON task
 files. AI context is restricted before source collection; deterministic findings
 are filtered after full-context rule evaluation. Reporters display workflow
-scope and unassessed task criteria. See P5_WORKFLOWS.md for limitations.
+scope and task criteria, with optional P13 assessments. See P5_WORKFLOWS.md for limitations.
 
 ## P6 local distribution
 
-markdown-report.ts produces a summary and a safely fenced complete report.
+markdown-report.ts produces a summary and a safely fenced human-readable report. JSON retains the complete structured metadata.
 --markdown is available on audit/diff/task and is exclusive with --json. Renderers
 return strings; shell redirection can save output. prepack builds the CLI; the
-package allowlist includes docs and the offline demo but excludes tests and
+package allowlist includes docs and offline fixtures but excludes development tests and
 local artifacts. See RELEASE_CHECKLIST.md for validation and known limits.
 
 ## P6.1 audit reliability
@@ -204,7 +204,7 @@ numbered lines. Coverage is separate from citation and semantic validity.
 Ancestor aliases are canonicalized while linked final roots remain rejected.
 Evaluation tooling replays responses and scores human assessments against fixed
 cases. See P6_1_AUDIT_RELIABILITY.md for limits and live evaluation results.
-## P7 first implementation slice
+## P7 external checks and whole-repository AI
 
 checks.ts validates commands and executes direct child processes only after explicit
 authorization. Reports retain external check statuses and bounded raw output separately
@@ -228,7 +228,7 @@ use an exclusion-aware repository inventory; they never authorize execution.
 check-process.ts performs best-effort Windows tree/POSIX group termination after
 timeout or overflow. P7_STRUCTURED_CHECKS.md documents schemas and validation limits.
 
-## P8 local references (first slice)
+## P8 local references
 
 resource-contracts.ts defines resource metadata and citation contracts. Config
 validates explicit local paths and scope patterns. reference-resources.ts performs

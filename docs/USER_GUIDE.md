@@ -127,7 +127,7 @@ Authorized remote references can be fetched even without AI or in preview/mock.
 ## Read and save results
 
 Console is for people; `--json` is for automation. `--markdown` includes a readable
-summary and complete report. Keep stderr separate from JSON. For PowerShell:
+summary and human-readable report; use JSON to retain all structured metadata. Keep stderr separate from JSON. For PowerShell:
 
 ```powershell
 shipcheck audit . --json 1> ../shipcheck-report.json 2> ../shipcheck-errors.txt
@@ -146,3 +146,8 @@ another check or a human decision instead of treating missing evidence as succes
 
 Use the [agent guide](AGENT_GUIDE.md) for an editing/auditing loop. `npm run verify`
 checks Shipcheck itself; it does not run the target project's test suite.
+
+When `--run-checks` is authorized, external checks finish before deterministic and
+AI review snapshots are collected. This lets the review see files changed by a
+check. Checks remain trusted commands, not a sandbox; prefer inspection-only tools.
+Task-definition changes still invalidate task assessment.

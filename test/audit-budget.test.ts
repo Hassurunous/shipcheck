@@ -11,7 +11,7 @@ import {reviewWholeRepository} from '../src/ai/whole-repository.js';
 import {runCli} from '../src/cli-command.js';
 
 let root:string;let directory:string;
-const now=Date.parse('2026-09-27T12:00:00Z');
+const now=Date.parse('2026-09-30T12:00:00Z');
 const name='test-budget';const hash='a'.repeat(64);
 const usage={input_tokens:1000,output_tokens:200};
 const context={files:[{path:'a.py',content:'value = 1'}],preview:{files:[{path:'a.py',bytes:9,lines:1,sha256:hash}],skipped:[],serializedBytes:40,limited:false}};
@@ -100,7 +100,7 @@ it.each(['missing','corrupt','lock','expired','unexpected-file','linked-ledger']
   if(kind==='unexpected-file')await fs.writeFile(join(directory,'unexpected'),'');
   if(kind==='linked-ledger') {await fs.rename(directory,join(root,'real-budget'));await fs.symlink(join(root,'real-budget'),directory,'junction');}
   const send=vi.fn<typeof fetch>();
-  await expect(originalRequest(request(),context,'low-cost',1000,'dummy',name,{fetch:send,directory,now:kind==='expired'?Date.parse('2026-10-04'):now})).rejects.toBeDefined();
+  await expect(originalRequest(request(),context,'low-cost',1000,'dummy',name,{fetch:send,directory,now:kind==='expired'?Date.parse('2026-10-31'):now})).rejects.toBeDefined();
   expect(send).not.toHaveBeenCalled();
 });
 it('rejects higher-priced models, invalid output caps and missing credentials without reservations',async()=>{
@@ -180,4 +180,22 @@ it('dispatches budget initialization and status without silently resetting a nam
   expect(settle).not.toHaveBeenCalled();
   expect((await runCli(['budget','settle',name,'000003','--charge-reservation'])).exitCode).toBe(0);
   expect(settle).toHaveBeenCalledWith(name,'000003');
+});
+it('preserves legacy ledger receipts and expiry without renewing an allowance',async()=>{
+  await budgets.initializeBudget(name,0.5,directory,now);await reserve();
+  const path=join(directory,'policy.json');
+  const policy=JSON.parse(await fs.readFile(path,'utf8'));
+  await fs.writeFile(path,JSON.stringify({...policy,version:1,expires:'2026-10-03T00:00:00.000Z'}));
+  expect(await budgets.budgetStatus(name,directory)).toMatchObject({expires:'2026-10-03T00:00:00.000Z',reservedUsd:0.00625,remainingUsd:0.49375,pricedUsageUpperBoundUsd:0.000225});
+  const callback=vi.fn(execute);await expect(reserve(callback)).rejects.toMatchObject({code:'pricing-expired'});expect(callback).not.toHaveBeenCalled();
+  await fs.unlink(join(directory,'000001.receipt.json'));
+  await budgets.settleBudgetAttempt(name,'000001',directory);
+  expect(await budgets.budgetStatus(name,directory)).toMatchObject({unresolved:false,reservedUsd:0.00625,remainingUsd:0.49375});
+  expect(JSON.parse(await fs.readFile(path,'utf8'))).toEqual({...policy,version:1,expires:'2026-10-03T00:00:00.000Z'});
+});
+it.each([{version:3},{version:1},{expires:'2099-01-01T00:00:00.000Z'}])('rejects unknown or mismatched policy versions %j',async(change)=>{
+  await budgets.initializeBudget(name,0.5,directory,now);
+  const path=join(directory,'policy.json'),policy=JSON.parse(await fs.readFile(path,'utf8'));
+  await fs.writeFile(path,JSON.stringify({...policy,...change}));
+  await expect(budgets.budgetStatus(name,directory)).rejects.toMatchObject({code:'budget-state'});
 });

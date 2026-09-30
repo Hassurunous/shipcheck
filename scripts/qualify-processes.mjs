@@ -9,7 +9,7 @@ import {runChecks,checksSchema} from '../dist/src/checks.js';
 
 // Synthetic ledgers and local processes only. Never accesses user budgets or HTTP.
 const root=await mkdtemp(join(tmpdir(),'shipcheck-process-qualification-'));
-const directory=join(root,'ledger'),now=Date.parse('2026-09-29T00:00:00Z'),name='qualification';
+const directory=join(root,'ledger'),now=Date.parse('2026-09-30T00:00:00Z'),name='qualification';
 const moduleUrl=new URL('../dist/src/ai/audit-budget.js',import.meta.url).href;
 let worker,descendant;
 const reservation=`import {withAuditReservation} from ${JSON.stringify(moduleUrl)};`;

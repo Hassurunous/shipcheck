@@ -1,5 +1,11 @@
 # Pre-P3 audit
 
+> Historical record: milestone-era status and future-work statements below describe
+> the implementation at that time. See the [user guide](USER_GUIDE.md),
+> [current architecture](ARCHITECTURE.md) and [P18 qualification](P18_QUALIFICATION.md)
+> for current behavior and limits. Original test results are preserved.
+
+
 Audit baseline: e276481 (P2.5). Documentation changes accompany this review;
 production behavior was not changed.
 

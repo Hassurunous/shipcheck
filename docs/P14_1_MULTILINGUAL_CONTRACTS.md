@@ -130,7 +130,8 @@ P14.2 has delivered Go `net/http`, C# `HttpClient`, Java request builders and
 Python HTTPX/Session and JS/TS Axios patterns with explicit limits. Rust reqwest,
 Ruby Net::HTTP and PHP cURL are prioritized for subsequent adapter work.
 Offline extraction is preferred; AI may supplement complex cases without replacing
-existing offline checks. SDK resolution/external roots remain P16.
+existing offline checks. [P16](P16_EXTERNAL_CONTRACTS.md) documents external roots
+and narrow installed SDK declaration checks, not general SDK resolution.
 
 Implementation references: [Babel parser](https://babeljs.io/docs/babel-parser),
 [Lezer Python grammar](https://github.com/lezer-parser/python), and

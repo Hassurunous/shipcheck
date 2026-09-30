@@ -118,3 +118,7 @@ it.each([
   const excluded=(await auditContracts(root,{...config,exclude:[path]}))[0]!;expect(excluded.state).toBe('partial');expect(excluded.files[0]!.status).toBe('excluded');
   expect(fetch).not.toHaveBeenCalled();
 }));
+it('bounds a 512-builder Java file within the normal test timeout',()=>{
+  const result=extractJavaCalls(java((chain('https://api.test/users')+'\n').repeat(512)));
+  expect(result.calls).toHaveLength(128);expect(result.issues).toContain('call-count-limit');
+});

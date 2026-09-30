@@ -1,5 +1,11 @@
 # Architecture decisions
 
+> Historical record: milestone-era status and future-work statements below describe
+> the implementation at that time. See the [user guide](USER_GUIDE.md),
+> [current architecture](ARCHITECTURE.md) and [P18 qualification](P18_QUALIFICATION.md)
+> for current behavior and limits. Original test results are preserved.
+
+
 Initial decisions — 2026-09-26
 
 1. **TypeScript:** strict checking for small modules and future structured contracts.
@@ -56,4 +62,4 @@ P2.5 scope clarification — pre-P3 audit
 The default credential environment variable is now `SHIPCHECK_API_KEY`.
 `ai.apiKeyEnv` can override it, including with `OPENAI_PROJECTDEV_API_KEY` for
 existing setups. This supersedes the default naming convention in the historical
-P3 decisions below; no credentials or spending allowances are migrated.
+P3 decisions above; no credentials or spending allowances are migrated.

@@ -1,8 +1,10 @@
 # P5 — audit, diff and task
 
-All workflows are read-only and offline by default. They accept the existing
---json or --markdown, --ai preview/mock/live, --mode, and --trial options. No scripts or tests
-are executed, no code is modified, and AI spending limits are unchanged.
+All workflows inspect without editing source. AI is opt-in; configured scripts or
+tests run only with `--run-checks` and are trusted external programs, not sandboxed.
+Use `--json` or `--markdown` for reports and `--ai preview/mock/live` for AI stages.
+Live calls require an initialized allowance; see [budgets](P7_LIVE_AUDITS.md).
+External references require separate [runtime grants](P16_EXTERNAL_CONTRACTS.md).
 
 ```powershell
 shipcheck audit .
@@ -58,18 +60,19 @@ Task reads are bounded to 1 MiB, valid UTF-8, regular files without linked path
 components. Missing or linked selected files reject the task before review.
 Repository exclusions still apply; listing a file does not override them.
 
-Task mode scopes review to those paths. Criteria are displayed as requiring
-human confirmation, not evaluated by deterministic rules or sent as AI
-instructions. The workflow does not claim task completion or understand arbitrary
-requirements. It uses the same QA reviewer and citation verifier as audit/diff.
+Task mode scopes review to those paths. Offline runs leave criteria unassessed;
+explicit AI runs include normalized criteria as untrusted expectations for
+[P13 task assessment](P13_TASK_ASSESSMENT.md). Assessments include evidence and
+uncertainty, not proof of task completion. Mock assessments are synthetic.
+Use `shipcheck task` without a task file for the configured
+[inline current task](P11_TASK_AUDITING.md).
 
 ## Reports and exits
 
 The optional workflow field identifies kind, selected scope (null for whole
 repository), HEAD baseline for diff, unavailable paths, and task criteria.
-Existing reports retain schemaVersion 1. Exit 0 means completed without scoped
-deterministic errors, 1 means deterministic error findings, and 2 means operational
-failure. AI candidates and human acceptance criteria do not determine exit 1.
-
-The approved live trial remains exhausted. P5 tests and smoke checks are offline
-and do not extend its allowance.
+Existing reports retain schemaVersion 1. Exit 1 includes deterministic violations
+and configured check failures; exit 2 takes precedence for operational failures and
+incomplete required deterministic stages. AI candidates and task assessments do
+not independently determine exit 1. Inspect stage coverage even after exit 0.
+See the [report and exit contract](REPORT_CONTRACT.md) for exact semantics.

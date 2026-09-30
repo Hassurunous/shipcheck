@@ -130,4 +130,12 @@ A source self-audit selected 55 Shipcheck files with a sample policy prohibiting
 remained partial: existing sensitive-content filters excluded two files and the
 custom `createRequire` binding was conservatively unresolved. This validates
 coverage disclosure, not whole-repository architectural correctness. Native parser
-installation was verified on Windows; other platforms retain the P18 release gate.
+installation was verified on Windows. [P18 qualification](P18_QUALIFICATION.md)
+also covers Windows only; other platforms remain unverified.
+
+Java imports undergo Unicode-escape translation before comment/token parsing,
+including repeated `u` escapes and escaped line terminators. Findings retain the
+original raw excerpt and physical line number. Malformed eligible escapes fail
+closed as partial analysis. This preprocessing does not add support for wildcard
+or static imports. The separate Java HTTP adapter still reports Unicode escapes
+as unsupported rather than interpreting their request semantics.

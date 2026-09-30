@@ -1,0 +1,22 @@
+import {it,expect,beforeEach,afterEach,vi} from 'vitest';
+import {mkdtemp,writeFile,rm} from 'node:fs/promises';
+import {join} from 'node:path';
+import {tmpdir} from 'node:os';
+import {createHash} from 'node:crypto';
+import {runWorkflow} from '../src/workflows.js';
+let root:string;
+beforeEach(async()=>{root=await mkdtemp(join(tmpdir(),'shipcheck-check-order-'));vi.stubGlobal('fetch',vi.fn(()=>{throw Error('No network');}));});
+afterEach(async()=>{vi.unstubAllGlobals();await rm(root,{recursive:true,force:true});});
+it.each([false,true])('reviews source and reference snapshots after authorized checks (whole=%s)',async(wholeRepository)=>{
+  await writeFile(join(root,'main.ts'),'export const value = 1;');
+  await writeFile(join(root,'requirements.md'),'Return 1.');
+  const source='export const value = 2;',reference='Return 2.';
+  await writeFile(join(root,'shipcheck.config.json'),JSON.stringify({resources:[{id:'requirements',path:'requirements.md'}],checks:[{id:'generate',command:process.execPath,args:['-e',`const fs=require('node:fs');fs.writeFileSync('main.ts',${JSON.stringify(source)});fs.writeFileSync('requirements.md',${JSON.stringify(reference)});`]}]}));
+  const report=await runWorkflow(root,'audit',{execution:'mock'},{runChecks:true,wholeRepository});
+  const hash=(s:string)=>createHash('sha256').update(s).digest('hex');
+  expect(report.checks?.[0]?.status).toBe('passed');
+  const ai=report.ai ?? report.aiAudit?.batches[0];
+  expect(ai?.preview.files.find(f=>f.path==='main.ts')?.sha256).toBe(hash(source));
+  expect(report.references?.resources.find(r=>r.id==='requirements')?.sha256).toBe(hash(reference));
+  expect(fetch).not.toHaveBeenCalled();
+});

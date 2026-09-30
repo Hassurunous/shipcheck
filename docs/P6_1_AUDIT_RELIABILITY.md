@@ -1,7 +1,8 @@
 # P6.1 — audit reliability
 
-This milestone addresses the self-audit's citation failures, missing cross-file
-context and misleading clean-result risks. It precedes P7's multi-language work.
+P6.1 addressed the self-audit's citation failures, missing cross-file context and
+misleading clean-result risks. The dated evaluation below records that work;
+[P18](P18_QUALIFICATION.md) contains the latest qualification evidence.
 
 ## Changes
 
@@ -32,7 +33,8 @@ Import detection is a lexical heuristic, not a language parser. Multiline import
 dynamic imports, require calls, aliases, package resolution and reverse callers
 are not resolved. Import-like text may be mistaken for a declaration. Even with
 dependency grouping, context caps can omit necessary code. This is not automatic
-whole-repository batching; selected/skipped coverage remains essential.
+whole-repository batching; [P7 batching](P7_CONFIGURATION.md) is a separate feature.
+Selected/skipped coverage remains essential.
 
 ## Repeatable quality evaluation
 
@@ -63,7 +65,7 @@ Input shape:
 ```
 
 Supply all six case IDs for a complete score. Missing/failed cases and unassessed
-candidates prevent a complete semantic score. Human review labels candidates as
+candidates prevent a complete semantic score. Explicit reviewer labels classify candidates as
 confirmed, false-positive or uncertain; confirmed labels must reference a known
 bug. A confirmed label with rejected citations cannot count as an evidence-backed
 detection and leaves the score incomplete. Matching citations alone do not count as detections. Scores include detected

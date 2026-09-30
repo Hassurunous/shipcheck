@@ -12,7 +12,8 @@
     "forceConsistentCasingInFileNames": true,
     "noEmitOnError": true,
     "types": ["node"],
-    "sourceMap": true
+    "sourceMap": true,
+    "declaration": true
   },
   "include": ["src/**/*.ts", "test/**/*.ts", "vitest.config.ts"],
   "exclude": ["node_modules", "dist"]

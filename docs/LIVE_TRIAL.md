@@ -1,5 +1,11 @@
 # P3 live trial
 
+> Historical record: milestone-era status and future-work statements below describe
+> the implementation at that time. See the [user guide](USER_GUIDE.md),
+> [current architecture](ARCHITECTURE.md) and [P18 qualification](P18_QUALIFICATION.md)
+> for current behavior and limits. Original test results are preserved.
+
+
 The approved trial is $0.50 total, at most three generation requests, one per
 mode, with zero retries or model fallbacks. It completed on 2026-09-26 using
 the linked Windows CLI and OPENAI_PROJECTDEV_API_KEY. No credential is stored

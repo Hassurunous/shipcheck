@@ -10,7 +10,8 @@ shipcheck audit . --ai mock --json
 shipcheck audit . --ai live --budget development --json
 ```
 
-Preview shows selection without sending content. Mock exercises plumbing and does
+Preview shows selection without sending content to a model. Explicitly authorized
+HTTPS references can still be fetched; see [external grants](P16_EXTERNAL_CONTRACTS.md). Mock exercises plumbing and does
 not diagnose defects. Live mode requires the existing initialized spending allowance
 and credentials. Reference content is sent to the provider only in live mode (or to
 an explicitly injected test transport). Secret heuristics are not a complete secret
@@ -81,5 +82,7 @@ recorded reports, explicit semantic labels, offline scoring commands and cost.
 Offline injected-transport tests validate plumbing, bounds, changed references,
 cross-file citations, ambiguity, omissions and batch previews. They do not establish
 live model quality. The live corpus is deliberately small and does not establish
-general diagnosis accuracy or comprehensive injection resistance. External roots/remote references remain P16; inline task
-requirement assessment remains P13. No source-editing capability is introduced.
+general diagnosis accuracy or comprehensive injection resistance.
+[External references](P16_EXTERNAL_CONTRACTS.md) and
+[task requirement assessment](P13_TASK_ASSESSMENT.md) are also implemented within
+their documented limits. Shipcheck has no source-editing capability.

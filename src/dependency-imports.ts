@@ -2,6 +2,7 @@ import type {Node,Literal,CallExpression,Identifier} from 'acorn';
 import {parser} from '@lezer/python';
 import {parseHttpSyntax} from './fetch-calls.js';
 import {syntaxTree,literal} from './standard-http-syntax.js';
+import {preprocessJava} from './java-source.js';
 export type ImportObservation={line:number;excerpt:string;specifier?:string;reason?:string};
 export function dependencyLanguage(path:string) {
   return /\.[cm]?[jt]sx?$/.test(path)?'javascript':path.endsWith('.py')?'python':path.endsWith('.go')?'go':path.endsWith('.java')?'java':path.endsWith('.cs')?'csharp':undefined;
@@ -9,13 +10,16 @@ export function dependencyLanguage(path:string) {
 /** Parse declarations only. No target code, compiler, or module loader is executed. */
 export function extractDependencyImports(source:string,path:string) {
   const imports:ImportObservation[]=[],issues:string[]=[],language=dependencyLanguage(path);
+  const java=language==='java'?preprocessJava(source):undefined;
+  if(java?.issues.length)return {imports,issues:java.issues};
   const add=(start:number,end:number,specifier?:string,reason?:string)=>{
+    if(java){start=java.starts[start] ?? source.length;end=java.ends[end-1] ?? start;}
     if(imports.length>=128){if(!issues.includes('import-count-limit'))issues.push('import-count-limit');return;}
-    const excerpt=source.slice(start,end),line=source.slice(0,start).split('\n').length;
+    const excerpt=source.slice(start,end),line=source.slice(0,start).split(/\r\n|\n|\r/).length;
     if(excerpt.length>2048){issues.push('import-excerpt-limit');return;}
     imports.push({line,excerpt,...(specifier===undefined?{}:{specifier}),...(reason?{reason}:{})});
   };
-  if(/\r(?!\n)/.test(source))return {imports,issues:['unsupported-line-endings']};
+  if(!java && /\r(?!\n)/.test(source))return {imports,issues:['unsupported-line-endings']};
   if(language==='javascript') {
     const parsed=parseHttpSyntax(source,/\.tsx$/.test(path)?'tsx':/\.[cm]?ts$/.test(path)?'typescript':'javascript');
     issues.push(...parsed.issues);
@@ -48,7 +52,7 @@ export function extractDependencyImports(source:string,path:string) {
       }
     }while(walk.next());
   } else if(language) {
-    const parsed=syntaxTree(language,source);issues.push(...parsed.issues);
+    const parsed=syntaxTree(language,java?.text ?? source);issues.push(...parsed.issues);
     for(const node of parsed.nodes) {
       if(language==='go' && node.kind()==='import_spec')add(node.range().start.index,node.range().end.index,literal(node.field('path')));
       if(language==='java' && node.kind()==='import_declaration') {

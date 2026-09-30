@@ -142,6 +142,7 @@ names, settle in a retry loop or silently increase the amount.
 > errors. Return changes, test evidence, remaining gaps and stop reason. Shipcheck
 > does not edit code or authorize release.
 
-This milestone provides an operating protocol and tested capture example. It does
-not establish that an autonomous developer reliably fixes defects. Scored live
-developer-agent experiments and broader adversarial qualification remain P18.
+The [P18 qualification record](P18_QUALIFICATION.md) includes a supervised developer
+repair loop, adversarial fixtures and live AI checks on Windows. These bounded
+experiments do not establish general autonomous-agent effectiveness. Validate the
+loop on representative projects and inspect coverage and evidence on every run.

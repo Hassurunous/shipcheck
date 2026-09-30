@@ -4,7 +4,7 @@ import { AiFailure, decodeResponse, type QaRequest } from './client.js';
 import type { AiContext } from './context.js';
 import type { AiMode } from './contracts.js';
 import { INPUT_LIMIT, OUTPUT_LIMIT, TRIAL_MODELS, usageSchema, usageMicroUsd, reservationMicroUsd, withTrialReservation } from './trial-budget.js';
-import { AUDIT_INPUT_LIMIT, AUDIT_OUTPUT_LIMIT, auditUsageSchema, auditReservationMicroUsd, withAuditReservation } from './audit-budget.js';
+import { AUDIT_MODELS, auditUsageMicroUsd, AUDIT_INPUT_LIMIT, AUDIT_OUTPUT_LIMIT, auditUsageSchema, auditReservationMicroUsd, withAuditReservation } from './audit-budget.js';
 
 const ORIGIN = 'https://api.openai.com/v1/responses';
 /** A fetch seam for offline tests; production has no configurable endpoint. */
@@ -75,7 +75,7 @@ export async function requestLiveQa(request: QaRequest, context: AiContext, mode
 export async function requestBudgetQa(request:QaRequest,context:AiContext,mode:AiMode,timeoutMs:number,
   apiKey:string|undefined,budget:string,dependencies:LiveDependencies={}) {
   if(!apiKey?.trim())throw new AiFailure('missing-credentials','Provide the configured API credential before live review.');
-  if(request.model!==TRIAL_MODELS[mode].model)throw new AiFailure('budget-model','Model does not match the pinned priced mapping.');
+  if(request.model!==AUDIT_MODELS[mode].model)throw new AiFailure('budget-model','Model does not match the pinned priced mapping.');
   if(!Number.isInteger(request.max_output_tokens) || request.max_output_tokens<128 || request.max_output_tokens>AUDIT_OUTPUT_LIMIT)
     throw new AiFailure('budget-output-limit','Budgeted output limit is 128–2000 tokens.');
   const payload={model:request.model,store:false,input:request.input,instructions:request.instructions,text:request.text,
@@ -96,6 +96,6 @@ export async function requestBudgetQa(request:QaRequest,context:AiContext,mode:A
     } catch {throw new AiFailure('invalid-usage','Response usage or processing tier cannot be reconciled; reservation retained.');}
     const output=decodeResponse(body,context);
     return {usage,value:{output,usage,countedInputTokens,reservedUsd:auditReservationMicroUsd(mode)/1e6,
-      pricedUsageUpperBoundUsd:usageMicroUsd(mode,usage.input_tokens,usage.output_tokens)/1e6}};
+      pricedUsageUpperBoundUsd:auditUsageMicroUsd(mode,usage.input_tokens,usage.output_tokens)/1e6}};
   },dependencies.directory,dependencies.now);
 }

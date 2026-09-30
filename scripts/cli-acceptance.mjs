@@ -147,6 +147,20 @@ try {
     await write('core/order.ts','import(name);');assert.equal(json(['audit',repo],2).architecture.state,'partial');
     await write('core/order.ts','export const order = 1;');await configure({});
   });
+  await check('Java Unicode preprocessing preserves forbidden imports and raw evidence',async()=>{
+    await write('ui/Foo.java','package ui; class Foo {}');
+    await configure({architecture:{files:['core/*.java'],aliases:[{prefix:'ui.',target:'ui'}],boundaries:[{id:'layer',from:'core',to:'ui',reason:'Keep layers separate.'}]}});
+    for(const escape of ['\\u000a','\\uu000d']) {
+      await write('core/Main.java','package core;\n// '+escape+' \\u0069mport ui.Foo;\nclass Main {}');
+      const report=json(['audit',repo],1);
+      assert.equal(report.architecture.boundaries[0].status,'violation');
+      assert.equal(report.architecture.dependencies[0].excerpt,'\\u0069mport ui.Foo;');
+      assert.equal(report.architecture.dependencies[0].line,2);
+    }
+    await write('core/Main.java','// \\u00xx\nclass Main {}');
+    assert.equal(json(['audit',repo],2).architecture.state,'partial');
+    await write('core/Main.java','class Main {}');await configure({});
+  });
   await check('filename conventions work independently of language parsing',async()=>{
     await write('core/BadName.rs','fn main() {}');await configure({architecture:{files:['core/*.rs'],conventions:[{id:'names',within:'core',style:'snake_case',reason:'Use snake case.'}]}});
     assert.deepEqual(json(['audit',repo],1).architecture.conventions[0].evidence,['core/BadName.rs']);await configure({});

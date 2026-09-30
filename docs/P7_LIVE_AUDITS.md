@@ -88,7 +88,7 @@ Models/prices are pinned to the existing low-cost/balanced/high-quality mapping.
 Configured alternatives are rejected before reservation. Standard processing,
 no tools, no retries, and the highest short-context input rate (cache writes) are
 used. [Official pricing](https://developers.openai.com/api/docs/pricing) was checked
-September 27, 2026. These shipped rates expire **October 3, 2026 UTC**: a reviewed
+September 30, 2026 (including the [GPT-6 Sol rate table](https://developers.openai.com/api/docs/models/gpt-6-sol)). New version-2 budgets expire **October 30, 2026 at 00:00 UTC**: a reviewed
 pricing-policy update is required afterward; config cannot extend it.
 
 | Mode | Model | Reservation per request |
@@ -132,3 +132,17 @@ const report = await runWorkflow('/path/to/repo', 'audit',
   {execution:'live', budget:'baseline'}, {wholeRepository:true});
 console.log(await budgetStatus('baseline'));
 ```
+
+## Pricing policy upgrades
+
+Ledger policies and their model/rate mappings are versioned. Version-1 ledgers
+retain their October 3 expiry and all reservations, receipts and settlement support,
+but are retired for new requests in this release. The original three-request trial
+is unchanged. Upgrading Shipcheck never resets or renews an existing allowance.
+After inspecting and resolving an old ledger, explicitly approve a separate
+allowance and initialize a new name with `shipcheck budget init <new-name> --usd <amount>`.
+This is additional spending authorization, not a transfer or refund of unused funds.
+Do not delete an old ledger or recreate it to bypass its accounting.
+Maintainers: add a new pricing policy version when changing rates, models, limits
+or expiry. Preserve every historical version's rates and validation rules so
+status and settlement keep working; never repoint an old version to a new table.

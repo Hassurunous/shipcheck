@@ -8,6 +8,7 @@ import { aiResultSchema, modeSchema, type AiMode, type AiResult } from './contra
 import { AiFailure, buildRequest, mockTransport, requestQa, type ResponseTransport } from './client.js';
 import { requestLiveQa, requestBudgetQa } from './live.js';
 import { budgetNameSchema } from './audit-budget.js';
+import { AUDIT_MODELS } from './audit-budget.js';
 import { TRIAL_MODELS } from './trial-budget.js';
 import { verifyEvidence } from './verify-evidence.js';
 import {attachReferences} from './reference-context.js';
@@ -40,7 +41,7 @@ export async function reviewWithAi(target = '.', options: AiReviewOptions = {exe
   const mode = modeSchema.parse(options.mode ?? config.ai.mode);
   const profile = await inspectRepository(target,{exclude:config.exclude});
   const report = createReport(profile,config);
-  const plannedModel = options.execution === 'live' ? (config.ai.models[mode] ?? TRIAL_MODELS[mode].model) : config.ai.models[mode];
+  const plannedModel = options.execution === 'live' ? (config.ai.models[mode] ?? (options.budget?AUDIT_MODELS:TRIAL_MODELS)[mode].model) : config.ai.models[mode];
   const execution = options.execution === 'live' ? 'live' : options.execution === 'preview' ? 'preview' : injected ? 'injected' : 'mock';
   const model = execution === 'mock' ? `mock-${mode}` : plannedModel;
   const result: AiResult = {

@@ -5,6 +5,7 @@
   "private": true,
   "type": "module",
   "main": "./dist/src/index.js",
+  "types": "./dist/src/index.d.ts",
   "bin": {
     "shipcheck": "./dist/src/cli.js"
   },

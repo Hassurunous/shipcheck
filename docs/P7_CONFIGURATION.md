@@ -1,6 +1,6 @@
 # P7: configurable checks and repository baselines
 
-This first P7 slice adds external check commands, AI credential references and
+Shipcheck supports external check commands, AI credential references and
 review concerns, and whole-repository AI batching. Live batches share a named,
 persistent allowance. ESLint and Ruff JSON adapters provide normalized diagnostics;
 see [structured checks](P7_STRUCTURED_CHECKS.md) for configuration and validation limits.
@@ -62,15 +62,16 @@ not style preferences. These are AI instructions, not analyzers or proven diagno
 ## First report and the developer-agent loop
 
 ```powershell
-shipcheck audit . --run-checks --json > baseline.json
-shipcheck audit . --ai preview --whole-repository --json > ai-plan.json
-shipcheck audit . --ai mock --whole-repository --markdown > mock-report.md
-shipcheck diff . --run-checks --json > changes.json
+shipcheck audit . --run-checks --json > ../baseline.json
+shipcheck audit . --ai preview --whole-repository --json > ../ai-plan.json
+shipcheck audit . --ai mock --whole-repository --markdown > ../mock-report.md
+shipcheck diff . --run-checks --json > ../changes.json
 ```
 
 Save reports outside the target or exclude them: redirection creates output before
 inspection. The baseline runs deterministic rules and configured commands. Preview
-and mock use no model/network and produce no real AI diagnoses.
+and mock make no model requests and produce no real AI diagnoses. Explicitly
+granted HTTPS references can still be fetched; see [external access](P16_EXTERNAL_CONTRACTS.md).
 
 `audit` already inspects the whole inventory subject to exclusions. `diff` restricts
 findings/AI focus to changed paths. External checks currently always run at the root,
@@ -127,7 +128,7 @@ Whole-repository live AI requires a named allowance; see
 The original trial ledger remains separate. Citation checks verify source locations,
 not diagnosis correctness. Preview/mock and external checks spend no API credits.
 
-## Reference resources and planned task auditing
+## Reference resources and task auditing
 
 Optional `resources` configuration now supports bounded local reference loading.
 See [P8 reference resources](P8_REFERENCE_RESOURCES.md) for schema, examples and

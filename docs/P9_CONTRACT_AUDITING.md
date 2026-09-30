@@ -1,8 +1,9 @@
-# P9 — Contract auditing (started)
+# P9 — OpenAPI contract index
 
-The first implementation is an exported, offline OpenAPI operation index. It is
-not yet invoked by `shipcheck audit` and does not compare consumer code to contracts.
-P8's remaining AI-reference integration remains pending.
+The exported offline OpenAPI operation index underpins contract comparisons in
+`audit`, `diff` and `task`. This page documents the standalone index API; see
+[P14](P14_CONTRACT_CHECKS.md) and [multilingual adapters](P14_2_ADDITIONAL_LANGUAGES.md)
+for consumer comparisons, and [P12](P12_REFERENCE_AUDITS.md) for AI reference use.
 
 ```js
 import { loadReferenceResources, indexOpenApi } from 'shipcheck';
@@ -33,8 +34,8 @@ malformed path/operation entries produce explicit issues. Referenced Path Items 
 skipped entirely; their sibling operations are not treated as resolved contracts.
 No `$ref` is fetched, including local references. YAML, OpenAPI 2/3.2, webhooks,
 callbacks, parameter/schema resolution and full specification validation are outside
-this initial index. An absent operation therefore cannot yet establish a hallucinated
-API call or a contract violation.
+this standalone index. An absent operation alone does not establish a hallucinated
+API call: comparison also requires supported consumer extraction and complete provider coverage.
 
 The implementation uses the Paths, Path Item and Operation definitions in the
 [OpenAPI 3.1.1 specification](https://spec.openapis.org/oas/v3.1.1.html).

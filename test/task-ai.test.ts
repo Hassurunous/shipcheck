@@ -63,7 +63,7 @@ it('invalidates results when task reload fails and rejects changed source citati
   const changed=await run(async()=>{await writeFile(join(root,'fee.ts'),'export const fee=()=>7;');return response([assessment]);});
   expect(changed.ai?.taskReview?.assessments[0]?.evidenceVerification?.status).toBe('rejected');
 });
-it('marks task changes by explicitly authorized checks after AI review',async()=>{
+it('marks task changes by explicitly authorized checks before AI review',async()=>{
   await writeFile(join(root,'shipcheck.config.json'),JSON.stringify({currentTask:task,checks:[{id:'change',command:process.execPath,
     args:['-e',"const fs=require('fs');const p='shipcheck.config.json';const c=JSON.parse(fs.readFileSync(p));c.currentTask.title='Changed';fs.writeFileSync(p,JSON.stringify(c));"]}]}));
   const report=await runWorkflow(root,'task',{execution:'mock'},{currentTask:true,runChecks:true});

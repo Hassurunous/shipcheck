@@ -162,14 +162,15 @@ being recognized; the report covers the named patterns, not every network action
 
 ## Follow-up priority
 
-The next planned core milestone is P15. For subsequent adapter work, prioritize
+For subsequent adapter work, prioritize
 Rust reqwest literal RequestBuilder chains, Ruby Net::HTTP URI-based calls, then
 PHP cURL literal URL/options. Each must preserve offline checks and include
 clean/defect/unsupported fixtures, no-execution assertions, evidence and packaged
 CLI checks. More complex instances, async clients, default configuration and SDK
 resolution follow explicit data-flow/dependency work; they must not be silently
 treated as supported. Optional bounded AI can supplement interpretation while
-leaving unresolved offline coverage visible. External contracts/SDKs remain P16.
+leaving unresolved offline coverage visible. See [P16](P16_EXTERNAL_CONTRACTS.md)
+for implemented external contract and SDK checks and their limits.
 
 References: [ast-grep JS API](https://ast-grep.github.io/guide/api-usage/js-api.html),
 [Go net/http](https://pkg.go.dev/net/http),
@@ -191,4 +192,5 @@ References: [ast-grep JS API](https://ast-grep.github.io/guide/api-usage/js-api.
   extraction limits, exclusions and unchanged source bytes. Network calls are forbidden
   in fixture tests. Request construction remains distinct from execution.
 - Paid API spend: $0. Non-Windows platforms and arbitrary runtime integrations are
-  not established by these checks; broader platform qualification remains P18.
+  not established by these checks. [P18 qualification](P18_QUALIFICATION.md) is
+  Windows-only; macOS/Linux still need testing.

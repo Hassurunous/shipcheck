@@ -129,3 +129,10 @@ it('emits console, markdown and JSON policies with violation and partial exit pr
   await write('core/a.ts','import "node:fs";');
   expect((await runCli(['audit',root])).exitCode).toBe(0);
 });
+it.each([String.raw`\u000a`,String.raw`\uu000d`])('CLI finds a Java boundary violation after preprocessing %s',async(escape)=>{
+  await write('core/A.java','package core;\n// '+escape+' import ui.Foo;\nclass A {}');
+  await write('ui/Foo.java','package ui; class Foo {}');
+  await write('shipcheck.config.json',JSON.stringify({architecture:{...config.architecture,aliases:[{prefix:'ui.',target:'ui'}]}}));
+  const result=await runCli(['audit',root,'--json']);
+  expect(result.exitCode).toBe(1);expect(JSON.parse(result.stdout).architecture.boundaries[0].status).toBe('violation');
+});

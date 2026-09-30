@@ -73,12 +73,14 @@ export async function runWorkflow(target:string, kind:'audit'|'diff'|'task', ai?
   const config=inlineConfig ?? (ai?.config===undefined?await loadConfig(target):configSchema.parse(ai.config));
   const referenceAccess=options.referenceAccess ?? ai?.referenceAccess ?? {};
   const whole=kind==='audit' && (options.wholeRepository || config.ai.scope==='whole-repository');
+  // Authorized tools can write files. Collect review snapshots only after they finish.
+  const root=await validateRoot(target);
+  const languages=options.runChecks && config.checks.some(check=>check.languages)
+    ? Object.keys((await inspectRepository(root,{exclude:config.exclude})).languages):undefined;
+  const checks=await runChecks(root,config.checks,options.runChecks===true,config.ai.apiKeyEnv,languages);
   const references=config.resources.length?(await loadReferenceResources(target,config,paths,referenceAccess)).report:undefined;
   const report = ai && paths?.length !== 0 && references?.state!=='incomplete' ? whole ? await reviewWholeRepository(target,{...ai,config,referenceAccess})
     : await reviewWithAi(target,{...ai,config,referenceAccess,...(taskDefinition?{task:taskDefinition,reloadTask}:{}),...(paths ? {paths} : {})}) : await reviewRepository(target,config);
-  const languages=options.runChecks && config.checks.some(check=>check.languages)
-    ? Object.keys((await inspectRepository(report.root,{exclude:config.exclude})).languages):undefined;
-  const checks=await runChecks(report.root,config.checks,options.runChecks===true,config.ai.apiKeyEnv,languages);
   if(report.ai?.taskReview && report.ai.taskReview.freshness==='unchanged') {
     try {if(describeCurrentTask(await reloadTask()).sha256!==report.ai.taskReview.taskHash)invalidateTaskReview(report.ai.taskReview);}
     catch {invalidateTaskReview(report.ai.taskReview);}

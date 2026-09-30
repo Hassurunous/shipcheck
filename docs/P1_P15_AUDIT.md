@@ -1,5 +1,11 @@
 # P1-P15 implementation audit
 
+> Historical record: milestone-era status and future-work statements below describe
+> the implementation at that time. See the [user guide](USER_GUIDE.md),
+> [current architecture](ARCHITECTURE.md) and [P18 qualification](P18_QUALIFICATION.md)
+> for current behavior and limits. Original test results are preserved.
+
+
 This audit compares the roadmap with implementation, regression tests and real
 CLI execution before P16. It covers the current working tree, including P15.
 Milestone completion means its **documented bounded scope**, not every originally

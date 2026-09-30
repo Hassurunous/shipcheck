@@ -1,4 +1,4 @@
-# P10 — Requirements and architecture policies (started)
+# P10 — Requirements and architecture policies (pure policy API)
 
 P10 introduced the pure policy evaluator below. P15 now integrates automatic
 bounded import extraction, dependency resolution, boundary and naming checks into
@@ -31,9 +31,9 @@ A matching observation produces `potential-violation` with the original evidence
 Otherwise the outcome is `no-observed-violation`, never proof that the repository
 satisfies the rule. Coverage is explicitly `supplied-observations-only`; line and
 excerpt evidence is caller supplied and unverified. Duplicate observations are
-deduplicated. Requirements always produce `insufficient-evidence` in this slice.
-Optional requirement `resourceIds` identify intended references but are not yet
-resolved or assessed.
+deduplicated. Requirements always produce `insufficient-evidence` in this pure API.
+Optional requirement `resourceIds` are metadata; this API does not resolve or
+assess them. Workflow-level task assessment is documented in [P13](P13_TASK_ASSESSMENT.md).
 
 IDs must be unique across requirements and boundaries. Schemas reject unknown
 fields, empty text and oversized inputs: up to 100 requirements, 100 boundaries,
