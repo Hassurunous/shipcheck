@@ -164,3 +164,11 @@ successful quality checks. External command file coverage can be unknown.
 `auditSummary.generalQualityVerdict` intentionally remains `not-established`;
 zero findings or exit 0 is not a general quality guarantee.
 See [audit scope and limitations](P19_AUDIT_SCOPE.md).
+
+## Optional quality presets
+
+Enable quality.presets in shipcheck.config.json to discover project-local ESLint,
+TypeScript or Ruff. Run shipcheck audit . --run-checks to authorize execution.
+Tests and alternative tools stay explicitly configured. Discovery readiness is
+not a passed check; inspect execution results and coverage gaps.
+See [P20 setup and examples](P20_QUALITY_WORKFLOWS.md).

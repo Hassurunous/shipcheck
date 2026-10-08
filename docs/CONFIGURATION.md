@@ -161,3 +161,11 @@ sandbox or rewrite their behavior.
 
 The small pinned `ignore` dependency implements Git pattern matching; Shipcheck
 controls file discovery, read bounds, precedence and reporting.
+
+## Quality presets (P20)
+
+Optional quality.presets accepts javascript, typescript and python. quality.bindings
+maps eslint/typescript/ruff slots to an existing checks ID or false. Presets discover
+local tools but require --run-checks for execution. Checks can optionally declare
+purpose: lint, typecheck, test or other; purpose is descriptive only.
+See [P20 configuration, commands and limitations](P20_QUALITY_WORKFLOWS.md).

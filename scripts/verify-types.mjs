@@ -12,10 +12,15 @@ try {
   const consumer=join(directory,'consumer.mts');
   const installed=createRequire(consumer).resolve('shipcheck');
   assert.ok(installed.startsWith(join(prefix,'node_modules','shipcheck')+sep),'Expected Shipcheck in the selected fresh installation');
-  await writeFile(consumer,`import {runWorkflow, reportSchema} from 'shipcheck';
+  await writeFile(consumer,`import {runWorkflow, reportSchema, qualityReportSchema, type ConfigInput} from 'shipcheck';
 const report=await runWorkflow('.', 'audit');
 const parsed=reportSchema.parse(report);
 const root:string=parsed.root;
+const config:ConfigInput={quality:{presets:["typescript"],bindings:{eslint:false}}};
+if(parsed.quality)qualityReportSchema.parse(parsed.quality);
+// @ts-expect-error unknown preset must remain a type error
+const invalid:ConfigInput={quality:{presets:["invented"]}};
+void config;void invalid;
 // @ts-expect-error invalid workflow kind must remain a type error
 await runWorkflow('.', 'invented-workflow');
 console.log(root);

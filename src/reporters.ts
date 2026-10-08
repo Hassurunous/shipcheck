@@ -21,6 +21,11 @@ export function renderConsoleReport(input: Report): string {
       for(const limit of stage.limitations)lines.push('    Limit: '+text(limit));
     }
   } else lines.push('', 'Assessment scope unavailable in this report; no overall code-quality conclusion can be established.');
+  if(report.quality) {
+    lines.push('', 'Quality presets: '+report.quality.presets.map(text).join(', '));
+    for(const tool of report.quality.tools)lines.push('  '+text(tool.slot)+': '+tool.status.toUpperCase()+' — '+text(tool.reason)+' Check: '+text(tool.checkId));
+    for(const gap of report.quality.gaps)lines.push('  Coverage gap: '+text(gap));
+  }
   if(report.ignorePolicy) {
     const policy=report.ignorePolicy;
     lines.push(`Ignore policy: ${policy.mode}; repository .gitignore: ${policy.respectGitignore?'enabled':'disabled'}; global Git ignore settings: never used.`);

@@ -1,3 +1,4 @@
+import {qualityReportSchema} from './quality-contracts.js';
 import {auditSummarySchema} from './audit-summary-contracts.js';
 import {inspectionStages,summarizeAudit} from './audit-summary.js';
 import {architectureResultSchema} from './architecture-contracts.js';
@@ -37,6 +38,7 @@ export const reportSchema = z.object({
   inspectionWarnings: repositoryProfileSchema.shape.warnings,
   ai: aiResultSchema.optional(),
   checks:z.array(checkResultSchema).optional(),
+  quality:qualityReportSchema.optional(),
   references:referencesSchema.optional(),
   contracts:z.array(contractResultSchema).optional(),
   architecture:architectureResultSchema.optional(),

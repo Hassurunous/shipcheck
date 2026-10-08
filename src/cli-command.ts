@@ -26,7 +26,7 @@ Commands:
 Audit, diff, and task options:
   --json           Print the report as JSON
   --markdown       Print a Markdown report (exclusive with --json)
-  --run-checks     Execute trusted configured checks (whole repository)
+  --run-checks     Execute trusted configured checks and quality presets (whole repository)
   --reference-root <id=path> Authorize one external resource root (repeatable)
   --allow-reference-origin <https://host> Authorize pinned HTTPS references (repeatable)
   --whole-repository Batch all eligible source for audit --ai preview/mock/live

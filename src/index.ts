@@ -38,3 +38,5 @@ export {ignorePolicySchema,type IgnorePolicyReport} from './ignore-contracts.js'
 export type {IgnoreOptions} from './ignore-policy.js';
 
 export {auditSummarySchema,auditStageSchema,type AuditSummary,type AuditStage} from './audit-summary-contracts.js';
+
+export {qualitySchema,qualityReportSchema,type QualityReport} from './quality-contracts.js';

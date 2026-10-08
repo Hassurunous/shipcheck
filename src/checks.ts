@@ -5,6 +5,7 @@ import {terminateCheckTree} from './check-process.js';
 
 export const checkSchema = z.object({
   id:z.string().regex(/^[a-zA-Z0-9][a-zA-Z0-9_-]{0,63}$/),
+  purpose:z.enum(['lint','typecheck','test','other']).optional(),
   command:z.string().min(1).max(1024).refine(value=>!value.includes('\0')),
   args:z.array(z.string().max(4096).refine(value=>!value.includes('\0'))).max(100).default([]),
   timeoutMs:z.number().int().min(100).max(300000).default(60000),
@@ -21,6 +22,7 @@ export const checkSchema = z.object({
 export const checksSchema = z.array(checkSchema).max(20).default([]).refine(
   checks=>new Set(checks.map(check=>check.id)).size===checks.length,'Check IDs must be unique.');
 export const checkResultSchema=z.object({
+  purpose:z.enum(['lint','typecheck','test','other']).optional(),
   id:z.string(),status:z.enum(['skipped','passed','failed','error']),
   exitCode:z.number().int().nullable(),reason:z.string(),output:z.string(),
   scope:z.literal('whole-repository'),
@@ -34,7 +36,7 @@ export async function runChecks(root:string, checks:z.infer<typeof checksSchema>
   credentialEnv='SHIPCHECK_API_KEY',detectedLanguages?:readonly string[]):Promise<CheckResult[]> {
   const results:CheckResult[]=[];
   for(const check of checks) {
-    const base={id:check.id,exitCode:null,output:'',scope:'whole-repository' as const};
+    const base={id:check.id,...(check.purpose?{purpose:check.purpose}:{}),exitCode:null,output:'',scope:'whole-repository' as const};
     if(!authorized) {results.push({...base,status:'skipped',reason:'Requires --run-checks authorization.'});continue;}
     if(check.languages && (!detectedLanguages || !check.languages.some(language=>detectedLanguages.includes(language)))) {
       results.push({...base,status:'skipped',reason:detectedLanguages?'No configured language detected in the inspected inventory.':'Language selection requires an inspected inventory.'});continue;

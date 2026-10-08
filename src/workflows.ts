@@ -1,3 +1,4 @@
+import {planQuality} from './quality.js';
 import {summarizeAudit} from './audit-summary.js';
 import {createIgnorePolicy} from './ignore-policy.js';
 import {auditArchitecture} from './architecture-audit.js';
@@ -98,9 +99,10 @@ export async function runWorkflow(target:string, kind:'audit'|'diff'|'task', ai?
   const whole=kind==='audit' && (options.wholeRepository || config.ai.scope==='whole-repository');
   // Authorized tools can write files. Collect review snapshots only after they finish.
   const root=await validateRoot(target);
-  const languages=options.runChecks && config.checks.some(check=>check.languages)
+  const languages=config.quality || (options.runChecks && config.checks.some(check=>check.languages))
     ? Object.keys((await inspectRepository(root,{respectGitignore:config.respectGitignore,exclude:config.exclude})).languages):undefined;
-  const checks=await runChecks(root,config.checks,options.runChecks===true,config.ai.apiKeyEnv,languages);
+  const quality=await planQuality(root,config,languages ?? [],options.runChecks===true);
+  const checks=[...await runChecks(root,quality.checks,options.runChecks===true,config.ai.apiKeyEnv,languages),...quality.unavailable];
   const references=config.resources.length?(await loadReferenceResources(target,config,paths,referenceAccess)).report:undefined;
   const report = ai && paths?.length !== 0 && references?.state!=='incomplete' ? whole ? await reviewWholeRepository(target,{...ai,config,referenceAccess})
     : await reviewWithAi(target,{...ai,config,referenceAccess,...(taskDefinition?{task:taskDefinition,reloadTask}:{}),...(paths ? {paths} : {})}) : await reviewRepository(target,config);
@@ -123,6 +125,7 @@ export async function runWorkflow(target:string, kind:'audit'|'diff'|'task', ai?
     ...(taskSummary?{currentTask:taskSummary}:{}),
     ...(references?{references}:{}),
     ...(checks.length?{checks}:{}),
+    ...(quality.report?{quality:quality.report}:{}),
     ...(contracts.length?{contracts}:{}),
     ...(sdkContracts.length?{sdkContracts}:{}),
     ...(architecture?{architecture}:{}),

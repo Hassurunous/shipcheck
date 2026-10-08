@@ -8,7 +8,7 @@ compatibility is not yet verified.
 
 See [P18 qualification evidence and release limitations](docs/P18_QUALIFICATION.md)
 for installed-tool results, the supervised developer-loop exercise and test limits.
-**Status: pre-alpha, local distribution; P1–P19 delivered within documented scope.**
+**Status: pre-alpha, local distribution; P1–P20 delivered within documented scope.**
 It provides configurable repository checks, audit/diff/task workflows,
 console/JSON/Markdown reports, and optional AI review with citation checks.
 Built-in checks cover Node package manifests, configured HTTP/SDK contracts and
@@ -236,3 +236,11 @@ or zero findings does not establish overall code quality.
 Reports now include an execution and coverage summary: what ran, what was skipped,
 what failed, and where coverage is unknown. Preview prepares input without calling
 a model; mock results are synthetic. See [audit scope](docs/P19_AUDIT_SCOPE.md).
+
+## Optional quality presets
+
+Enable quality.presets in shipcheck.config.json to discover project-local ESLint,
+TypeScript or Ruff. Run shipcheck audit . --run-checks to authorize execution.
+Tests and alternative tools stay explicitly configured. Discovery readiness is
+not a passed check; inspect execution results and coverage gaps.
+See [P20 setup and examples](docs/P20_QUALITY_WORKFLOWS.md).

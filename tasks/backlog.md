@@ -338,11 +338,15 @@ work is organized into P19–P21 below; it does not expand earlier completed sco
 See [P19 audit scope](../docs/P19_AUDIT_SCOPE.md). This milestone adds reporting
 clarity, not new quality analyzers or automatic command/API authorization.
 
-### P20 — Practical code-quality workflows (planned)
+### P20 — Practical code-quality workflows (completed)
 
-- [ ] Convenient offline quality presets and integration with existing project tools
-- [ ] Useful language-specific lint/type/test coverage without overstating support
-- [ ] Optional AI enhancement for contextual correctness and maintainability review
+- [x] Convenient offline quality presets and integration with existing project tools
+- [x] ESLint/TypeScript/Ruff presets, explicit test commands and coverage gaps
+- [x] Optional existing AI focus/preview/mock/live workflow composed with checks
+
+See [P20 workflows](../docs/P20_QUALITY_WORKFLOWS.md) for discovery paths, bindings,
+authorization, supported tool output and validation. No auto-installation or paid
+requests were added.
 
 ### P21 — Quality-audit effectiveness evaluation (planned)
 
@@ -350,5 +354,5 @@ clarity, not new quality analyzers or automatic command/API authorization.
 - [ ] Measure missed issues, false positives, coverage and AI cost
 - [ ] Evaluate developer repair loops against independently defined expectations
 
-P20/P21 details remain to be agreed before implementation; earlier unscheduled
+P21 details remain to be agreed before implementation; earlier unscheduled
 platform, language-adapter and publication follow-ups remain separate.

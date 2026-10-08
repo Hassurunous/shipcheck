@@ -1,3 +1,4 @@
+import {qualitySchema} from './quality-contracts.js';
 import {architectureSchema} from './architecture-contracts.js';
 import {sdkBindingSchema} from './sdk-contracts.js';
 import { readBoundedConfig, validateRoot } from "./filesystem-policy.js";
@@ -44,13 +45,26 @@ export const configSchema = z.object({
   rules: rulesSchema.default({}),
   ai: aiSettingsSchema.prefault({}),
   checks: checksSchema,
+  quality:qualitySchema.optional(),
   resources:z.array(resourceDefinitionSchema.safeExtend({appliesTo:z.array(pattern).min(1).default(['**'])})).max(32).default([])
     .refine(resources=>new Set(resources.map(resource=>resource.id)).size===resources.length,'Resource IDs must be unique.'),
   overrides: z.array(z.object({
     files: z.array(pattern).min(1), rules: rulesSchema,
     reason: z.string().min(1),
   }).strict()).default([]),
-}).strict().transform(config=>({...config,exclude:config.exclude ?? [],respectGitignore:config.respectGitignore ?? config.exclude===undefined}));
+}).strict().superRefine((config,ctx)=>{
+  if(!config.quality)return;
+  const slots=new Set<string>();
+  if(config.quality.presets.some(p=>p==='javascript' || p==='typescript'))slots.add('eslint');
+  if(config.quality.presets.includes('typescript'))slots.add('typescript');
+  if(config.quality.presets.includes('python'))slots.add('ruff');
+  for(const [slot,id] of Object.entries(config.quality.bindings)) {
+    if(!slots.has(slot))ctx.addIssue({code:'custom',path:['quality','bindings',slot],message:'Binding requires its corresponding preset.'});
+    if(id!==false && !config.checks.some(check=>check.id===id))ctx.addIssue({code:'custom',path:['quality','bindings',slot],message:'Binding must name an existing check ID.'});
+  }
+  if(config.checks.some(check=>check.id.startsWith('quality-')))ctx.addIssue({code:'custom',path:['checks'],message:'quality- check IDs are reserved when presets are enabled.'});
+  if(config.checks.length+slots.size>20)ctx.addIssue({code:'custom',path:['checks'],message:'Quality presets and explicit checks together must fit the 20-check limit.'});
+}).transform(config=>({...config,exclude:config.exclude ?? [],respectGitignore:config.respectGitignore ?? config.exclude===undefined}));
 export type Config = z.infer<typeof configSchema>;
 export type ConfigInput = z.input<typeof configSchema>;
 

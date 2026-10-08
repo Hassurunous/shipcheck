@@ -1,0 +1,519 @@
+{
+  "date": "2026-10-02",
+  "baselineCommit": "5581a74152dae3812fed1eb1ba4fc5352886ea75",
+  "scope": "Working-tree src/**/*.ts, including uncommitted changes",
+  "modules": [
+    {
+      "path": "src/additional-rules.ts",
+      "file": "additional-rules.md",
+      "functions": 13,
+      "variables": 16,
+      "types": 0,
+      "sha256": "4b13055fbd9e5b866b247103263a21639d111586e6cc786b712e4dd48cfa4ac9"
+    },
+    {
+      "path": "src/ai/audit-budget.ts",
+      "file": "ai--audit-budget.md",
+      "functions": 22,
+      "variables": 51,
+      "types": 1,
+      "sha256": "186523c4ab0ffda07f7bba5ad4cce2dab23a4ddc283a845755c138463280f909"
+    },
+    {
+      "path": "src/ai/client.ts",
+      "file": "ai--client.md",
+      "functions": 31,
+      "variables": 32,
+      "types": 2,
+      "sha256": "d6a3c73f82800bdb9403f1b0a674dc17ad76bb10340c3a93c87080e54a20a03c"
+    },
+    {
+      "path": "src/ai/context.ts",
+      "file": "ai--context.md",
+      "functions": 11,
+      "variables": 34,
+      "types": 2,
+      "sha256": "006a568600376e86afb70e7a8326e6b7a37487b2a4026d8a442efd5731f014a2"
+    },
+    {
+      "path": "src/ai/contracts.ts",
+      "file": "ai--contracts.md",
+      "functions": 2,
+      "variables": 13,
+      "types": 4,
+      "sha256": "b48b364561c73a86bd002d3fffbea69731ba8d7df6c0722acde1e8d1ef82f707"
+    },
+    {
+      "path": "src/ai/evaluation.ts",
+      "file": "ai--evaluation.md",
+      "functions": 17,
+      "variables": 22,
+      "types": 3,
+      "sha256": "07789128b0865599652d78a4a78230b5cad222440f0cffd83a615246dffb6ca7"
+    },
+    {
+      "path": "src/ai/live.ts",
+      "file": "ai--live.md",
+      "functions": 8,
+      "variables": 28,
+      "types": 1,
+      "sha256": "816aafd602d741921857296ea519ddb63db6a62dc9c237d30dd55dc3e5748089"
+    },
+    {
+      "path": "src/ai/local-imports.ts",
+      "file": "ai--local-imports.md",
+      "functions": 4,
+      "variables": 6,
+      "types": 0,
+      "sha256": "045737d1ed47fde20cb8124707e762a8a9f091721bb952927cbb5d5df03b1679"
+    },
+    {
+      "path": "src/ai/reference-context.ts",
+      "file": "ai--reference-context.md",
+      "functions": 5,
+      "variables": 8,
+      "types": 0,
+      "sha256": "ef7d1051da994ed51816baa57b6754873cb63324398cedc8bbfe0457ab5fc1ab"
+    },
+    {
+      "path": "src/ai/reference-evaluation.ts",
+      "file": "ai--reference-evaluation.md",
+      "functions": 12,
+      "variables": 23,
+      "types": 3,
+      "sha256": "892591effa90005428b9af595abe6ab9b1d9d5a6d432e2dab79ff118e8bca194"
+    },
+    {
+      "path": "src/ai/review.ts",
+      "file": "ai--review.md",
+      "functions": 21,
+      "variables": 29,
+      "types": 2,
+      "sha256": "2c21f1e5984e328850f499409f7122ae3a180714d090948c12ebcaed4acc9f56"
+    },
+    {
+      "path": "src/ai/task-evaluation.ts",
+      "file": "ai--task-evaluation.md",
+      "functions": 13,
+      "variables": 10,
+      "types": 3,
+      "sha256": "6cd71dfe9dab074126d13ab572b6e095e37378ff945fb0734ed47dca701c8ad4"
+    },
+    {
+      "path": "src/ai/task-review.ts",
+      "file": "ai--task-review.md",
+      "functions": 17,
+      "variables": 7,
+      "types": 0,
+      "sha256": "094bda2c89e91a1d3b432bec4a152d9fe1f7921d7257b0cb7cee98ac0e43d503"
+    },
+    {
+      "path": "src/ai/trial-budget.ts",
+      "file": "ai--trial-budget.md",
+      "functions": 16,
+      "variables": 33,
+      "types": 1,
+      "sha256": "ccc1d0c782ad9453c8f731e23ef55267da8dbc98f8d8d86c2b831343a7a7553f"
+    },
+    {
+      "path": "src/ai/verify-evidence.ts",
+      "file": "ai--verify-evidence.md",
+      "functions": 7,
+      "variables": 8,
+      "types": 2,
+      "sha256": "9a5e54522baa34a364efdaf54ebee960a41061aaed2ba54724ce7ef0925db88c"
+    },
+    {
+      "path": "src/ai/whole-repository.ts",
+      "file": "ai--whole-repository.md",
+      "functions": 7,
+      "variables": 20,
+      "types": 0,
+      "sha256": "2c03d52eb042304c50be9fecf61e1ccf98ac0850783a7769397b86bfe9ced863"
+    },
+    {
+      "path": "src/architecture-audit.ts",
+      "file": "architecture-audit.md",
+      "functions": 22,
+      "variables": 31,
+      "types": 0,
+      "sha256": "ff6a3c71422ff3dff710912587dd45e6dfb92a9a18ffcf65c3c51cea21837334"
+    },
+    {
+      "path": "src/architecture-contracts.ts",
+      "file": "architecture-contracts.md",
+      "functions": 5,
+      "variables": 5,
+      "types": 1,
+      "sha256": "80152f4c968878f20d8a6aa4b3b64a7d47df7030e43b5c648d3a6dae1f43db84"
+    },
+    {
+      "path": "src/axios-calls.ts",
+      "file": "axios-calls.md",
+      "functions": 11,
+      "variables": 37,
+      "types": 0,
+      "sha256": "370be360543ff2567e080f61043f9a0a2471d9ea523abf970537f71b3beec743"
+    },
+    {
+      "path": "src/check-diagnostics.ts",
+      "file": "check-diagnostics.md",
+      "functions": 9,
+      "variables": 11,
+      "types": 2,
+      "sha256": "1cfd7a39b3df137867d780dba222461c26346e7f22bb54a75a37b65a64f48fc6"
+    },
+    {
+      "path": "src/check-process.ts",
+      "file": "check-process.md",
+      "functions": 1,
+      "variables": 1,
+      "types": 0,
+      "sha256": "92d9e157a0590179208b8ed8ac5b811779361a72ab377b57b29ebed15b801a79"
+    },
+    {
+      "path": "src/checks.ts",
+      "file": "checks.md",
+      "functions": 21,
+      "variables": 30,
+      "types": 1,
+      "sha256": "1a6dfa2af954e49389b294d3d3cb7d94347c4932a21d5cb7a7cdb4bbdb27fecd"
+    },
+    {
+      "path": "src/classify.ts",
+      "file": "classify.md",
+      "functions": 1,
+      "variables": 5,
+      "types": 0,
+      "sha256": "0e0eb688da64de13c1207b28170bf729b19119d94e207f50ccd9a3352a417267"
+    },
+    {
+      "path": "src/cli-command.ts",
+      "file": "cli-command.md",
+      "functions": 14,
+      "variables": 44,
+      "types": 1,
+      "sha256": "97c3af935345471d1525885afd30d36d6fafc5d97835582b832a982896f3b712"
+    },
+    {
+      "path": "src/cli.ts",
+      "file": "cli.md",
+      "functions": 0,
+      "variables": 1,
+      "types": 0,
+      "sha256": "32e6128c2efb4290f9001fe47881bae95c96f0cf90971fce44b31f68d3b44273"
+    },
+    {
+      "path": "src/config.ts",
+      "file": "config.md",
+      "functions": 19,
+      "variables": 14,
+      "types": 3,
+      "sha256": "06d2550d5eef044dad7662b0d3a5bc842dff305ae9b75600bcab8e27793345aa"
+    },
+    {
+      "path": "src/contract-adapter-types.ts",
+      "file": "contract-adapter-types.md",
+      "functions": 0,
+      "variables": 0,
+      "types": 3,
+      "sha256": "c92479d886cd3c00d139d6fe602e9ebccfa2d299f016fa7e1cc32a35fc62b11f"
+    },
+    {
+      "path": "src/contract-adapters.ts",
+      "file": "contract-adapters.md",
+      "functions": 2,
+      "variables": 2,
+      "types": 0,
+      "sha256": "23628852015d53476cdc009469aa87b24148aca87f3416a8d69d1f2df7b96fdf"
+    },
+    {
+      "path": "src/contract-audit.ts",
+      "file": "contract-audit.md",
+      "functions": 22,
+      "variables": 44,
+      "types": 1,
+      "sha256": "843c8fc6d0fc635eb966f52c2ab31083025c5a19ce819bf25e6a5baf12e9bd83"
+    },
+    {
+      "path": "src/contract-contracts.ts",
+      "file": "contract-contracts.md",
+      "functions": 1,
+      "variables": 3,
+      "types": 2,
+      "sha256": "c5e941168fd346d07eb6457accc2e8c6f507b43bb7319904e7d35d61e13106e7"
+    },
+    {
+      "path": "src/csharp-http-calls.ts",
+      "file": "csharp-http-calls.md",
+      "functions": 12,
+      "variables": 24,
+      "types": 0,
+      "sha256": "c2bdf1a4912a83e1835846776137b0a4d13a04f153c9a5bcf6831544778bd3c6"
+    },
+    {
+      "path": "src/dependency-imports.ts",
+      "file": "dependency-imports.md",
+      "functions": 6,
+      "variables": 27,
+      "types": 1,
+      "sha256": "be74d7045f263e96b49093aafcd967cbe830abc35c065c7e929ef1f3888636cf"
+    },
+    {
+      "path": "src/fetch-calls.ts",
+      "file": "fetch-calls.md",
+      "functions": 6,
+      "variables": 23,
+      "types": 1,
+      "sha256": "70038954ed924d0ccdf1a1abff92b9ea0a9fde06b63b92ae7f00206c2387faec"
+    },
+    {
+      "path": "src/filesystem-policy.ts",
+      "file": "filesystem-policy.md",
+      "functions": 2,
+      "variables": 9,
+      "types": 0,
+      "sha256": "d39ad3d70e6edb02c8e9e37faa9a1a387acad152242849dcfcc7650b089b899c"
+    },
+    {
+      "path": "src/findings.ts",
+      "file": "findings.md",
+      "functions": 7,
+      "variables": 14,
+      "types": 2,
+      "sha256": "1e501f700040f1fbcfcd3d0585506d8af285728f7fa3b32d07d4711d29f4dc02"
+    },
+    {
+      "path": "src/go-http-calls.ts",
+      "file": "go-http-calls.md",
+      "functions": 6,
+      "variables": 18,
+      "types": 0,
+      "sha256": "df6694a1efa6def15f45bd4b2ba593d6a029fe7de9e13b952daa1780c1f87be1"
+    },
+    {
+      "path": "src/ignore-contracts.ts",
+      "file": "ignore-contracts.md",
+      "functions": 0,
+      "variables": 1,
+      "types": 1,
+      "sha256": "e173d248087f676c8e140ad669e4a3314f509f579ca6a948aec9e8469d088bce"
+    },
+    {
+      "path": "src/ignore-policy.ts",
+      "file": "ignore-policy.md",
+      "functions": 10,
+      "variables": 27,
+      "types": 3,
+      "sha256": "04e0fa3dfd6d17943168e3fa0f7447d18341d0b7a2993590ebb183db746ed3c5"
+    },
+    {
+      "path": "src/index.ts",
+      "file": "index.md",
+      "functions": 1,
+      "variables": 1,
+      "types": 0,
+      "sha256": "dcae06b95108bd00405c96cff892c7233942d29463f914dc12d29d75512b8f5f"
+    },
+    {
+      "path": "src/inspect-package.ts",
+      "file": "inspect-package.md",
+      "functions": 2,
+      "variables": 4,
+      "types": 2,
+      "sha256": "92781aeef27bece9ab4bae4b52ba4544b5320b846e4ddac7aad874047072e5c4"
+    },
+    {
+      "path": "src/inspect-repository.ts",
+      "file": "inspect-repository.md",
+      "functions": 14,
+      "variables": 23,
+      "types": 0,
+      "sha256": "2132527d738e877b891662fe0d50f4622e6234789d6c94aae437fb3d9c8aa91e"
+    },
+    {
+      "path": "src/intent-policy.ts",
+      "file": "intent-policy.md",
+      "functions": 11,
+      "variables": 10,
+      "types": 0,
+      "sha256": "3851fc5c103fddc0eb59d4f2fd08d581721108ea50db06f0ba8d220e52fe4277"
+    },
+    {
+      "path": "src/java-http-calls.ts",
+      "file": "java-http-calls.md",
+      "functions": 9,
+      "variables": 20,
+      "types": 0,
+      "sha256": "da92b50c225a935c4b9b9dccdf8331a1aed1a62b1c4413efaea91baa6ac8fabe"
+    },
+    {
+      "path": "src/java-source.ts",
+      "file": "java-source.md",
+      "functions": 1,
+      "variables": 17,
+      "types": 0,
+      "sha256": "cbb40dfb3da2d8ee2c375999d12518781ef1a4871a9e68abde4957733ca0a661"
+    },
+    {
+      "path": "src/markdown-report.ts",
+      "file": "markdown-report.md",
+      "functions": 4,
+      "variables": 4,
+      "types": 0,
+      "sha256": "37bd60e806955f8e2df35398aa537330ada7b88a751d567ed2858fd2e700e8c4"
+    },
+    {
+      "path": "src/openapi-contract.ts",
+      "file": "openapi-contract.md",
+      "functions": 4,
+      "variables": 15,
+      "types": 1,
+      "sha256": "8d5e177410d4253e9e4797231dbe363101718a6b073211e59025578be5efc573"
+    },
+    {
+      "path": "src/package-references.ts",
+      "file": "package-references.md",
+      "functions": 1,
+      "variables": 11,
+      "types": 0,
+      "sha256": "f1a5f90ac54818155def8a486b9333cd249f2d41b43da03a7fc3417a27b4dec8"
+    },
+    {
+      "path": "src/python-calls.ts",
+      "file": "python-calls.md",
+      "functions": 22,
+      "variables": 79,
+      "types": 0,
+      "sha256": "f19bb7fdcd69dc750cc7ca74dfc59b6994438887b6aef8d9103cb6041e524410"
+    },
+    {
+      "path": "src/reference-access.ts",
+      "file": "reference-access.md",
+      "functions": 3,
+      "variables": 5,
+      "types": 1,
+      "sha256": "daba2ceb59cb5deb8c4ec88e0071d2af062948809f608bef82071588b5eaa873"
+    },
+    {
+      "path": "src/reference-existence.ts",
+      "file": "reference-existence.md",
+      "functions": 2,
+      "variables": 7,
+      "types": 1,
+      "sha256": "1beaf2729614a1c620179a30f4ed4a36bcd2972f11b3f4212e28ac6844338296"
+    },
+    {
+      "path": "src/reference-resources.ts",
+      "file": "reference-resources.md",
+      "functions": 12,
+      "variables": 35,
+      "types": 2,
+      "sha256": "bbbcf7fc5fbae2ba2167bebe8f12e9405a687fce4959444f0acbced679986a64"
+    },
+    {
+      "path": "src/remote-reference.ts",
+      "file": "remote-reference.md",
+      "functions": 13,
+      "variables": 15,
+      "types": 0,
+      "sha256": "3d9e7ad2eed2a93d724e3f7497393b47234422248567872ce9169d83ff00f93a"
+    },
+    {
+      "path": "src/reporters.ts",
+      "file": "reporters.md",
+      "functions": 6,
+      "variables": 50,
+      "types": 0,
+      "sha256": "137c6bd387d920896caced859a4dcdaadb437315835d896876af196a6fc9d25d"
+    },
+    {
+      "path": "src/repository-profile.ts",
+      "file": "repository-profile.md",
+      "functions": 0,
+      "variables": 3,
+      "types": 1,
+      "sha256": "21a58301fad40bb3bc556f408002d6b364a137382c1aef2133eb52bf8c104b8a"
+    },
+    {
+      "path": "src/resource-contracts.ts",
+      "file": "resource-contracts.md",
+      "functions": 3,
+      "variables": 6,
+      "types": 2,
+      "sha256": "df9f9e58c15038a78911e988c7bab85d55e96c9271e8b6774eec11c2f5dcfcf0"
+    },
+    {
+      "path": "src/review-repository.ts",
+      "file": "review-repository.md",
+      "functions": 1,
+      "variables": 1,
+      "types": 0,
+      "sha256": "eb47f5dd81e18f664d4412979db3edf48bfa966b09dea4be2da012a2bbd1be6d"
+    },
+    {
+      "path": "src/sdk-audit.ts",
+      "file": "sdk-audit.md",
+      "functions": 7,
+      "variables": 20,
+      "types": 0,
+      "sha256": "431e515f06c2a7373a88ea8fd8e5fe35d0e7421381bc28a79eb2884f4328e5e4"
+    },
+    {
+      "path": "src/sdk-contracts.ts",
+      "file": "sdk-contracts.md",
+      "functions": 1,
+      "variables": 3,
+      "types": 1,
+      "sha256": "0cb0643d50095f37a8df9255712e3c548ba2cbccdb8651ac2adbc2ae27a09660"
+    },
+    {
+      "path": "src/sdk-syntax.ts",
+      "file": "sdk-syntax.md",
+      "functions": 21,
+      "variables": 28,
+      "types": 5,
+      "sha256": "2628ac2630b6825a27561c9743ff48c97d1942eb6c94b81535264ddc84c6cdaa"
+    },
+    {
+      "path": "src/sensitive-content.ts",
+      "file": "sensitive-content.md",
+      "functions": 0,
+      "variables": 2,
+      "types": 0,
+      "sha256": "e812c14f4b2965a99e6e9a9b36e91f8c545f41e8e85f02333cfbfc19ea517617"
+    },
+    {
+      "path": "src/standard-http-syntax.ts",
+      "file": "standard-http-syntax.md",
+      "functions": 9,
+      "variables": 15,
+      "types": 1,
+      "sha256": "0eac430365ad0e73ed0768d4cb259e7b282c64309d1e6fe3db040067af5e852a"
+    },
+    {
+      "path": "src/task-file.ts",
+      "file": "task-file.md",
+      "functions": 9,
+      "variables": 10,
+      "types": 1,
+      "sha256": "70446ca771e36ffed93625f905c9bb41646158fde858e274c076d598e8cd2e5c"
+    },
+    {
+      "path": "src/version-policy.ts",
+      "file": "version-policy.md",
+      "functions": 2,
+      "variables": 1,
+      "types": 0,
+      "sha256": "9d864d0a09d2757f7b47e15d1fc4888111dc92bef1c349f8562aae37cd6a35cb"
+    },
+    {
+      "path": "src/workflows.ts",
+      "file": "workflows.md",
+      "functions": 9,
+      "variables": 42,
+      "types": 1,
+      "sha256": "4f62d2915b15a9ed636a991494c4fe8f1edb704d5ff4e12bb7a044f033480f13"
+    }
+  ]
+}

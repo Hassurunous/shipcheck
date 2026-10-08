@@ -1,6 +1,6 @@
 # Architecture
 
-## Current implementation through P19
+## Current implementation through P20
 
 `src/cli.ts` is the executable entry point, with command dispatch in
 `src/cli-command.ts`. `audit` performs configured review; help/version explain
@@ -371,3 +371,14 @@ results without I/O. Inspection records successful bounded text reads separately
 from file inventory. Report builders refresh the summary after AI and workflow
 stages; renderers display it without changing exit-code logic. Detailed stage
 results remain authoritative. See [scope semantics](P19_AUDIT_SCOPE.md).
+
+## P20 quality presets
+
+quality-contracts.ts defines opt-in presets, bindings and discovery reports.
+quality.ts examines fixed local tool paths without execution or link traversal,
+then constructs check plans. workflows.ts combines these with explicit checks
+before source/reference snapshots. Existing command limits, diagnostics, credential
+filtering, authorization and process cleanup apply. Missing applicable tools become
+operational check errors only with run authorization. No tool installation,
+package-script guessing, new dependency or implicit AI execution was added.
+See [quality workflows](P20_QUALITY_WORKFLOWS.md).

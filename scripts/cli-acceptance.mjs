@@ -92,6 +92,17 @@ try {
     assert.match(command(['audit',repo]).stdout,/Overall code quality is not established/);
     assert.match(command(['audit',repo,'--markdown']).stdout,/No external checks are configured/);
   });
+  await check('quality presets report missing tools, require authorization and run local checks',async()=>{
+    await configure({quality:{presets:['typescript']}});
+    const missing=json(['audit',repo,'--run-checks'],2);
+    assert.ok(missing.quality.tools.some(tool=>tool.status==='unavailable'));
+    await write('node_modules/eslint/bin/eslint.js','console.log("[]");');
+    await configure({quality:{presets:['javascript']}});
+    const pending=json(['audit',repo]);assert.equal(pending.checks[0].status,'skipped');
+    const ran=json(['audit',repo,'--run-checks']);assert.equal(ran.checks[0].status,'passed');
+    assert.equal(ran.checks[0].purpose,'lint');assert.equal(ran.quality.tools[0].source,'project-local');
+    await configure({});
+  });
   await check('repository Git ignore fallback, override and combined policy are visible',async()=>{
     await write('.gitignore','generated/\n');await write('generated/package.json','{');
     await configure({ai:{mode:'balanced'}});

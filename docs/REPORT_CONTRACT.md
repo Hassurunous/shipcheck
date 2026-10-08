@@ -131,3 +131,14 @@ completed live responses; preview/mock/injected selections stay in
 `selectedFiles` and do not establish live assessment. `omitted` lists recorded
 gaps, not every excluded descendant; use `ignorePolicy` and detailed stage
 results too. See [P19 scope](P19_AUDIT_SCOPE.md).
+
+## Quality discovery (P20)
+
+The optional quality field records preset tool discovery and coverage gaps.
+quality.tools entries identify a slot, checkId, purpose, source, status and reason,
+plus command/args when known. ready is a discovery state, never a passed check.
+Other states are unavailable, disabled and not-applicable. Resolve checkId against
+checks to determine actual execution; unavailable requested tools become check
+errors when execution is authorized. checks[].purpose is an optional caller label.
+The discovery stage in auditSummary may complete while checks remain unauthorized.
+See [P20](P20_QUALITY_WORKFLOWS.md). These are additive schema-version-1 fields.

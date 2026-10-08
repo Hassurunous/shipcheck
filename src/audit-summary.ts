@@ -45,6 +45,12 @@ export function summarizeAudit(report:Report,options:Options={}):AuditSummary {
     item.limitations=['Exact checked files are not attested by this command result. Diagnostic paths alone are not a complete coverage list.',
       'A command name does not establish which analyses it performed. Its own configuration and ignores apply.'];stages.push(item);
   }
+  if(report.quality) {
+    const quality=report.quality;
+    const item=stage('quality','Quality preset discovery',quality.tools.some(t=>t.status==='unavailable')?'partial':'completed',
+      'Tool discovery and coverage gaps only; see external check results for actual execution.',[],'tool-defined');
+    item.limitations=[...quality.gaps,...quality.limitations];stages.push(item);
+  } else if(config?.quality)stages.push(stage('quality','Quality preset discovery','not-run','This entry point did not resolve quality presets.',[],'tool-defined'));
   const refs=report.references;
   const reference=stage('references','Reference loading',refs?(refs.resources.every(r=>r.status==='not-applicable')?'skipped':refs.resources.some(r=>!['loaded','not-applicable'].includes(r.status))?'partial':'completed'):config?.resources.length?'not-run':'not-configured',
     refs?'Reference snapshots were requested; loading documentation is not requirements verification.':'No reference snapshots were loaded.',refs?refs.resources.filter(r=>r.status==='loaded').map(r=>r.path):[]);
