@@ -1,3 +1,4 @@
+import {summarizeAudit} from '../audit-summary.js';
 import { configSchema, loadConfig } from '../config.js';
 import { inspectRepository } from '../inspect-repository.js';
 import { createReport, reportSchema, type Report } from '../findings.js';
@@ -11,7 +12,7 @@ export async function reviewWholeRepository(target:string,options:AiReviewOption
   if(options.execution!=='live' && (options.budget || options.trial))throw new Error('Spending authorization requires live AI.');
   if(options.paths) throw new Error('Whole-repository AI cannot be combined with selected paths.');
   const config=options.config===undefined?await loadConfig(target):configSchema.parse(options.config);
-  const profile=await inspectRepository(target,{exclude:config.exclude});
+  const profile=await inspectRepository(target,{respectGitignore:config.respectGitignore,exclude:config.exclude});
   const report=createReport(profile,config);
   const remaining=new Set(profile.files.map(file=>file.path));
   const selected=new Set<string>();
@@ -44,9 +45,11 @@ export async function reviewWholeRepository(target:string,options:AiReviewOption
   for(const path of remaining)skipped.set(path,stoppedReason?`stopped:${stoppedReason}`:'batch-count-limit');
   const failed=batches.some(batch=>batch.status==='failed');
   const partial=skipped.size>0 || batches.some(batch=>batch.coverage?.state==='partial');
-  return reportSchema.parse({...report,aiAudit:{scope:'whole-repository',batches,...(options.budget?{budgetName:options.budget}:{}),
+  const completed=reportSchema.parse({...report,aiAudit:{scope:'whole-repository',batches,...(options.budget?{budgetName:options.budget}:{}),
     ...(stoppedReason?{stoppedReason}:{}),
     selectedPaths:[...selected].sort(),validResponsePaths:[...valid].sort(),
     skipped:[...skipped].map(([path,reason])=>({path,reason})),
     state:failed?'failed':options.execution==='preview'?'preview':partial?'partial':'complete'}});
+  completed.auditSummary=summarizeAudit(completed,{config,aiRequested:options.execution});
+  return completed;
 }

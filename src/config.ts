@@ -39,7 +39,8 @@ export const configSchema = z.object({
   architecture:architectureSchema.optional(),
   sdkContracts:z.array(sdkBindingSchema).max(20).default([]).refine(items=>new Set(items.map(item=>item.id)).size===items.length,'SDK binding IDs must be unique.'),
   contracts:z.array(contractBindingSchema).max(20).default([]).refine(items=>new Set(items.map(item=>item.id)).size===items.length,'Contract binding IDs must be unique.'),
-  exclude: z.array(pattern).default([]),
+  exclude: z.array(pattern).optional(),
+  respectGitignore:z.boolean().optional(),
   rules: rulesSchema.default({}),
   ai: aiSettingsSchema.prefault({}),
   checks: checksSchema,
@@ -49,7 +50,7 @@ export const configSchema = z.object({
     files: z.array(pattern).min(1), rules: rulesSchema,
     reason: z.string().min(1),
   }).strict()).default([]),
-}).strict();
+}).strict().transform(config=>({...config,exclude:config.exclude ?? [],respectGitignore:config.respectGitignore ?? config.exclude===undefined}));
 export type Config = z.infer<typeof configSchema>;
 export type ConfigInput = z.input<typeof configSchema>;
 

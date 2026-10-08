@@ -76,6 +76,31 @@ try {
     assert.equal(report.schemaVersion,1);assert.equal(report.findings.length,0);assert.equal(report.ai,undefined);
     assert.deepEqual(await snapshot(),before);
   });
+  await check('execution summary separates default scope, preview and mock from live analysis',()=>{
+    const base=json(['audit',repo]);
+    const stage=(report,id)=>report.auditSummary.stages.find(item=>item.id===id);
+    assert.equal(base.auditSummary.generalQualityVerdict,'not-established');
+    assert.equal(stage(base,'external-checks').status,'not-configured');
+    assert.equal(stage(base,'ai').status,'not-requested');
+    assert.ok(stage(base,'inspection').files.includes('src/main.ts'));
+    for(const mode of ['preview','mock']){
+      const report=json(['audit',repo,'--ai',mode]);
+      assert.equal(stage(report,'ai').status,mode);
+      assert.deepEqual(stage(report,'ai').files,[]);
+      assert.ok(stage(report,'ai').selectedFiles.includes('src/main.ts'));
+    }
+    assert.match(command(['audit',repo]).stdout,/Overall code quality is not established/);
+    assert.match(command(['audit',repo,'--markdown']).stdout,/No external checks are configured/);
+  });
+  await check('repository Git ignore fallback, override and combined policy are visible',async()=>{
+    await write('.gitignore','generated/\n');await write('generated/package.json','{');
+    await configure({ai:{mode:'balanced'}});
+    const inherited=json(['audit',repo]);assert.equal(inherited.ignorePolicy.mode,'gitignore');
+    assert.ok(inherited.ignorePolicy.skipped.some(p=>p.path==='generated' && p.source==='.gitignore'));
+    await configure({exclude:[]});assert.equal(json(['audit',repo],1).ignorePolicy.mode,'built-in');
+    await configure({respectGitignore:true,exclude:['audit-reports/**']});assert.equal(json(['audit',repo]).ignorePolicy.mode,'combined');
+    await write('generated/package.json','{}');await write('.gitignore','');await configure({});
+  });
   await check('manifest error and config override control exit 1',async()=>{
     await write('package.json','{');assert.equal(json(['audit',repo],1).findings[0].ruleId,'package/invalid-json');
     await configure({rules:{'package/invalid-json':'off'}});assert.equal(json(['audit',repo]).findings.length,0);

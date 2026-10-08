@@ -1,3 +1,4 @@
+import {createIgnorePolicy,type IgnorePolicy} from './ignore-policy.js';
 import * as fs from 'node:fs/promises';
 import {join,relative} from 'node:path';
 import {createHash} from 'node:crypto';
@@ -15,14 +16,14 @@ export type ResourceSnapshot={record:ResourceRecord;content:string};
 export type LoadedReferences={report:z.infer<typeof referencesSchema>;snapshots:ResourceSnapshot[]};
 class ResourceFailure extends Error {constructor(public status:ResourceRecord['status']){super(status);}}
 const intrinsicallyExcluded=(path:string)=>path.split('/').some(part=>part.toLowerCase()==='.git' || /^\.env(?:\.|$)/i.test(part));
-async function readResource(root:string,path:string,limit:number,exclude:string[]) {
+async function readResource(root:string,path:string,limit:number,exclude:string[],policy?:IgnorePolicy) {
   let current=root;
   for(const part of path.split('/')) {
     current=join(current,part);
     const stat=await fs.lstat(current);
     if(stat.isSymbolicLink())throw new ResourceFailure('linked');
     const actual=relative(root,await fs.realpath(current)).replace(/\\/g,'/');
-    if(actual==='..' || actual.startsWith('../') || intrinsicallyExcluded(actual) || isExcluded(actual,exclude))throw new ResourceFailure('excluded');
+    if(actual==='..' || actual.startsWith('../') || intrinsicallyExcluded(actual) || isExcluded(actual,exclude) || await policy?.reason(actual,stat.isDirectory(),false))throw new ResourceFailure('excluded');
   }
   const stat=await fs.lstat(current);
   if(!stat.isFile())throw new ResourceFailure('non-regular');
@@ -45,6 +46,7 @@ async function readResource(root:string,path:string,limit:number,exclude:string[
 export async function loadReferenceResources(target:string,options:ConfigInput={},paths?:readonly string[],access:ReferenceAccess={}):Promise<LoadedReferences> {
   const root=await validateRoot(target);const config=configSchema.parse(options);
   const grants=referenceAccessSchema.parse(access);
+  const policy=createIgnorePolicy(root,config);
   const records:ResourceRecord[]=[];const snapshots:ResourceSnapshot[]=[];let consumed=0;
   for(const resource of config.resources) {
     const record:ResourceRecord={...resource,status:'loaded',sha256:null,bytes:0,lines:0};
@@ -76,7 +78,7 @@ export async function loadReferenceResources(target:string,options:ConfigInput={
         if(bytes.includes(0))throw new ResourceFailure('invalid-text');
         let content:string;try{content=new TextDecoder('utf-8',{fatal:true}).decode(bytes);}catch{throw new ResourceFailure('invalid-text');}
         read={content,bytes:bytes.length,sha256:createHash('sha256').update(bytes).digest('hex')};
-      } else read=await readResource(sourceRoot,resource.path,limit,config.exclude);
+      } else read=await readResource(sourceRoot,resource.path,limit,config.exclude,resource.rootId?undefined:policy);
       consumed+=read.bytes;
       if(sensitiveContent.test(read.content)) {record.status='sensitive-content';continue;}
       record.sha256=read.sha256;record.bytes=read.bytes;record.lines=read.content.split(/\r\n|\n|\r/).length;

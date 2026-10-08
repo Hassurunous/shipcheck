@@ -1,3 +1,5 @@
+import {auditSummarySchema} from './audit-summary-contracts.js';
+import {inspectionStages,summarizeAudit} from './audit-summary.js';
 import {architectureResultSchema} from './architecture-contracts.js';
 import {sdkResultSchema} from './sdk-contracts.js';
 import { z } from "zod";
@@ -28,7 +30,9 @@ export type Finding = z.infer<typeof findingSchema>;
 
 export const reportSchema = z.object({
   schemaVersion: z.literal(1),
+  auditSummary:auditSummarySchema.optional(),
   root: z.string().min(1),
+  ignorePolicy:repositoryProfileSchema.shape.ignorePolicy,
   findings: z.array(findingSchema),
   inspectionWarnings: repositoryProfileSchema.shape.warnings,
   ai: aiResultSchema.optional(),
@@ -98,5 +102,8 @@ export function createReport(input: RepositoryProfile, options: ConfigInput = {}
       const right = JSON.stringify([b.path, b.code, b.message]);
       return left < right ? -1 : left > right ? 1 : 0;
     });
-  return reportSchema.parse({ schemaVersion: 1, root: profile.root, findings, inspectionWarnings });
+  const report:Report={schemaVersion:1,root:profile.root,findings,inspectionWarnings,...(profile.ignorePolicy?{ignorePolicy:profile.ignorePolicy}:{}),
+    auditSummary:{outcome:'not-assessed',generalQualityVerdict:'not-established',conclusion:'',stages:inspectionStages(profile,config)}};
+  report.auditSummary=summarizeAudit(report,{config});
+  return reportSchema.parse(report);
 }

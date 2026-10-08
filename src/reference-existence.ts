@@ -1,3 +1,4 @@
+import type {IgnorePolicy} from './ignore-policy.js';
 import fs from 'node:fs/promises';
 import { join, posix, relative } from 'node:path';
 import { isExcluded } from './config.js';
@@ -6,7 +7,7 @@ import type { RepositoryProfile } from './repository-profile.js';
 type Reference = RepositoryProfile['packageReferences'][number];
 
 /** Capture existence using the filesystem's own case rules, without traversing links. */
-export async function referenceExistence(root: string, reference: Reference, excluded: string[]): Promise<'exists' | 'missing' | 'unknown'> {
+export async function referenceExistence(root: string, reference: Reference, excluded: string[], policy?:IgnorePolicy): Promise<'exists' | 'missing' | 'unknown'> {
   if (!reference.target || /[:\\%$*?{}~]/.test(reference.target) || posix.isAbsolute(reference.target)) return 'unknown';
   const target = posix.normalize(posix.join(posix.dirname(reference.path), reference.target));
   if (target === '..' || target.startsWith('../') || target === '.') return 'unknown';
@@ -23,11 +24,11 @@ export async function referenceExistence(root: string, reference: Reference, exc
       if (stat.isSymbolicLink() || (!stat.isFile() && !stat.isDirectory())) return 'unknown';
       // Canonical casing also prevents exclusions being bypassed by a case alias.
       const actual = relative(root, await fs.realpath(current)).split('\\').join('/');
-      if (actual.startsWith('../') || isExcluded(actual, excluded)
+      if (actual.startsWith('../') || isExcluded(actual, excluded) || await policy?.reason(actual,stat.isDirectory())
         || actual.split('/').some(p => p === '.git' || p === 'node_modules')) return 'unknown';
       if (index < parts.length - 1 && !stat.isDirectory()) return 'unknown';
     } catch (error) {
-      return (error as NodeJS.ErrnoException).code === 'ENOENT' ? 'missing' : 'unknown';
+      return (error as NodeJS.ErrnoException).code === 'ENOENT' && !await policy?.reason(target,true) ? 'missing' : 'unknown';
     }
   }
   return 'exists';

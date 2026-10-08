@@ -77,3 +77,10 @@ it('integrates JSON/console/Markdown and CLI exit precedence',async()=>{
   for(const args of [[],['--json'],['--markdown']]){const report=await runCli(['audit',root,...args]);expect(report.exitCode).toBe(1);expect(report.stdout).toMatch(/mismatch/i);}
   await write('a.ts','import {getUser} from "fixture-sdk";getUser(1);getUser(variable);');const partial=await runCli(['audit',root,'--json']);expect(partial.exitCode).toBe(2);expect(JSON.parse(partial.stdout).sdkContracts[0].state).toBe('partial');
 });
+it('keeps explicit provider access through Git ignores while excluding consumer source',async()=>{
+  await write('.gitignore','node_modules/\n');
+  expect((await audit('import {getUser} from "fixture-sdk"; getUser("x");')).state).toBe('checked');
+  await write('.gitignore','node_modules/\na.ts\n');
+  expect((await audit('import {getUser} from "fixture-sdk"; getUser("x");')).files[0]?.status).toBe('excluded');
+  expect((await audit('import {getUser} from "fixture-sdk"; getUser("x");',{...config,exclude:['node_modules/**'],respectGitignore:true})).state).toBe('unavailable');
+});

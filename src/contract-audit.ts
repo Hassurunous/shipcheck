@@ -71,7 +71,7 @@ export async function auditContracts(root:string,input:ConfigInput={},scope?:rea
     const resource=config.resources.find(item=>item.id===binding.resourceId);
     if(!resource || resource.kind!=='openapi'){result.state='unavailable';result.issues.push('Binding requires a configured OpenAPI resource.');continue;}
     if(files.some(path=>!resource.appliesTo.some(pattern=>matchesPattern(path,pattern)))){result.state='unavailable';result.issues.push('Mapped files are outside reference appliesTo scope.');continue;}
-    const references=await loadReferenceResources(root,{exclude:config.exclude,resources:[resource]},files,access);
+    const references=await loadReferenceResources(root,{respectGitignore:config.respectGitignore,exclude:config.exclude,resources:[resource]},files,access);
     const snapshot=references.snapshots[0];
     const provider=references.report.resources[0]!;
     result.reference={path:provider.path,sha256:provider.sha256,...(provider.origin?{origin:provider.origin}:{})};
@@ -82,7 +82,7 @@ export async function auditContracts(root:string,input:ConfigInput={},scope?:rea
     const versionProblem=versionIssue(index.apiVersion,binding.expectedVersion,binding.versionRange,resource.version);
     if(versionProblem){result.state='version-mismatch';result.issues.push(versionProblem);continue;}
     const document=JSON.parse(snapshot.content) as {paths:Record<string,unknown>};
-    const loaded=await loadReferenceResources(root,{exclude:config.exclude,resources:files.map((path,i)=>({id:'source'+i,path,kind:'source' as const}))});
+    const loaded=await loadReferenceResources(root,{respectGitignore:config.respectGitignore,exclude:config.exclude,resources:files.map((path,i)=>({id:'source'+i,path,kind:'source' as const}))});
     for(const record of loaded.report.resources) {
       const adapter=contractAdapterFor(record.path);
       const file:ContractResult['files'][number]={path:record.path,sha256:record.sha256,status:record.status,callCount:0,

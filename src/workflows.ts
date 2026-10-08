@@ -1,8 +1,10 @@
+import {summarizeAudit} from './audit-summary.js';
+import {createIgnorePolicy} from './ignore-policy.js';
 import {auditArchitecture} from './architecture-audit.js';
 import {auditSdkContracts} from './sdk-audit.js';
 import { execFile } from 'node:child_process';
 import { promisify } from 'node:util';
-import { realpath, lstat } from 'node:fs/promises';
+import { realpath, lstat, readdir } from 'node:fs/promises';
 import { join,resolve } from 'node:path';
 import { validateRoot } from './filesystem-policy.js';
 import { reviewRepository } from './review-repository.js';
@@ -10,7 +12,7 @@ import { reviewWithAi, type AiReviewOptions } from './ai/review.js';
 import { reportSchema, type Report } from './findings.js';
 import { loadTask, describeCurrentTask,normalizeLegacyTask } from './task-file.js';
 import {invalidateTaskReview} from './ai/task-review.js';
-import { configSchema, loadConfig } from './config.js';
+import { configSchema, loadConfig, type ConfigInput } from './config.js';
 import { runChecks } from './checks.js';
 import { reviewWholeRepository } from './ai/whole-repository.js';
 import { inspectRepository } from './inspect-repository.js';
@@ -25,13 +27,33 @@ async function git(root:string, args:string[]) {
   try { return (await exec('git',['--no-optional-locks','-C',root,...args],{encoding:'utf8',timeout:10000,maxBuffer:1024*1024,windowsHide:true})).stdout; }
   catch { throw new Error('Git inspection failed. Use a Git repository with a valid HEAD; Git must be installed.'); }
 }
-export async function changedPaths(target:string): Promise<string[]> {
+export async function changedPaths(target:string,input?:ConfigInput): Promise<string[]> {
   const root = await realpath(await validateRoot(target));
   const top = (await git(root,['rev-parse','--show-toplevel'])).trim();
   if (await realpath(top) !== root) throw new Error('Diff target must be the Git repository root.');
   const tracked = await git(root,['diff','--no-ext-diff','--no-textconv','--name-only','-z','HEAD','--']);
-  const untracked = await git(root,['ls-files','--others','--exclude-standard','-z']);
-  return [...new Set((tracked+untracked).split('\0').filter(Boolean))].sort();
+  // Enumerate locally: --exclude-standard would inherit global/info excludes,
+  // and would hide ignored untracked files even when Shipcheck opts out.
+  let config,configError:unknown;
+  try {config=input===undefined?await loadConfig(root):configSchema.parse(input);}
+  catch(error){configError=error;config=configSchema.parse({});}
+  const policy=createIgnorePolicy(root,config);
+  const indexed=new Set((await git(root,['ls-files','--cached','-z'])).split('\0'));
+  const candidates=tracked.split('\0').filter(Boolean),pending=[''];
+  while(pending.length) {
+    const parent=pending.pop()!;
+    for(const entry of await readdir(join(root,parent),{withFileTypes:true})) {
+      const path=parent?parent+'/'+entry.name:entry.name;
+      if(await policy.reason(path,entry.isDirectory()))continue;
+      if(entry.isDirectory())pending.push(path);
+      else if(!indexed.has(path))candidates.push(path);
+    }
+  }
+  const selected:string[]=[];
+  for(const path of [...new Set(candidates)].sort())if(!await policy.reason(path))selected.push(path);
+  // Retain the no-work shortcut even when an unchanged config is invalid.
+  if(selected.length && configError)throw configError;
+  return selected;
 }
 export async function runWorkflow(target:string, kind:'audit'|'diff'|'task', ai?:AiReviewOptions, options:WorkflowOptions={}): Promise<Report> {
   if(options.wholeRepository && (kind!=='audit' || !ai)) throw new Error('--whole-repository requires audit with --ai.');
@@ -54,9 +76,10 @@ export async function runWorkflow(target:string, kind:'audit'|'diff'|'task', ai?
     if(!fresh)throw new Error('Current task is unavailable.');
     return fresh;
   };
-  const paths = kind==='diff' ? await changedPaths(target) : task ? [...new Set(task.files)].sort() : undefined;
+  const paths = kind==='diff' ? await changedPaths(target,ai?.config) : task ? [...new Set(task.files)].sort() : undefined;
   if (kind==='diff' && paths?.length===0) return reportSchema.parse({schemaVersion:1,
     root:await realpath(await validateRoot(target)),findings:[],inspectionWarnings:[],
+    auditSummary:summarizeAudit({schemaVersion:1,root:target,findings:[],inspectionWarnings:[]},{emptyDiff:true}),
     workflow:{kind:'diff',scope:[],baseline:'HEAD',unavailablePaths:[]}});
   const unavailablePaths: string[] = [];
   for (const path of paths ?? []) {
@@ -76,7 +99,7 @@ export async function runWorkflow(target:string, kind:'audit'|'diff'|'task', ai?
   // Authorized tools can write files. Collect review snapshots only after they finish.
   const root=await validateRoot(target);
   const languages=options.runChecks && config.checks.some(check=>check.languages)
-    ? Object.keys((await inspectRepository(root,{exclude:config.exclude})).languages):undefined;
+    ? Object.keys((await inspectRepository(root,{respectGitignore:config.respectGitignore,exclude:config.exclude})).languages):undefined;
   const checks=await runChecks(root,config.checks,options.runChecks===true,config.ai.apiKeyEnv,languages);
   const references=config.resources.length?(await loadReferenceResources(target,config,paths,referenceAccess)).report:undefined;
   const report = ai && paths?.length !== 0 && references?.state!=='incomplete' ? whole ? await reviewWholeRepository(target,{...ai,config,referenceAccess})
@@ -96,7 +119,7 @@ export async function runWorkflow(target:string, kind:'audit'|'diff'|'task', ai?
   const contracts=await auditContracts(report.root,config,paths,referenceAccess);
   const sdkContracts=await auditSdkContracts(report.root,config,paths,referenceAccess);
   const architecture=await auditArchitecture(report.root,config,paths);
-  return reportSchema.parse({...report,
+  const completed=reportSchema.parse({...report,
     ...(taskSummary?{currentTask:taskSummary}:{}),
     ...(references?{references}:{}),
     ...(checks.length?{checks}:{}),
@@ -106,4 +129,6 @@ export async function runWorkflow(target:string, kind:'audit'|'diff'|'task', ai?
     findings:paths ? report.findings.filter(f=>f.evidence.some(e=>selected.has(e.path))) : report.findings,
     workflow:{kind,scope:paths ?? null,baseline:kind==='diff'?'HEAD':null,unavailablePaths,...(task ? {criteria:task.criteria} : {})},
   });
+  completed.auditSummary=summarizeAudit(completed,{config,workflow:true,aiRequested:ai?.execution,checksAuthorized:options.runChecks===true});
+  return completed;
 }

@@ -6,5 +6,5 @@ import { createReport } from "./findings.js";
 /** Load root configuration, inspect locally, and evaluate the enabled rules. */
 export async function reviewRepository(target = ".", options?: ConfigInput) {
   const config = options === undefined ? await loadConfig(resolve(target)) : configSchema.parse(options);
-  return createReport(await inspectRepository(target, { exclude: config.exclude }), config);
+  return createReport(await inspectRepository(target, { respectGitignore:config.respectGitignore,exclude: config.exclude }), config);
 }

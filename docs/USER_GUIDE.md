@@ -71,8 +71,11 @@ shipcheck task --ai preview --json
 
 Task and contract file lists are explicit paths, not globs. Architecture selectors
 and exclusions have their own documented glob subset. General inspection skips
-`.git` and `node_modules`, but does not apply `.gitignore`. Add generated output
-and report directories to exclusions, or save reports outside the audited tree.
+`.git` and `node_modules`. Without an `exclude` setting it also inherits only
+repository-local `.gitignore` files. Explicit exclusions replace Git inheritance
+unless `respectGitignore: true` is set. `ignorePolicy` in the report explains the
+applied rules and skipped paths; see [configuration](CONFIGURATION.md). Save reports
+outside the audited tree or exclude their directory.
 
 ## Choose checks
 
@@ -151,3 +154,13 @@ When `--run-checks` is authorized, external checks finish before deterministic a
 AI review snapshots are collected. This lets the review see files changed by a
 check. Checks remain trusted commands, not a sandbox; prefer inspection-only tools.
 Task-definition changes still invalidate task assessment.
+
+## Read the execution summary before accepting a report
+
+Inspect `auditSummary.stages` alongside the detailed report. Require the check IDs
+and analysis modes your project needs to have actually run. Missing configuration,
+missing authorization, mock/preview results and unsupported patterns are not
+successful quality checks. External command file coverage can be unknown.
+`auditSummary.generalQualityVerdict` intentionally remains `not-established`;
+zero findings or exit 0 is not a general quality guarantee.
+See [audit scope and limitations](P19_AUDIT_SCOPE.md).

@@ -36,7 +36,9 @@ appear, and impacts whose evidence is solely on unchanged files can be omitted.
 Repository-wide inspection warnings remain visible.
 
 Deleted, linked, and non-regular selected paths are disclosed as unavailable.
-An empty diff returns no scoped findings and skips configuration loading, repository inspection and AI. A nonempty scope with
+An empty diff returns no scoped findings and skips content inspection and AI.
+Scope discovery applies the ignore policy; an unchanged invalid configuration
+retains the no-work shortcut when no eligible changes are found. A nonempty scope with
 no eligible AI source fails explicitly if AI was requested. Renames follow
 Git's name-only output; there is no rename-history analysis. Arbitrary bases,
 staged-only review and merge-base comparisons are not implemented.

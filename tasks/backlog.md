@@ -323,4 +323,32 @@ CLI acceptance; `npm run test:cli` runs only the executable acceptance suite.
 - [ ] Resolve public-distribution metadata, platform support and publication approval.
 
 Live pricing maintenance remains necessary before its documented expiry. These
-follow-ups have no assigned new milestone; they do not expand the completed scope.
+platform, adapter and publication follow-ups remain unscheduled. Quality-audit
+work is organized into P19–P21 below; it does not expand earlier completed scope.
+
+## Quality auditing follow-on milestones
+
+### P19 — Audit scope and execution transparency (completed)
+
+- [x] Shared console/Markdown/JSON execution and coverage summary
+- [x] Distinguish unavailable, disabled, unauthorized, preview, mock and live stages
+- [x] Explicit partial/failed results, unknown coverage and narrow default scope
+- [x] Offline regression tests and real CLI acceptance checks
+
+See [P19 audit scope](../docs/P19_AUDIT_SCOPE.md). This milestone adds reporting
+clarity, not new quality analyzers or automatic command/API authorization.
+
+### P20 — Practical code-quality workflows (planned)
+
+- [ ] Convenient offline quality presets and integration with existing project tools
+- [ ] Useful language-specific lint/type/test coverage without overstating support
+- [ ] Optional AI enhancement for contextual correctness and maintainability review
+
+### P21 — Quality-audit effectiveness evaluation (planned)
+
+- [ ] Representative seeded defects and clean controls across supported workflows
+- [ ] Measure missed issues, false positives, coverage and AI cost
+- [ ] Evaluate developer repair loops against independently defined expectations
+
+P20/P21 details remain to be agreed before implementation; earlier unscheduled
+platform, language-adapter and publication follow-ups remain separate.

@@ -97,3 +97,37 @@ Its output is an example envelope `{cliExitCode, report}`, not the Shipcheck rep
 schema itself. It applies a 120-second timeout and 16 MiB output cap, writes no files,
 and grants no checks, reference access or AI spending. Adapt limits explicitly for
 your project. It is a capture example, not a clean-report gate.
+
+The optional `ignorePolicy` field records effective exclusions, repository-local
+Git ignore provenance, and a bounded skipped-entry sample. Counts refer to pruned
+entries/subtrees, not all descendants. Its absence in older reports or skipped
+empty diffs is not evidence of any applied policy. External checks retain their
+own ignore behavior. See [configuration](CONFIGURATION.md#repository-ignore-policy).
+
+## Execution and coverage summary (P19)
+
+`auditSummary` is optional and additive within schema version 1. Its schemas and
+TypeScript types are exported as `auditSummarySchema`, `auditStageSchema`,
+`AuditSummary` and `AuditStage`. Historical reports without it have unknown
+summary coverage; they must not be interpreted as passing.
+
+`outcome` is `issues-reported`, `incomplete`,
+`no-issues-in-executed-checks` or `not-assessed`, in that precedence order.
+Issues may coexist with incomplete stages. `generalQualityVerdict` is always
+`not-established`. Neither outcome nor stage completion replaces the detailed
+findings, evidence, coverage or exit-code handling above.
+
+Each stage supplies `id`, `label`, `status`, `explanation`, `scope`,
+`files`, `selectedFiles`, `omitted` and `limitations`. Status distinguishes
+completed, partial, failed, blocked, preview, mock, injected, disabled,
+not-configured, not-requested, not-authorized, not-run and skipped. Completion
+means the bounded operation ran, not that the repository passed every possible
+check. An external check that reports failure has status failed.
+
+`files: null` means unknown, not zero. Inspection/built-in file lists describe
+successful bounded reads, not semantic analysis of every file. External command
+coverage is unknown even when diagnostics name files. AI files list paths in
+completed live responses; preview/mock/injected selections stay in
+`selectedFiles` and do not establish live assessment. `omitted` lists recorded
+gaps, not every excluded descendant; use `ignorePolicy` and detailed stage
+results too. See [P19 scope](P19_AUDIT_SCOPE.md).

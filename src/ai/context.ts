@@ -1,3 +1,4 @@
+import {createIgnorePolicy,type IgnorePolicy} from '../ignore-policy.js';
 import fs from 'node:fs/promises';
 import { join, posix, relative } from 'node:path';
 import { createHash } from 'node:crypto';
@@ -21,14 +22,14 @@ function allowed(path: string) {
     && !/[:\\\u0000-\u001f]/.test(path) && extensions.has(posix.extname(path).toLowerCase());
 }
 
-async function readSource(root: string, path: string, limit: number, excluded: string[]): Promise<string> {
+async function readSource(root: string, path: string, limit: number, excluded: string[],policy:IgnorePolicy): Promise<string> {
   let current = root;
   for (const part of path.split('/')) {
     current = join(current, part);
     const stat = await fs.lstat(current);
     if (stat.isSymbolicLink()) throw new Error('symlink');
     const actual = relative(root, await fs.realpath(current)).split('\\').join('/');
-    if (actual.startsWith('../') || isExcluded(actual, excluded)) throw new Error('excluded');
+    if (actual.startsWith('../') || isExcluded(actual, excluded) || await policy.reason(actual,stat.isDirectory())) throw new Error('excluded');
   }
   const stat = await fs.lstat(current);
   if (!stat.isFile()) throw new Error('non-regular');
@@ -53,6 +54,7 @@ async function readSource(root: string, path: string, limit: number, excluded: s
 /** Only selected source is eligible for a request. Full profiles/marker excerpts are never sent. */
 export async function collectContext(profile: RepositoryProfile, settings: AiSettings, requestedPaths?:readonly string[]): Promise<AiContext> {
   const root = await fs.realpath(await validateRoot(profile.root));
+  const policy=createIgnorePolicy(root,{exclude:profile.excluded,respectGitignore:profile.ignorePolicy?.respectGitignore ?? false});
   const files: SourceFile[] = [];
   const preview: AiResult['preview'] = {files:[], skipped:[], serializedBytes:2, limited:false};
   const inventory = new Set(profile.files.map(f=>f.path));
@@ -74,7 +76,7 @@ export async function collectContext(profile: RepositoryProfile, settings: AiSet
     else if (files.length >= settings.maxFiles) { reason = 'file-count-limit'; preview.limited = true; }
     if (reason) { preview.skipped.push({path, reason}); continue; }
     let content: string;
-    try { content = await readSource(root,path,settings.maxFileBytes,profile.excluded); }
+    try { content = await readSource(root,path,settings.maxFileBytes,profile.excluded,policy); }
     catch (error) {
       const known = ['symlink','excluded','non-regular','file-size-limit','non-text'];
       const message = error instanceof Error ? error.message : '';

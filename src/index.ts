@@ -33,3 +33,8 @@ export {architectureSchema,architectureResultSchema} from './architecture-contra
 export {auditSdkContracts} from './sdk-audit.js';
 export {sdkBindingSchema,sdkResultSchema,type SdkResult} from './sdk-contracts.js';
 export {referenceAccessSchema,type ReferenceAccess} from './reference-access.js';
+
+export {ignorePolicySchema,type IgnorePolicyReport} from './ignore-contracts.js';
+export type {IgnoreOptions} from './ignore-policy.js';
+
+export {auditSummarySchema,auditStageSchema,type AuditSummary,type AuditStage} from './audit-summary-contracts.js';

@@ -1,6 +1,6 @@
 # Architecture
 
-## Current implementation through P18
+## Current implementation through P19
 
 `src/cli.ts` is the executable entry point, with command dispatch in
 `src/cli-command.ts`. `audit` performs configured review; help/version explain
@@ -40,9 +40,12 @@ filename conventions; it does not establish coverage or test quality. Marker
 scanning recognizes uppercase whole-word TODO/FIXME in any readable text,
 including documentation and strings; markers are observations, not findings.
 
-Limitations: `.gitignore` is not interpreted; build output, hidden files, and
-other dependencies are included unless named above or explicitly excluded in
-inspection options. `reviewRepository` loads root configuration and passes its
+`ignore-policy.ts` applies repository-local Git ignore semantics by default when
+explicit Shipcheck exclusions are absent. It prunes directories before traversal
+and records policy provenance and a bounded skipped-path sample. Global, ancestor
+and `.git/info/exclude` rules never participate. `respectGitignore` can combine
+Git patterns with explicit exclusions or disable inheritance. Matching uses the
+pinned `ignore` parser, with bounded, link-rejecting ignore-file reads. `reviewRepository` loads root configuration and passes its
 exclusions into inspection. Inspection does not create
 a filesystem snapshot or protect against concurrent malicious path replacement;
 use a stable local tree. Read limits are per file, not a total tree budget.
@@ -198,7 +201,8 @@ local artifacts. See RELEASE_CHECKLIST.md for validation and known limits.
 
 ## P6.1 audit reliability
 
-Empty diffs stop before config loading/inspection. The AI context selector follows
+Empty diffs stop before content inspection and AI; scope discovery applies the
+ignore policy and retains the no-work shortcut for an unchanged invalid config. The AI context selector follows
 static local import hints within existing limits; requests serialize explicit
 numbered lines. Coverage is separate from citation and semantic validity.
 Ancestor aliases are canonicalized while linked final roots remain rejected.
@@ -358,3 +362,12 @@ and check descendant cleanup with disposable state. These are explicit developme
 qualification tools; they add no product runtime behavior or external-tool dependency.
 The developer-loop fixture supports a supervised source-only repair exercise.
 See P18_QUALIFICATION.md for measurements and remaining release decisions.
+
+## P19 execution and coverage summary
+
+`audit-summary-contracts.ts` defines the additive optional report summary.
+`audit-summary.ts` derives disclosure from captured inspection facts and stage
+results without I/O. Inspection records successful bounded text reads separately
+from file inventory. Report builders refresh the summary after AI and workflow
+stages; renderers display it without changing exit-code logic. Detailed stage
+results remain authoritative. See [scope semantics](P19_AUDIT_SCOPE.md).

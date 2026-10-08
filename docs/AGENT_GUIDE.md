@@ -146,3 +146,13 @@ The [P18 qualification record](P18_QUALIFICATION.md) includes a supervised devel
 repair loop, adversarial fixtures and live AI checks on Windows. These bounded
 experiments do not establish general autonomous-agent effectiveness. Validate the
 loop on representative projects and inspect coverage and evidence on every run.
+
+## Read the execution summary before accepting a report
+
+Inspect `auditSummary.stages` alongside the detailed report. Require the check IDs
+and analysis modes your project needs to have actually run. Missing configuration,
+missing authorization, mock/preview results and unsupported patterns are not
+successful quality checks. External command file coverage can be unknown.
+`auditSummary.generalQualityVerdict` intentionally remains `not-established`;
+zero findings or exit 0 is not a general quality guarantee.
+See [audit scope and limitations](P19_AUDIT_SCOPE.md).

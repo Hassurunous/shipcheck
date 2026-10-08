@@ -1,3 +1,4 @@
+import {ignorePolicySchema} from './ignore-contracts.js';
 import { z } from "zod";
 
 const relativePath = z.string().min(1);
@@ -10,7 +11,9 @@ export const packageIssueSchema = z.object({
 
 export const repositoryProfileSchema = z.object({
   root: z.string().min(1),
+  ignorePolicy:ignorePolicySchema.optional(),
   directories: z.array(relativePath).default([]),
+  inspectedFiles:z.array(relativePath).optional(),
   excluded: z.array(z.string()).default([]),
   packageReferences: z.array(z.object({
     path: relativePath, field: z.string(), target: z.string(),

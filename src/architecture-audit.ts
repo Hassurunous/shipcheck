@@ -10,7 +10,7 @@ const within=(p:string,prefix:string)=>p===prefix || p.startsWith(prefix+'/');
 
 export async function auditArchitecture(root:string,input:ConfigInput={},scope?:readonly string[]):Promise<ArchitectureResult|undefined> {
   const config=configSchema.parse(input),policy=config.architecture;if(!policy)return;
-  const profile=await inspectRepository(root,{exclude:config.exclude});
+  const profile=await inspectRepository(root,{respectGitignore:config.respectGitignore,exclude:config.exclude});
   const files=new Set(profile.files.map(f=>f.path)),directories=new Set(profile.directories);
   const selected=[...new Set([...files,...(scope ?? []),...policy.files.filter(p=>!p.includes('*'))])]
     .filter(p=>(!scope || scope.includes(p)) && policy.files.some(pattern=>matchesPattern(p,pattern)) && !isExcluded(p,config.exclude)).sort();
@@ -48,7 +48,7 @@ export async function auditArchitecture(root:string,input:ConfigInput={},scope?:
     return {...edge,status:'resolved',to:matches[0]!,reason:language==='csharp'?'Mapped namespace declaration; actual type use is not assessed.':'Resolved configured local import.'};
   };
   for(let offset=0;offset<Math.min(selected.length,128);offset+=32) {
-    const loaded=await loadReferenceResources(root,{exclude:config.exclude,resources:selected.slice(offset,Math.min(offset+32,128)).map((path,i)=>({id:'architecture'+i,path,kind:'source'}))});
+    const loaded=await loadReferenceResources(root,{respectGitignore:config.respectGitignore,exclude:config.exclude,resources:selected.slice(offset,Math.min(offset+32,128)).map((path,i)=>({id:'architecture'+i,path,kind:'source'}))});
     for(const record of loaded.report.resources) {
       const file={path:record.path,sha256:record.sha256,status:record.status as string};result.files.push(file);
       if(record.status!=='loaded'){result.issues.push(record.path+': '+record.status);continue;}

@@ -1,3 +1,4 @@
+import {createIgnorePolicy,type IgnoreOptions} from './ignore-policy.js';
 import fs from "node:fs/promises";
 import { join } from "node:path";
 import { MAX_FILE_BYTES, validateRoot } from "./filesystem-policy.js";
@@ -9,15 +10,16 @@ import { configSchema, isExcluded } from "./config.js";
 import { repositoryProfileSchema, type RepositoryProfile } from "./repository-profile.js";
 
 export { MAX_FILE_BYTES } from "./filesystem-policy.js";
-const ignoredNames = new Set([".git", "node_modules"]);
+
 const compare = (a: string, b: string) => a < b ? -1 : a > b ? 1 : 0;
 
 /** Read local repository facts. Never executes scripts or writes to the target. */
-export async function inspectRepository(target = ".", options: { exclude?: string[] } = {}): Promise<RepositoryProfile> {
-  const { exclude } = configSchema.parse({ exclude: options.exclude ?? [] });
+export async function inspectRepository(target = ".", options: IgnoreOptions = {}): Promise<RepositoryProfile> {
+  const { exclude,respectGitignore } = configSchema.parse(options);
   const root = await validateRoot(target);
+  const policy=createIgnorePolicy(root,{exclude,respectGitignore});
   const profile: RepositoryProfile = {
-    root, directories: [], excluded: exclude, packageReferences: [], files: [], languages: {}, manifests: [], readmes: [], tests: [],
+    root, inspectedFiles:[], directories: [], excluded: exclude, packageReferences: [], files: [], languages: {}, manifests: [], readmes: [], tests: [],
     packageScripts: [], packageIssues: [], markers: [], warnings: [],
   };
   const warn = (path: string, code: RepositoryProfile["warnings"][number]["code"], message: string) => {
@@ -75,6 +77,7 @@ export async function inspectRepository(target = ".", options: { exclude?: strin
       return;
     }
 
+    profile.inspectedFiles!.push(path);
     if (path.split("/").at(-1) === "package.json") {
       profile.packageReferences.push(...packageReferences(path, content));
       const result = inspectPackage(path, content);
@@ -106,9 +109,9 @@ export async function inspectRepository(target = ".", options: { exclude?: strin
     }
     entries.sort((a, b) => compare(a.name, b.name));
     for (const entry of entries) {
-      if (ignoredNames.has(entry.name)) continue;
       const path = directory ? `${directory}/${entry.name}` : entry.name;
-      if (isExcluded(path, exclude)) continue;
+      const ignored=await policy.reason(path,entry.isDirectory());
+      if(ignored){policy.record(path,entry.isDirectory()?'directory':entry.isFile()?'file':'other',ignored);continue;}
       if (entry.isSymbolicLink()) warn(path, "symlink-skipped", "Symbolic links are not followed.");
       else if (entry.isDirectory()) { profile.directories.push(path); pending.push(path); }
       else if (entry.isFile()) await inspectFile(path);
@@ -117,8 +120,9 @@ export async function inspectRepository(target = ".", options: { exclude?: strin
   }
 
   for (const reference of profile.packageReferences) {
-    reference.existence = await referenceExistence(root, reference, exclude);
+    reference.existence = await referenceExistence(root, reference, exclude,policy);
   }
+  profile.inspectedFiles!.sort(compare);
   profile.files.sort((a, b) => compare(a.path, b.path));
   profile.directories.sort(compare);
   profile.packageReferences.sort((a, b) => compare(a.path, b.path) || compare(a.field, b.field));
@@ -130,5 +134,6 @@ export async function inspectRepository(target = ".", options: { exclude?: strin
   profile.markers.sort((a, b) => compare(a.path, b.path) || a.line - b.line);
   profile.warnings.sort((a, b) => compare(a.path, b.path) || compare(a.code, b.code));
   profile.languages = Object.fromEntries(Object.entries(profile.languages).sort(([a], [b]) => compare(a, b)));
+  profile.ignorePolicy=policy.describe();
   return repositoryProfileSchema.parse(profile);
 }

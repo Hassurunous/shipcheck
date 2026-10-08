@@ -7,7 +7,7 @@ Shipcheck does not modify source, requirements or configuration during an audit.
 
 ## Current status
 
-P0–P18 are delivered within their documented scope. Version 0.1.0 is private,
+P0–P19 are delivered within their documented scope. Version 0.1.0 is private,
 pre-alpha and available for local distribution. Qualification covers **Windows
 x64 with Node.js 22 only**; macOS/Linux installation, CLI, native parsers and
 process cleanup still need testing. No public npm release is authorized.

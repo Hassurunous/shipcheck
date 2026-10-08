@@ -15,7 +15,7 @@ export async function auditSdkContracts(root:string,input:ConfigInput={},scope?:
     const result:SdkResult={id:binding.id,package:binding.package,state:'checked',scope:'direct-named-function-calls-only',issues:[],files:[],calls:[]};results.push(result);
     const packageRoot=binding.packageRoot ?? 'node_modules/'+binding.package;
     const rootOption=binding.rootId?{rootId:binding.rootId}:{};
-    const manifestRefs=await loadReferenceResources(root,{exclude:config.exclude,resources:[{id:'sdk-manifest',path:posix.join(packageRoot,'package.json'),...rootOption}]},undefined,access);
+    const manifestRefs=await loadReferenceResources(root,{respectGitignore:false,exclude:config.exclude,resources:[{id:'sdk-manifest',path:posix.join(packageRoot,'package.json'),...rootOption}]},undefined,access);
     const manifest=manifestRefs.snapshots[0];
     result.provider={manifestPath:manifestRefs.report.resources[0]!.path,manifestSha256:manifestRefs.report.resources[0]!.sha256,...rootOption};
     const rootHash=manifestRefs.report.resources[0]!.origin?.rootSha256;
@@ -33,12 +33,12 @@ export async function auditSdkContracts(root:string,input:ConfigInput={},scope?:
     if(typeof declared!=='string' || !/\.d\.(?:ts|mts|cts)$/.test(declared) || !resourceDefinitionSchema.shape.path.safeParse(declared.replace(/^\.\//,'')).success) {
       result.state='unavailable';result.issues.push('declaration-entry-unavailable-or-unsafe');continue;
     }
-    const declarationRefs=await loadReferenceResources(root,{exclude:config.exclude,resources:[{id:'sdk-declarations',path:posix.join(packageRoot,declared),kind:'source',...rootOption}]},undefined,access);
+    const declarationRefs=await loadReferenceResources(root,{respectGitignore:false,exclude:config.exclude,resources:[{id:'sdk-declarations',path:posix.join(packageRoot,declared),kind:'source',...rootOption}]},undefined,access);
     const declaration=declarationRefs.snapshots[0];
     result.provider.declarationPath=declarationRefs.report.resources[0]!.path;result.provider.declarationSha256=declarationRefs.report.resources[0]!.sha256;
     if(!declaration){result.state='unavailable';result.issues.push('Declaration '+declarationRefs.report.resources[0]!.status);continue;}
     const index=indexSdkDeclarations(declaration.content);result.issues.push(...index.issues);
-    const sources=await loadReferenceResources(root,{exclude:config.exclude,resources:files.map((path,i)=>({id:'sdk-source'+i,path,kind:'source'}))});
+    const sources=await loadReferenceResources(root,{respectGitignore:config.respectGitignore,exclude:config.exclude,resources:files.map((path,i)=>({id:'sdk-source'+i,path,kind:'source'}))});
     for(const record of sources.report.resources) {
       result.files.push({path:record.path,sha256:record.sha256,status:record.status});
       if(record.status!=='loaded'){result.issues.push(record.path+': '+record.status);continue;}

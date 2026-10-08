@@ -1,3 +1,4 @@
+import {summarizeAudit} from '../audit-summary.js';
 import { createHash } from 'node:crypto';
 import { resolve } from 'node:path';
 import { configSchema, loadConfig, type ConfigInput } from '../config.js';
@@ -39,7 +40,7 @@ export async function reviewWithAi(target = '.', options: AiReviewOptions = {exe
   if(options.execution!=='live' && (options.trial || options.budget))throw new Error('Spending authorization requires live AI.');
   const config = options.config === undefined ? await loadConfig(resolve(target)) : configSchema.parse(options.config);
   const mode = modeSchema.parse(options.mode ?? config.ai.mode);
-  const profile = await inspectRepository(target,{exclude:config.exclude});
+  const profile = await inspectRepository(target,{respectGitignore:config.respectGitignore,exclude:config.exclude});
   const report = createReport(profile,config);
   const plannedModel = options.execution === 'live' ? (config.ai.models[mode] ?? (options.budget?AUDIT_MODELS:TRIAL_MODELS)[mode].model) : config.ai.models[mode];
   const execution = options.execution === 'live' ? 'live' : options.execution === 'preview' ? 'preview' : injected ? 'injected' : 'mock';
@@ -146,5 +147,7 @@ export async function reviewWithAi(target = '.', options: AiReviewOptions = {exe
     failedResponsePaths:result.status==='failed'?selectedPaths:[],skippedPaths:result.preview.skipped.map(file=>file.path),
     matchedCandidates:result.candidates.length-rejectedCandidates,rejectedCandidates,
     outOfScopeCandidates:result.coverage?.outOfScopeCandidates ?? 0};
-  return reportSchema.parse({...report,ai:aiResultSchema.parse(result)});
+  const completed=reportSchema.parse({...report,ai:aiResultSchema.parse(result)});
+  completed.auditSummary=summarizeAudit(completed,{config,aiRequested:options.execution});
+  return completed;
 }

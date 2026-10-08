@@ -55,5 +55,5 @@ their conclusions explicitly concern included files only.
 
 TODO matches are not findings. FIXME policy intentionally covers only a narrow
 source convention; use overrides for fixtures or disable the rule. Generated
-files remain in scope unless excluded, because `.gitignore` is not interpreted.
+files remain in scope unless excluded by the effective Shipcheck/Git ignore policy.
 See [configuration](CONFIGURATION.md) for exclusions, levels, and overrides.

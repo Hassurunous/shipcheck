@@ -8,7 +8,7 @@ compatibility is not yet verified.
 
 See [P18 qualification evidence and release limitations](docs/P18_QUALIFICATION.md)
 for installed-tool results, the supervised developer-loop exercise and test limits.
-**Status: pre-alpha, local distribution; P1–P18 delivered within documented scope.**
+**Status: pre-alpha, local distribution; P1–P19 delivered within documented scope.**
 It provides configurable repository checks, audit/diff/task workflows,
 console/JSON/Markdown reports, and optional AI review with citation checks.
 Built-in checks cover Node package manifests, configured HTTP/SDK contracts and
@@ -97,7 +97,10 @@ references; README, test detection, entry points and FIXME policies are opt-in.
 Linters, type checkers and test runners require configured checks and
 `--run-checks`. Zero findings is not proof of correctness. Inspection ignores
 .git and node_modules, rejects/skips links,
-and bounds reads; .gitignore is not generally interpreted.
+and bounds reads. Repository-local `.gitignore` rules apply by default when
+`exclude` is absent. Set `respectGitignore: true` to combine them with explicit
+exclusions; global/ancestor Git ignore settings are never inherited. Reports expose
+the effective policy and skipped-path sample. See [configuration](docs/CONFIGURATION.md).
 
 ## AI and evidence
 
@@ -222,3 +225,14 @@ shipcheck audit fixtures/integrations/consumer --reference-root provider=fixture
 This offline example reports one HTTP match and one SDK match. HTTPS references
 require a separate `--allow-reference-origin` grant, including in preview/mock
 runs. Configuration cannot authorize external-root access or network requests.
+
+## What an audit establishes
+
+A default offline audit runs narrow built-in rules. It does not automatically run
+linting, typechecking or tests. Configure external checks and authorize them with
+`--run-checks`; AI remains optional and separately authorized. A zero exit code
+or zero findings does not establish overall code quality.
+
+Reports now include an execution and coverage summary: what ran, what was skipped,
+what failed, and where coverage is unknown. Preview prepares input without calling
+a model; mock results are synthetic. See [audit scope](docs/P19_AUDIT_SCOPE.md).

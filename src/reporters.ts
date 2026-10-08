@@ -13,6 +13,22 @@ export function renderConsoleReport(input: Report): string {
   const report = reportSchema.parse(input);
   const lines = ["Shipcheck — deterministic review", `Target: ${text(report.root)}`, "",
     `Findings: ${report.findings.length}`, `Inspection warnings: ${report.inspectionWarnings.length}`];
+  if(report.auditSummary) {
+    lines.push('', 'Assessment: '+text(report.auditSummary.conclusion));
+    for(const stage of report.auditSummary.stages) {
+      lines.push(`  ${text(stage.label)}: ${stage.status.toUpperCase()} — ${text(stage.explanation)}`);
+      lines.push(`    Coverage: ${stage.scope}; files read/assessed: ${stage.files===null?'unknown':stage.files.length}; selected: ${stage.selectedFiles.length}; omissions: ${stage.omitted.length}.`);
+      for(const limit of stage.limitations)lines.push('    Limit: '+text(limit));
+    }
+  } else lines.push('', 'Assessment scope unavailable in this report; no overall code-quality conclusion can be established.');
+  if(report.ignorePolicy) {
+    const policy=report.ignorePolicy;
+    lines.push(`Ignore policy: ${policy.mode}; repository .gitignore: ${policy.respectGitignore?'enabled':'disabled'}; global Git ignore settings: never used.`);
+    if(policy.exclude.length)lines.push('Shipcheck exclusions: '+policy.exclude.map(text).join(', '));
+    for(const source of policy.sources)lines.push('  Ignore file: '+text(source.path));
+    lines.push(`Ignored entries/subtrees: ${policy.skippedCount}${policy.skippedTruncated?' (first 200 listed in JSON)':''}; descendants of ignored directories were not enumerated.`);
+    for(const item of policy.skipped)lines.push(`  Ignored: ${text(item.path)} — ${item.reason}${item.source?' ('+text(item.source)+')':''}${item.pattern?': '+text(item.pattern):''}`);
+  }
   if (report.workflow) {
     lines.push(`Workflow: ${report.workflow.kind}; scope: ${report.workflow.scope===null?'whole repository':`${report.workflow.scope.length} selected paths`}`);
     if (report.workflow.baseline) lines.push(`Git baseline: ${text(report.workflow.baseline)}; current file contents reviewed, not historical patches.`);
@@ -31,7 +47,7 @@ export function renderConsoleReport(input: Report): string {
     }
     lines.push(`  Suggested action: ${text(finding.suggestedAction)}`);
   }
-  if (report.findings.length === 0) lines.push("", "No findings from the implemented rules.");
+  if (report.findings.length === 0) lines.push("", "No findings from the implemented rules. This does not mean a general code-quality audit passed.");
   if(report.currentTask) {
     const task=report.currentTask;
     lines.push('',`Current task: ${text(task.id)} — ${text(task.title)}`,`Task SHA256 (normalized content): ${task.sha256}`,
