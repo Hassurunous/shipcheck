@@ -1,0 +1,559 @@
+[
+  {
+    "id": "undefined-defect",
+    "category": "lint",
+    "kind": "defect",
+    "description": "lint",
+    "files": {
+      "main.js": "export const result = missing;\n"
+    },
+    "sourcePaths": [
+      "main.js"
+    ],
+    "config": {},
+    "tools": [
+      "eslint"
+    ],
+    "expectedBugs": [
+      {
+        "id": "undefined",
+        "description": "The exported value reads an undeclared identifier.",
+        "signals": [
+          "diagnostic:eslint:no-undef:main.js"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "undefined-clean",
+    "category": "lint",
+    "kind": "clean",
+    "description": "lint",
+    "files": {
+      "main.js": "export const result = 1;\n"
+    },
+    "sourcePaths": [
+      "main.js"
+    ],
+    "config": {},
+    "tools": [
+      "eslint"
+    ],
+    "expectedBugs": []
+  },
+  {
+    "id": "unused-defect",
+    "category": "code-smell",
+    "kind": "defect",
+    "description": "code-smell",
+    "files": {
+      "main.py": "import os\nvalue = 1\n"
+    },
+    "sourcePaths": [
+      "main.py"
+    ],
+    "config": {},
+    "tools": [
+      "ruff"
+    ],
+    "expectedBugs": [
+      {
+        "id": "unused",
+        "description": "Unused os import adds an unnecessary dependency on this module.",
+        "signals": [
+          "diagnostic:ruff:F401:main.py"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "unused-clean",
+    "category": "code-smell",
+    "kind": "clean",
+    "description": "code-smell",
+    "files": {
+      "main.py": "value = 1\n"
+    },
+    "sourcePaths": [
+      "main.py"
+    ],
+    "config": {},
+    "tools": [
+      "ruff"
+    ],
+    "expectedBugs": []
+  },
+  {
+    "id": "type-defect",
+    "category": "type-error",
+    "kind": "defect",
+    "description": "type-error",
+    "files": {
+      "main.ts": "export const value: string = 1;\n"
+    },
+    "sourcePaths": [
+      "main.ts"
+    ],
+    "config": {},
+    "tools": [
+      "typescript"
+    ],
+    "expectedBugs": [
+      {
+        "id": "type",
+        "description": "A number is assigned to a string binding.",
+        "signals": [
+          "check:types"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "type-clean",
+    "category": "type-error",
+    "kind": "clean",
+    "description": "type-error",
+    "files": {
+      "main.ts": "export const value: string = \"one\";\n"
+    },
+    "sourcePaths": [
+      "main.ts"
+    ],
+    "config": {},
+    "tools": [
+      "typescript"
+    ],
+    "expectedBugs": []
+  },
+  {
+    "id": "route-defect",
+    "category": "external-contract",
+    "kind": "defect",
+    "description": "external-contract",
+    "files": {
+      "main.js": "export const load = () => fetch(\"https://api.example.test/usres\");\n",
+      "api.json": "{\"openapi\":\"3.1.0\",\"info\":{\"title\":\"Fixture\",\"version\":\"1.0.0\"},\"paths\":{\"/users\":{\"get\":{}}}}"
+    },
+    "sourcePaths": [
+      "main.js"
+    ],
+    "config": {
+      "resources": [
+        {
+          "id": "api",
+          "path": "api.json",
+          "kind": "openapi"
+        }
+      ],
+      "contracts": [
+        {
+          "id": "api",
+          "resourceId": "api",
+          "files": [
+            "main.js"
+          ],
+          "baseUrl": "https://api.example.test"
+        }
+      ]
+    },
+    "tools": [],
+    "expectedBugs": [
+      {
+        "id": "route",
+        "description": "The client requests /usres, absent from the authoritative API.",
+        "signals": [
+          "contract:api:main.js"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "route-clean",
+    "category": "external-contract",
+    "kind": "clean",
+    "description": "external-contract",
+    "files": {
+      "main.js": "export const load = () => fetch(\"https://api.example.test/users\");\n",
+      "api.json": "{\"openapi\":\"3.1.0\",\"info\":{\"title\":\"Fixture\",\"version\":\"1.0.0\"},\"paths\":{\"/users\":{\"get\":{}}}}"
+    },
+    "sourcePaths": [
+      "main.js"
+    ],
+    "config": {
+      "resources": [
+        {
+          "id": "api",
+          "path": "api.json",
+          "kind": "openapi"
+        }
+      ],
+      "contracts": [
+        {
+          "id": "api",
+          "resourceId": "api",
+          "files": [
+            "main.js"
+          ],
+          "baseUrl": "https://api.example.test"
+        }
+      ]
+    },
+    "tools": [],
+    "expectedBugs": []
+  },
+  {
+    "id": "boundary-defect",
+    "category": "architecture",
+    "kind": "defect",
+    "description": "architecture",
+    "files": {
+      "core/main.js": "import \"../ui/view.js\";\n",
+      "ui/view.js": "export const value = 1;\n"
+    },
+    "sourcePaths": [
+      "core/main.js",
+      "ui/view.js"
+    ],
+    "config": {
+      "architecture": {
+        "files": [
+          "core/**",
+          "ui/**"
+        ],
+        "boundaries": [
+          {
+            "id": "core-ui",
+            "from": "core",
+            "to": "ui",
+            "reason": "Core cannot depend on UI."
+          }
+        ]
+      }
+    },
+    "tools": [],
+    "expectedBugs": [
+      {
+        "id": "boundary",
+        "description": "Core imports UI despite an explicit boundary.",
+        "signals": [
+          "boundary:core-ui"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "boundary-clean",
+    "category": "architecture",
+    "kind": "clean",
+    "description": "architecture",
+    "files": {
+      "core/main.js": "export const value = 1;\n",
+      "ui/view.js": "export const value = 1;\n"
+    },
+    "sourcePaths": [
+      "core/main.js",
+      "ui/view.js"
+    ],
+    "config": {
+      "architecture": {
+        "files": [
+          "core/**",
+          "ui/**"
+        ],
+        "boundaries": [
+          {
+            "id": "core-ui",
+            "from": "core",
+            "to": "ui",
+            "reason": "Core cannot depend on UI."
+          }
+        ]
+      }
+    },
+    "tools": [],
+    "expectedBugs": []
+  },
+  {
+    "id": "edge-defect",
+    "category": "edge-case",
+    "kind": "defect",
+    "description": "edge-case",
+    "files": {
+      "main.mjs": "export function total(count) { return count === 0 ? 7 : count * 7; }\n",
+      "policy.md": "Inputs are nonnegative integer item counts up to 100. A count of zero must cost zero; all other counts cost exactly count * 7 cents.\n"
+    },
+    "sourcePaths": [
+      "main.mjs"
+    ],
+    "config": {
+      "resources": [
+        {
+          "id": "policy",
+          "path": "policy.md"
+        }
+      ]
+    },
+    "tools": [],
+    "expectedBugs": [
+      {
+        "id": "edge",
+        "description": "Zero items incorrectly costs seven cents.",
+        "signals": []
+      }
+    ],
+    "oracle": "import assert from \"node:assert/strict\"; import {total} from \"./main.mjs\"; for (const n of [0,1,2,100]) assert.equal(total(n),n*7);\n"
+  },
+  {
+    "id": "edge-clean",
+    "category": "edge-case",
+    "kind": "clean",
+    "description": "edge-case",
+    "files": {
+      "main.mjs": "export function total(count) { return count * 7; }\n",
+      "policy.md": "Inputs are nonnegative integer item counts up to 100. A count of zero must cost zero; all other counts cost exactly count * 7 cents.\n"
+    },
+    "sourcePaths": [
+      "main.mjs"
+    ],
+    "config": {
+      "resources": [
+        {
+          "id": "policy",
+          "path": "policy.md"
+        }
+      ]
+    },
+    "tools": [],
+    "expectedBugs": [],
+    "oracle": "import assert from \"node:assert/strict\"; import {total} from \"./main.mjs\"; for (const n of [0,1,2,100]) assert.equal(total(n),n*7);\n"
+  },
+  {
+    "id": "tested-edge-defect",
+    "category": "configured-tests",
+    "kind": "defect",
+    "description": "configured-tests",
+    "files": {
+      "main.mjs": "export function total(count) { return count === 0 ? 7 : count * 7; }\n",
+      "test.mjs": "import assert from \"node:assert/strict\"; import {total} from \"./main.mjs\"; for (const n of [0,1,2,100]) assert.equal(total(n),n*7);\n",
+      "policy.md": "Inputs are nonnegative integer item counts up to 100. A count of zero must cost zero; all other counts cost exactly count * 7 cents.\n"
+    },
+    "sourcePaths": [
+      "main.mjs",
+      "test.mjs"
+    ],
+    "config": {
+      "resources": [
+        {
+          "id": "policy",
+          "path": "policy.md"
+        }
+      ]
+    },
+    "tools": [
+      "node-test"
+    ],
+    "expectedBugs": [
+      {
+        "id": "tested-edge",
+        "description": "Zero items incorrectly costs seven cents and the declared test fails.",
+        "signals": [
+          "check:tests"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "tested-edge-clean",
+    "category": "configured-tests",
+    "kind": "clean",
+    "description": "configured-tests",
+    "files": {
+      "main.mjs": "export function total(count) { return count * 7; }\n",
+      "test.mjs": "import assert from \"node:assert/strict\"; import {total} from \"./main.mjs\"; for (const n of [0,1,2,100]) assert.equal(total(n),n*7);\n",
+      "policy.md": "Inputs are nonnegative integer item counts up to 100. A count of zero must cost zero; all other counts cost exactly count * 7 cents.\n"
+    },
+    "sourcePaths": [
+      "main.mjs",
+      "test.mjs"
+    ],
+    "config": {
+      "resources": [
+        {
+          "id": "policy",
+          "path": "policy.md"
+        }
+      ]
+    },
+    "tools": [
+      "node-test"
+    ],
+    "expectedBugs": []
+  },
+  {
+    "id": "units-defect",
+    "category": "cross-file",
+    "kind": "defect",
+    "description": "cross-file",
+    "files": {
+      "main.mjs": "import {cents} from \"./fees.mjs\";\nexport function charge(count) { return cents(count) / 100; }\n",
+      "fees.mjs": "export function cents(count) { return count * 7; }\n",
+      "policy.md": "Public charge returns the fee in integer cents, not dollars. cents is the canonical provider. Inputs are integers from 0 through 100; fee is count * 7 cents.\n"
+    },
+    "sourcePaths": [
+      "main.mjs",
+      "fees.mjs"
+    ],
+    "config": {
+      "resources": [
+        {
+          "id": "policy",
+          "path": "policy.md"
+        }
+      ]
+    },
+    "tools": [],
+    "expectedBugs": [
+      {
+        "id": "units",
+        "description": "Consumer converts cents to dollars despite the public cents contract.",
+        "signals": []
+      }
+    ],
+    "oracle": "import assert from \"node:assert/strict\"; import {charge} from \"./main.mjs\"; assert.equal(charge(2),14);\n"
+  },
+  {
+    "id": "units-clean",
+    "category": "cross-file",
+    "kind": "clean",
+    "description": "cross-file",
+    "files": {
+      "main.mjs": "import {cents} from \"./fees.mjs\";\nexport function charge(count) { return cents(count); }\n",
+      "fees.mjs": "export function cents(count) { return count * 7; }\n",
+      "policy.md": "Public charge returns the fee in integer cents, not dollars. cents is the canonical provider. Inputs are integers from 0 through 100; fee is count * 7 cents.\n"
+    },
+    "sourcePaths": [
+      "main.mjs",
+      "fees.mjs"
+    ],
+    "config": {
+      "resources": [
+        {
+          "id": "policy",
+          "path": "policy.md"
+        }
+      ]
+    },
+    "tools": [],
+    "expectedBugs": [],
+    "oracle": "import assert from \"node:assert/strict\"; import {charge} from \"./main.mjs\"; assert.equal(charge(2),14);\n"
+  },
+  {
+    "id": "race-defect",
+    "category": "race-condition",
+    "kind": "defect",
+    "description": "race-condition",
+    "files": {
+      "main.mjs": "let total=0;\nexport async function increment(pause) { const before=total; await pause(); total=before+1; }\nexport const get=()=>total;\n",
+      "policy.md": "The in-process counter accepts concurrent increment calls. Each completed call must increment the shared total once. pause is an asynchronous operation that can yield; get returns the current total.\n"
+    },
+    "sourcePaths": [
+      "main.mjs"
+    ],
+    "config": {
+      "resources": [
+        {
+          "id": "policy",
+          "path": "policy.md"
+        }
+      ]
+    },
+    "tools": [],
+    "expectedBugs": [
+      {
+        "id": "race",
+        "description": "Concurrent increments capture the same total before yielding and lose an update.",
+        "signals": []
+      }
+    ],
+    "oracle": "import assert from \"node:assert/strict\"; import {increment,get} from \"./main.mjs\"; await Promise.all([increment(()=>Promise.resolve()),increment(()=>Promise.resolve())]); assert.equal(get(),2);\n"
+  },
+  {
+    "id": "race-clean",
+    "category": "race-condition",
+    "kind": "clean",
+    "description": "race-condition",
+    "files": {
+      "main.mjs": "let total=0;\nexport async function increment(pause) { await pause(); total+=1; }\nexport const get=()=>total;\n",
+      "policy.md": "The in-process counter accepts concurrent increment calls. Each completed call must increment the shared total once. pause is an asynchronous operation that can yield; get returns the current total.\n"
+    },
+    "sourcePaths": [
+      "main.mjs"
+    ],
+    "config": {
+      "resources": [
+        {
+          "id": "policy",
+          "path": "policy.md"
+        }
+      ]
+    },
+    "tools": [],
+    "expectedBugs": [],
+    "oracle": "import assert from \"node:assert/strict\"; import {increment,get} from \"./main.mjs\"; await Promise.all([increment(()=>Promise.resolve()),increment(()=>Promise.resolve())]); assert.equal(get(),2);\n"
+  },
+  {
+    "id": "dynamic-contract",
+    "category": "coverage",
+    "kind": "incomplete",
+    "description": "A dynamic route cannot be compared statically.",
+    "files": {
+      "main.js": "export const load = (url) => fetch(url);\n",
+      "api.json": "{\"openapi\":\"3.1.0\",\"info\":{\"title\":\"Fixture\",\"version\":\"1.0.0\"},\"paths\":{\"/users\":{\"get\":{}}}}"
+    },
+    "sourcePaths": [
+      "main.js"
+    ],
+    "config": {
+      "resources": [
+        {
+          "id": "api",
+          "path": "api.json",
+          "kind": "openapi"
+        }
+      ],
+      "contracts": [
+        {
+          "id": "api",
+          "resourceId": "api",
+          "files": [
+            "main.js"
+          ],
+          "baseUrl": "https://api.example.test"
+        }
+      ]
+    },
+    "tools": [],
+    "expectedBugs": []
+  },
+  {
+    "id": "missing-tool",
+    "category": "coverage",
+    "kind": "incomplete",
+    "description": "Requested Ruff is absent.",
+    "files": {
+      "main.py": "value = 1\n"
+    },
+    "sourcePaths": [
+      "main.py"
+    ],
+    "config": {
+      "quality": {
+        "presets": [
+          "python"
+        ]
+      }
+    },
+    "tools": [],
+    "expectedBugs": []
+  }
+]

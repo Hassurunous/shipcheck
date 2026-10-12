@@ -142,3 +142,19 @@ checks to determine actual execution; unavailable requested tools become check
 errors when execution is authorized. checks[].purpose is an optional caller label.
 The discovery stage in auditSummary may complete while checks remain unauthorized.
 See [P20](P20_QUALITY_WORKFLOWS.md). These are additive schema-version-1 fields.
+
+### Captured analysis context (P22 additive metadata)
+
+Optional `ai.preview.analysis`, and the same field in each `aiAudit.batches`
+entry, contains `bytes`, `sha256`, `records`, `omittedRecords`, `filtered`, and
+`freshness: "not-revalidated"`. These describe bounded analysis evidence prepared
+for the request, not verification of an AI diagnosis. Zero bytes means the
+prepared evidence was omitted entirely. Filtering/omission makes AI coverage
+partial. See [P22](P22_ANALYSIS_CONTEXT.md) for budgeting and security boundaries.
+
+Candidates can additionally include `executionClaims` and `executionVerification`.
+Verification status is `supported`, `contradicted`, `unknown`, or `not-claimed`;
+its scope is `captured-check-observations-only`. Per-claim reasons preserve the
+original assertion. Contradicted/unknown premises make AI coverage partial.
+Never interpret supported execution premises or matched citations as confirming
+a defect. Contradicted candidates remain visible for review, not automatic repair.

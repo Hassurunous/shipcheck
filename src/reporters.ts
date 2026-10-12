@@ -146,6 +146,7 @@ export function renderConsoleReport(input: Report): string {
       `Reviewer: ${ai.reviewer}; model: ${text(ai.model ?? 'not selected')}`,
       `Planned real model: ${text(ai.plannedModel ?? 'not selected; budget discussion pending')}`,
       `Selected source files: ${ai.preview.files.length}; skipped: ${ai.preview.skipped.length}; limited: ${ai.preview.limited}`);
+    if(ai.preview.analysis)lines.push(`Analysis context: ${ai.preview.analysis.records} records; omitted: ${ai.preview.analysis.omittedRecords}; filtered: ${ai.preview.analysis.filtered}; freshness: ${ai.preview.analysis.freshness}`);
     for (const file of ai.preview.files) lines.push(`  ${text(file.path)} (${file.bytes} bytes, ${file.lines} lines); freshness: ${file.freshness ?? 'not-rechecked'}`);
     for(const reference of ai.preview.references ?? [])lines.push(`  Reference [${text(reference.status)}]: ${text(reference.id)} — ${text(reference.path)}; SHA256: ${reference.sha256 ?? 'unavailable'}; freshness: ${reference.freshness ?? 'not-rechecked'}`);
     for (const skipped of ai.preview.skipped) lines.push(`  Skipped: ${text(skipped.path)} — ${text(skipped.reason)}`);
@@ -184,6 +185,11 @@ export function renderConsoleReport(input: Report): string {
     }
     for (const candidate of ai.candidates) {
       lines.push(`  [${candidate.severity.toUpperCase()}] ${text(candidate.title)}`, `    ${text(candidate.explanation)}`);
+      if(candidate.executionVerification) {
+        lines.push(`    Execution premises: ${candidate.executionVerification.status.toUpperCase()} (captured observations only)`);
+        for(const check of candidate.executionVerification.checks)lines.push(`    ${text(check.claim.checkId)}: ${text(check.reason)}`);
+        if(candidate.executionVerification.status==='contradicted')lines.push('    Do not act on this candidate until the contradicted execution premise is resolved.');
+      }
       if(candidate.referenceConflict)lines.push('    Depends on a disputed reference: clarify expectations before changing code.');
       if (candidate.evidenceVerification) {
         lines.push(`    Citation check: ${candidate.evidenceVerification.status.toUpperCase()} (diagnosis remains unverified)`);

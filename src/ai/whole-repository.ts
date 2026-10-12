@@ -1,3 +1,4 @@
+import {planAnalysisContext} from './analysis-context.js';
 import {summarizeAudit} from '../audit-summary.js';
 import { configSchema, loadConfig } from '../config.js';
 import { inspectRepository } from '../inspect-repository.js';
@@ -14,6 +15,7 @@ export async function reviewWholeRepository(target:string,options:AiReviewOption
   const config=options.config===undefined?await loadConfig(target):configSchema.parse(options.config);
   const profile=await inspectRepository(target,{respectGitignore:config.respectGitignore,exclude:config.exclude});
   const report=createReport(profile,config);
+  const analysisPlan=planAnalysisContext({...report,...options.analysisResults},config.ai.maxContextBytes,config.ai.apiKeyEnv,process.env);
   const remaining=new Set(profile.files.map(file=>file.path));
   const selected=new Set<string>();
   const valid=new Set<string>();
@@ -21,7 +23,7 @@ export async function reviewWholeRepository(target:string,options:AiReviewOption
   const batches:NonNullable<Report['aiAudit']>['batches']=[];
   let stoppedReason:string|undefined;
   while(remaining.size && batches.length<config.ai.maxBatches) {
-    const context=await collectContext(profile,config.ai,[...remaining]);
+    const context=await collectContext(profile,{...config.ai,maxContextBytes:config.ai.maxContextBytes-analysisPlan.bytes},[...remaining]);
     for(const item of context.preview.skipped) {
       if(!['file-count-limit','context-size-limit'].includes(item.reason)) {
         remaining.delete(item.path);if(!selected.has(item.path))skipped.set(item.path,item.reason);

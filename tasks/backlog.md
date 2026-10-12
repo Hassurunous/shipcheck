@@ -348,11 +348,29 @@ See [P20 workflows](../docs/P20_QUALITY_WORKFLOWS.md) for discovery paths, bindi
 authorization, supported tool output and validation. No auto-installation or paid
 requests were added.
 
-### P21 â€” Quality-audit effectiveness evaluation (planned)
+### P21 â€” Quality-audit effectiveness evaluation (completed for documented fixture scope)
 
-- [ ] Representative seeded defects and clean controls across supported workflows
-- [ ] Measure missed issues, false positives, coverage and AI cost
-- [ ] Evaluate developer repair loops against independently defined expectations
+- [x] Twenty seeded defect, clean and incomplete cases across supported workflows
+- [x] Measured offline/live misses, false positives, incomplete coverage and bounded cost
+- [x] One supervised source-only repair against a frozen external verifier; negative tamper/iteration checks
 
-P21 details remain to be agreed before implementation; earlier unscheduled
+See [P21 evidence and limitations](../docs/P21_EFFECTIVENESS.md). Independent
+real-project effectiveness remains unqualified; earlier unscheduled
 platform, language-adapter and publication follow-ups remain separate.
+
+### P22 — Evidence-grounded AI findings (in progress)
+
+- [x] External check diagnostics, execution failures and offline analysis in AI context
+- [x] Bounded/sanitized evidence, request accounting and omission disclosure
+- [x] Contradictory evidence and paired clean/defect offline regression tests
+- [x] Narrow machine-checkable execution-premise validation, separate from citation matching
+- [ ] Held-out false-positive/false-negative model evaluation
+
+See [P22 implementation and boundaries](../docs/P22_ANALYSIS_CONTEXT.md). Context
+plumbing tests do not establish improved live-model accuracy.
+
+### P23 — Deeper offline detection (planned)
+
+- [ ] Strengthen analyzer integrations and required-check policies
+- [ ] Select bounded source checks with paired defect and clean controls
+- [ ] Demonstrate behavioral test integration without retuning the frozen P21 corpus

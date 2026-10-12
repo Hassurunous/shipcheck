@@ -1,3 +1,5 @@
+import {verifyExecutionClaims} from './verify-execution.js';
+import {planAnalysisContext,type AnalysisResults} from './analysis-context.js';
 import {summarizeAudit} from '../audit-summary.js';
 import { createHash } from 'node:crypto';
 import { resolve } from 'node:path';
@@ -29,6 +31,7 @@ export type AiReviewOptions = {
   task?:CurrentTask;
   reloadTask?:()=>Promise<CurrentTask>;
   referenceAccess?:ReferenceAccess;
+  analysisResults?:AnalysisResults;
 };
 /** Offline test seam: caller supplies transport and dummy credentials. */
 export type InjectedClient = {transport:ResponseTransport; apiKey?:string};
@@ -59,15 +62,21 @@ export async function reviewWithAi(target = '.', options: AiReviewOptions = {exe
     if(task && [task.id,task.title,task.description,...task.files,...task.nonGoals,...task.requirements.flatMap(item=>[item.id,item.text])].some(value=>sensitiveContent.test(value)))
       throw new AiFailure('sensitive-task','Task text resembles sensitive credentials; no request was sent.');
     if(taskBytes>config.ai.maxContextBytes-256)throw new AiFailure('task-context-limit','Task exceeds available context space; no request was sent.');
-    const sourceSettings={...config.ai,maxContextBytes:config.ai.maxContextBytes-taskBytes};
+    const analysisPlan=planAnalysisContext({...report,...options.analysisResults},
+      config.ai.maxContextBytes-taskBytes,config.ai.apiKeyEnv,process.env);
+    const analysisBytes=analysisPlan.bytes;
+    const sourceSettings={...config.ai,maxContextBytes:config.ai.maxContextBytes-taskBytes-analysisBytes};
     const context = await collectContext(profile,sourceSettings,options.paths ?? task?.files);
     if(task) {
       context.task=task;
       context.preview.task={id:task.id,sha256:describeCurrentTask(task).sha256,bytes:taskBytes,requirementIds:task.requirements.map(item=>item.id)};
     }
+    if(analysisPlan.context)context.analysis=analysisPlan.context;
+    context.preview.analysis=analysisPlan.metadata;
+    if(analysisPlan.limited)context.preview.limited=true;
     result.preview = context.preview;
     const referencesBlocked=await attachReferences(profile.root,{...config,ai:sourceSettings},context,options.referenceAccess);
-    context.preview.serializedBytes+=taskBytes;
+    context.preview.serializedBytes+=taskBytes+analysisBytes;
     if(referencesBlocked)throw new AiFailure('reference-context','A required applicable reference is unavailable, ambiguous, or exceeds remaining context space. No request was sent.');
     const request = buildRequest(context,config.ai,model ?? 'MODEL_NOT_SELECTED');
     result.requestBytes = Buffer.byteLength(JSON.stringify(request));
@@ -130,6 +139,7 @@ export async function reviewWithAi(target = '.', options: AiReviewOptions = {exe
       result.candidates = candidates.map(candidate=>({
         ...candidate, id:`ai/qa:${createHash('sha256').update(JSON.stringify(candidate)).digest('hex').slice(0,16)}`,
         evidenceStatus:'unverified', origin:'ai',
+        executionVerification:verifyExecutionClaims(candidate.executionClaims,context.analysis),
         ...(context.references?{referenceConflict:candidate.evidence.some(item=>conflictedPaths.has(item.path))}:{}),
         evidenceVerification:verifyEvidence(candidate,context,current),
       }));
@@ -142,7 +152,7 @@ export async function reviewWithAi(target = '.', options: AiReviewOptions = {exe
   const selectedPaths=result.preview.files.map(file=>file.path);
   const rejectedCandidates=result.candidates.filter(candidate=>candidate.evidenceVerification?.status!=='matched').length;
   result.coverage={state:result.status==='failed'?'failed':result.status==='preview'?'preview':
-    result.preview.limited || result.preview.skipped.length>0 || rejectedCandidates>0 || (result.taskReview && result.taskReview.state!=='assessed') || (result.referenceConflicts?.length ?? 0)>0 || (result.coverage?.outOfScopeCandidates ?? 0)>0?'partial':'complete',
+    result.candidates.some(candidate=>['contradicted','unknown'].includes(candidate.executionVerification?.status ?? '')) || result.preview.limited || result.preview.skipped.length>0 || rejectedCandidates>0 || (result.taskReview && result.taskReview.state!=='assessed') || (result.referenceConflicts?.length ?? 0)>0 || (result.coverage?.outOfScopeCandidates ?? 0)>0?'partial':'complete',
     selectedPaths,validResponsePaths:result.status==='completed'?selectedPaths:[],
     failedResponsePaths:result.status==='failed'?selectedPaths:[],skippedPaths:result.preview.skipped.map(file=>file.path),
     matchedCandidates:result.candidates.length-rejectedCandidates,rejectedCandidates,

@@ -1,3 +1,4 @@
+import type {AnalysisContext} from './analysis-context.js';
 import {createIgnorePolicy,type IgnorePolicy} from '../ignore-policy.js';
 import fs from 'node:fs/promises';
 import { join, posix, relative } from 'node:path';
@@ -12,7 +13,7 @@ import type {ResourceSnapshot} from '../reference-resources.js';
 import type {CurrentTask} from '../task-file.js';
 
 export type SourceFile = {path: string; content: string};
-export type AiContext = {files: SourceFile[]; preview: AiResult['preview']; references?:ResourceSnapshot[]; task?:CurrentTask};
+export type AiContext = {analysis?:AnalysisContext; files: SourceFile[]; preview: AiResult['preview']; references?:ResourceSnapshot[]; task?:CurrentTask};
 const extensions = new Set(['.ts','.tsx','.mts','.cts','.js','.jsx','.mjs','.cjs','.py','.go','.rs','.java','.cs','.c','.cpp','.h','.rb','.php','.swift']);
 
 function allowed(path: string) {

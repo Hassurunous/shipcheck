@@ -42,7 +42,8 @@
     "verify": "npm run typecheck && npm test && npm run test:cli",
     "test:watch": "vitest",
     "evaluate": "npm run build --silent && node scripts/evaluate.mjs",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "evaluate:quality": "npm run build --silent && node scripts/effectiveness-evaluate.mjs"
   },
   "keywords": [],
   "author": "",

@@ -1,6 +1,6 @@
 # Architecture
 
-## Current implementation through P20
+## Current implementation through P21
 
 `src/cli.ts` is the executable entry point, with command dispatch in
 `src/cli-command.ts`. `audit` performs configured review; help/version explain
@@ -171,7 +171,9 @@ The optional report.ai section separates unverified candidates from findings.
 No SDK or retry was introduced. The separate ai/live.ts module implements
 bounded HTTP for explicit --ai live with --budget or legacy --trial execution. ai/trial-budget.ts
 persists reservations and receipts outside repositories and locks concurrent
-requests. Only live execution reads the configured ai.apiKeyEnv (default SHIPCHECK_API_KEY). See
+requests. Only live execution uses the configured ai.apiKeyEnv (default SHIPCHECK_API_KEY)
+for authentication. P22 evidence sanitization also compares known credential
+environment values in offline modes, without sending those values. See
 LIVE_TRIAL.md for allowance limits and observed three-mode results.
 
 ## P4 citation verification
@@ -382,3 +384,23 @@ filtering, authorization and process cleanup apply. Missing applicable tools bec
 operational check errors only with run authorization. No tool installation,
 package-script guessing, new dependency or implicit AI execution was added.
 See [quality workflows](P20_QUALITY_WORKFLOWS.md).
+
+## P21 evaluation tooling
+
+`effectiveness.ts` scores fixture-specific signals and report-hash-bound reviewer
+labels. The offline/live runner uses the existing CLI and budget policy. The repair
+harness prepares an external developer handoff and verifies immutable expectations;
+it never applies code edits. No production audit behavior changed. Raw results stay
+out of version control. See [P21](P21_EFFECTIVENESS.md) for the bounded evidence.
+
+## P22 captured analysis context (in progress)
+
+Workflows run contract, SDK and architecture analysis after authorized checks and
+before AI. `ai/analysis-context.ts` selects, sanitizes and bounds captured stage
+observations before source/reference selection. The same reservation calculation
+is used in whole-repository batch planning. Requests carry untrusted evidence;
+preview metadata exposes omissions, filtering and lack of execution freshness
+revalidation. `ai/verify-execution.ts` separately checks structured candidate premises against
+submitted check observations, retaining contradicted candidates with warnings and
+partial coverage. Response citation checks retain their existing semantics. See
+[P22 context and limitations](P22_ANALYSIS_CONTEXT.md).

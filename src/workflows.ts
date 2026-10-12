@@ -104,8 +104,12 @@ export async function runWorkflow(target:string, kind:'audit'|'diff'|'task', ai?
   const quality=await planQuality(root,config,languages ?? [],options.runChecks===true);
   const checks=[...await runChecks(root,quality.checks,options.runChecks===true,config.ai.apiKeyEnv,languages),...quality.unavailable];
   const references=config.resources.length?(await loadReferenceResources(target,config,paths,referenceAccess)).report:undefined;
-  const report = ai && paths?.length !== 0 && references?.state!=='incomplete' ? whole ? await reviewWholeRepository(target,{...ai,config,referenceAccess})
-    : await reviewWithAi(target,{...ai,config,referenceAccess,...(taskDefinition?{task:taskDefinition,reloadTask}:{}),...(paths ? {paths} : {})}) : await reviewRepository(target,config);
+  const contracts=await auditContracts(root,config,paths,referenceAccess);
+  const sdkContracts=await auditSdkContracts(root,config,paths,referenceAccess);
+  const architecture=await auditArchitecture(root,config,paths);
+  const analysisResults={checks,contracts,sdkContracts,architecture,...(quality.report?{quality:quality.report}:{})};
+  const report = ai && paths?.length !== 0 && references?.state!=='incomplete' ? whole ? await reviewWholeRepository(target,{...ai,config,referenceAccess,analysisResults})
+    : await reviewWithAi(target,{...ai,config,referenceAccess,analysisResults,...(taskDefinition?{task:taskDefinition,reloadTask}:{}),...(paths ? {paths} : {})}) : await reviewRepository(target,config);
   if(report.ai?.taskReview && report.ai.taskReview.freshness==='unchanged') {
     try {if(describeCurrentTask(await reloadTask()).sha256!==report.ai.taskReview.taskHash)invalidateTaskReview(report.ai.taskReview);}
     catch {invalidateTaskReview(report.ai.taskReview);}
@@ -118,9 +122,6 @@ export async function runWorkflow(target:string, kind:'audit'|'diff'|'task', ai?
     for(const requirement of taskSummary.requirements)requirement.status=report.ai?.taskReview?.assessments.find(item=>item.requirementId===requirement.id)?.status ?? 'insufficient-evidence';
   }
   const selected = new Set(paths);
-  const contracts=await auditContracts(report.root,config,paths,referenceAccess);
-  const sdkContracts=await auditSdkContracts(report.root,config,paths,referenceAccess);
-  const architecture=await auditArchitecture(report.root,config,paths);
   const completed=reportSchema.parse({...report,
     ...(taskSummary?{currentTask:taskSummary}:{}),
     ...(references?{references}:{}),

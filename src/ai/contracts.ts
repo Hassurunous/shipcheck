@@ -28,7 +28,14 @@ const evidenceSchema = z.object({
   endLine: z.number().int().positive(),
   excerpt: z.string().min(1).max(4000),
 }).strict();
+export const executionClaimSchema=z.object({checkId:z.string().min(1).max(64),
+  claim:z.enum(['passed','failed','error','skipped','path-observed','path-not-observed']),
+  path:z.string().max(512).nullable()}).strict();
+export const executionVerificationSchema=z.object({status:z.enum(['supported','contradicted','unknown','not-claimed']),
+  scope:z.literal('captured-check-observations-only'),checks:z.array(z.object({claim:executionClaimSchema,
+    status:z.enum(['supported','contradicted','unknown']),reason:z.string()}))});
 export const candidateSchema = z.object({
+  executionClaims:z.array(executionClaimSchema).max(5).optional(),
   title: z.string().min(1).max(200),
   severity: z.enum(['error', 'warning', 'info']),
   explanation: z.string().min(1).max(4000),
@@ -59,6 +66,8 @@ export const contextPreviewSchema = z.object({
   skipped: z.array(z.object({path: z.string(), reason: z.string()})),
   serializedBytes: z.number().int().nonnegative(),
   limited: z.boolean(),
+  analysis:z.object({bytes:z.number().int().nonnegative(),sha256:z.string(),records:z.number().int().nonnegative(),
+    omittedRecords:z.number().int().nonnegative(),filtered:z.boolean(),freshness:z.literal('not-revalidated')}).optional(),
   task:z.object({id:z.string(),sha256:z.string(),bytes:z.number().int(),requirementIds:z.array(z.string())}).optional(),
   references:z.array(z.object({id:z.string(),path:z.string(),sha256:z.string().nullable(),
     status:z.string(),required:z.boolean(),freshness:z.enum(['unchanged','changed-or-unavailable']).optional()})).optional(),
@@ -88,6 +97,7 @@ export const aiResultSchema = z.object({
   candidates: z.array(candidateSchema.extend({
     id: z.string(), evidenceStatus: z.literal('unverified'), origin: z.literal('ai'),
     referenceConflict:z.boolean().optional(),
+    executionVerification:executionVerificationSchema.optional(),
     evidenceVerification: z.object({status:z.enum(['matched','rejected']),checks:z.array(z.object({
       path:z.string(),status:z.enum(['matched','rejected']),reason:z.string(),
     }))}).optional(),
