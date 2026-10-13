@@ -358,18 +358,20 @@ See [P21 evidence and limitations](../docs/P21_EFFECTIVENESS.md). Independent
 real-project effectiveness remains unqualified; earlier unscheduled
 platform, language-adapter and publication follow-ups remain separate.
 
-### P22 — Evidence-grounded AI findings (in progress)
+### P22 â€” Evidence-grounded AI findings (completed for documented comparison scope)
 
 - [x] External check diagnostics, execution failures and offline analysis in AI context
 - [x] Bounded/sanitized evidence, request accounting and omission disclosure
 - [x] Contradictory evidence and paired clean/defect offline regression tests
 - [x] Narrow machine-checkable execution-premise validation, separate from citation matching
-- [ ] Held-out false-positive/false-negative model evaluation
+- [x] Frozen paired false-positive/false-negative model evaluation (non-blind; known regression plus new cases)
 
 See [P22 implementation and boundaries](../docs/P22_ANALYSIS_CONTEXT.md). Context
-plumbing tests do not establish improved live-model accuracy.
+plumbing tests do not establish improved live-model accuracy. The [live comparison](../docs/P22_EVALUATION.md)
+found 3/3 seeded defects in each arm, with one versus zero false positives. This
+small result does not establish general rates.
 
-### P23 — Deeper offline detection (planned)
+### P23 â€” Deeper offline detection (planned)
 
 - [ ] Strengthen analyzer integrations and required-check policies
 - [ ] Select bounded source checks with paired defect and clean controls

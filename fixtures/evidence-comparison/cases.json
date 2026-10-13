@@ -1,0 +1,122 @@
+[
+  {
+    "id": "root-lint-defect",
+    "kind": "defect",
+    "category": "P21-root-lint-regression",
+    "files": {
+      "main.js": "export const score = missingScore + 2;\n",
+      "eslint.config.mjs": "export default [{files:[\"**/*.js\"],rules:{\"no-undef\":\"error\"}}];\n"
+    },
+    "paths": [
+      "main.js",
+      "eslint.config.mjs"
+    ],
+    "tool": "eslint",
+    "expectedStatus": "failed",
+    "expectedBug": "missingScore has no declaration"
+  },
+  {
+    "id": "root-lint-clean",
+    "kind": "clean",
+    "category": "P21-root-lint-regression",
+    "files": {
+      "main.js": "const missingScore = 3;\nexport const score = missingScore + 2;\n",
+      "eslint.config.mjs": "export default [{files:[\"**/*.js\"],rules:{\"no-undef\":\"error\"}}];\n"
+    },
+    "paths": [
+      "main.js",
+      "eslint.config.mjs"
+    ],
+    "tool": "eslint",
+    "expectedStatus": "passed",
+    "expectedBug": null
+  },
+  {
+    "id": "empty-average-defect",
+    "kind": "defect",
+    "category": "new-boundary-pair",
+    "files": {
+      "main.mjs": "// Accept arrays of finite numbers. Empty input must return zero.\nexport function average(values) {\n  return values.reduce((sum, value) => sum + value, 0) / values.length;\n}\n"
+    },
+    "paths": [
+      "main.mjs"
+    ],
+    "tool": "test",
+    "script": "import assert from 'node:assert/strict';import {average} from './main.mjs';assert.equal(average([]),0);assert.equal(average([2,4]),3);",
+    "expectedStatus": "failed",
+    "expectedBug": "empty array returns NaN rather than zero"
+  },
+  {
+    "id": "empty-average-clean",
+    "kind": "clean",
+    "category": "new-boundary-pair",
+    "files": {
+      "main.mjs": "// Accept arrays of finite numbers. Empty input must return zero.\nexport function average(values) {\n  if (values.length === 0) return 0;\n  return values.reduce((sum, value) => sum + value, 0) / values.length;\n}\n"
+    },
+    "paths": [
+      "main.mjs"
+    ],
+    "tool": "test",
+    "script": "import assert from 'node:assert/strict';import {average} from './main.mjs';assert.equal(average([]),0);assert.equal(average([2,4]),3);",
+    "expectedStatus": "passed",
+    "expectedBug": null
+  },
+  {
+    "id": "concurrent-append-defect",
+    "kind": "defect",
+    "category": "new-concurrency-pair",
+    "files": {
+      "main.mjs": "// Every completed append must retain its item, including concurrent calls.\nlet items = [];\nexport async function append(item) {\n  const before = items;\n  await Promise.resolve();\n  items = [...before, item];\n}\nexport function snapshot() { return [...items]; }\n"
+    },
+    "paths": [
+      "main.mjs"
+    ],
+    "tool": "test",
+    "script": "import assert from 'node:assert/strict';import {append,snapshot} from './main.mjs';await Promise.all([append('a'),append('b')]);assert.deepEqual(snapshot(),['a','b']);",
+    "expectedStatus": "failed",
+    "expectedBug": "concurrent append loses an item through a stale pre-await snapshot"
+  },
+  {
+    "id": "concurrent-append-clean",
+    "kind": "clean",
+    "category": "new-concurrency-pair",
+    "files": {
+      "main.mjs": "// Every completed append must retain its item, including concurrent calls.\nlet items = [];\nexport async function append(item) {\n  await Promise.resolve();\n  items = [...items, item];\n}\nexport function snapshot() { return [...items]; }\n"
+    },
+    "paths": [
+      "main.mjs"
+    ],
+    "tool": "test",
+    "script": "import assert from 'node:assert/strict';import {append,snapshot} from './main.mjs';await Promise.all([append('a'),append('b')]);assert.deepEqual(snapshot(),['a','b']);",
+    "expectedStatus": "passed",
+    "expectedBug": null
+  },
+  {
+    "id": "execution-timeout",
+    "kind": "incomplete",
+    "category": "execution-control",
+    "files": {
+      "main.mjs": "// Returns the square of a finite number.\nexport function square(value) { return value * value; }\n"
+    },
+    "paths": [
+      "main.mjs"
+    ],
+    "tool": "timeout",
+    "expectedStatus": "error",
+    "expectedBug": null
+  },
+  {
+    "id": "execution-unauthorized",
+    "kind": "incomplete",
+    "category": "execution-control",
+    "files": {
+      "main.mjs": "// Returns the square of a finite number.\nexport function square(value) { return value * value; }\n"
+    },
+    "paths": [
+      "main.mjs"
+    ],
+    "tool": "unauthorized",
+    "expectedStatus": "skipped",
+    "expectedBug": null
+  }
+]

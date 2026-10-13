@@ -253,4 +253,5 @@ See [P21 evaluation and developer-loop evidence](docs/P21_EFFECTIVENESS.md).
 
 AI review now receives bounded external-check and offline-analysis evidence,
 including execution errors. See [P22 evidence context](docs/P22_ANALYSIS_CONTEXT.md)
-for filtering, coverage disclosure and remaining accuracy validation.
+for filtering and coverage disclosure, and the [P22 live comparison](docs/P22_EVALUATION.md)
+for measured results and their limitations.

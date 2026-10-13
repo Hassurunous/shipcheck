@@ -105,13 +105,11 @@ build and all 26 CLI acceptance groups passed. An executable preview audit of
 Shipcheck itself included four analysis records without evidence omissions or
 filtering. No model request was made.
 
-## Remaining evaluation
+## Live evaluation completed
 
-The tests verify context plumbing, paired clean/defect observations and narrow
-premise validation. Synthetic/injected responses do not measure a live model's
-response to the new context. P22 remains in progress pending a held-out
-false-positive/false-negative model evaluation. No live spending occurred for
-this implementation. Preserve the P21 frozen corpus and distinguish future
-regression cases from independent evaluation data. A new P22 paid evaluation
-needs its own spending authorization; the earlier allowance was for P21.
-P23 will address deeper offline detection separately.
+The approved $0.25 paired comparison completed 16 requests. Both arms detected
+3/3 seeded defects; the arm with analysis evidence had zero false-positive
+diagnoses versus one in the arm without it. This is a small, non-blind comparison,
+not a general accuracy claim. See [P22 results and costs](P22_EVALUATION.md).
+P22 is complete within this documented scope; P23 addresses deeper offline
+coverage separately.

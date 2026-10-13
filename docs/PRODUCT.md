@@ -11,8 +11,8 @@ P0–P21 are delivered within their documented scope. Version 0.1.0 is private,
 pre-alpha and available for local distribution. Qualification covers **Windows
 x64 with Node.js 22 only**; macOS/Linux installation, CLI, native parsers and
 process cleanup still need testing. No public npm release is authorized.
-P22 evidence-context integration and narrow execution-premise validation are
-implemented; model effectiveness evaluation remains in progress. See [P22](P22_ANALYSIS_CONTEXT.md).
+P22 adds analysis context and narrow execution-premise validation, with a bounded
+[live comparison](P22_EVALUATION.md). See [P22 behavior](P22_ANALYSIS_CONTEXT.md).
 See [P18 qualification](P18_QUALIFICATION.md) for the actual experiments and limits,
 and the [milestone record](../tasks/backlog.md) for delivery history and follow-ups.
 

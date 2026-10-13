@@ -1,6 +1,6 @@
 # Architecture
 
-## Current implementation through P21
+## Current implementation through P22
 
 `src/cli.ts` is the executable entry point, with command dispatch in
 `src/cli-command.ts`. `audit` performs configured review; help/version explain
@@ -393,7 +393,7 @@ harness prepares an external developer handoff and verifies immutable expectatio
 it never applies code edits. No production audit behavior changed. Raw results stay
 out of version control. See [P21](P21_EFFECTIVENESS.md) for the bounded evidence.
 
-## P22 captured analysis context (in progress)
+## P22 captured analysis context
 
 Workflows run contract, SDK and architecture analysis after authorized checks and
 before AI. `ai/analysis-context.ts` selects, sanitizes and bounds captured stage
@@ -404,3 +404,8 @@ revalidation. `ai/verify-execution.ts` separately checks structured candidate pr
 submitted check observations, retaining contradicted candidates with warnings and
 partial coverage. Response citation checks retain their existing semantics. See
 [P22 context and limitations](P22_ANALYSIS_CONTEXT.md).
+
+The P22 paired evaluator directly composes the production check runner, request
+builder, budgeted transport and validators to compare identical source selection
+with versus without analysis evidence. Its hash-bound scorer and synthetic corpus
+are development tools. See [P22 evaluation](P22_EVALUATION.md).
