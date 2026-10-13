@@ -1,6 +1,6 @@
 # Architecture
 
-## Current implementation through P22
+## Current implementation through P23
 
 `src/cli.ts` is the executable entry point, with command dispatch in
 `src/cli-command.ts`. `audit` performs configured review; help/version explain
@@ -409,3 +409,14 @@ The P22 paired evaluator directly composes the production check runner, request
 builder, budgeted transport and validators to compare identical source selection
 with versus without analysis evidence. Its hash-bound scorer and synthetic corpus
 are development tools. See [P22 evaluation](P22_EVALUATION.md).
+
+## P23 required execution and Python types
+
+Optional check requirements propagate from explicit checks or quality slots into
+check results. CLI and execution summaries treat skipped required checks as
+incomplete; authorization is still separate. Empty diffs inspect valid required
+check configuration before taking the no-work shortcut. `quality.ts` discovers
+an opt-in Pyright Node entry point; `check-diagnostics.ts` normalizes its bounded
+JSON diagnostics, validates summary counts and keeps fatal failures separate.
+P22 receives requirement flags with captured checks. No new runtime dependency
+or automatic source editing was introduced. See [P23](P23_OFFLINE_CHECKS.md).

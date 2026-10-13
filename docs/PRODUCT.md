@@ -7,12 +7,13 @@ Shipcheck does not modify source, requirements or configuration during an audit.
 
 ## Current status
 
-P0–P21 are delivered within their documented scope. Version 0.1.0 is private,
+P0-P23 are delivered within their documented scope. Version 0.1.0 is private,
 pre-alpha and available for local distribution. Qualification covers **Windows
 x64 with Node.js 22 only**; macOS/Linux installation, CLI, native parsers and
 process cleanup still need testing. No public npm release is authorized.
 P22 adds analysis context and narrow execution-premise validation, with a bounded
 [live comparison](P22_EVALUATION.md). See [P22 behavior](P22_ANALYSIS_CONTEXT.md).
+P23 adds required checks and opt-in Python type checking; see [P23](P23_OFFLINE_CHECKS.md).
 See [P18 qualification](P18_QUALIFICATION.md) for the actual experiments and limits,
 and the [milestone record](../tasks/backlog.md) for delivery history and follow-ups.
 
@@ -33,7 +34,7 @@ incomplete coverage separately. See the [user guide](USER_GUIDE.md),
 | --- | --- |
 | Repository inspection and rules | File/language inventory, package structure, local references and optional repository policies; [rules](RULES.md) and [configuration](CONFIGURATION.md) |
 | External checks | Explicitly authorized commands, bounded execution, ESLint/Ruff JSON diagnostics and thresholds; [check configuration](P7_CONFIGURATION.md) |
-| Quality presets | Opt-in project-local ESLint/TypeScript/Ruff discovery, custom bindings and explicit coverage gaps; [P20 workflows](P20_QUALITY_WORKFLOWS.md) |
+| Quality presets | Opt-in project-local ESLint/TypeScript/Ruff/Pyright discovery, custom bindings and explicit coverage gaps; [P20 workflows](P20_QUALITY_WORKFLOWS.md) |
 | AI review | Preview, synthetic mock and paid modes; selected-file or whole-repository batching with coverage reporting and persistent allowances; [AI context](P3_AI.md) and [live budgets](P7_LIVE_AUDITS.md) |
 | Reference evidence | Scoped local snapshots, cross-file citations, conflicts and freshness checks; [reference-aware audits](P12_REFERENCE_AUDITS.md) |
 | Task expectations | Inline or file-based requirements with identity, uncertainty and evidence-based AI assessments; [task assessment](P13_TASK_ASSESSMENT.md) |

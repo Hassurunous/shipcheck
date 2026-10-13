@@ -78,7 +78,13 @@ export async function runWorkflow(target:string, kind:'audit'|'diff'|'task', ai?
     return fresh;
   };
   const paths = kind==='diff' ? await changedPaths(target,ai?.config) : task ? [...new Set(task.files)].sort() : undefined;
-  if (kind==='diff' && paths?.length===0) return reportSchema.parse({schemaVersion:1,
+  let requiredOnEmptyDiff=false;
+  if(kind==='diff' && paths?.length===0) {
+    try {const emptyConfig=ai?.config===undefined?await loadConfig(target):configSchema.parse(ai.config);
+      requiredOnEmptyDiff=emptyConfig.checks.some(check=>check.required===true) || Boolean(emptyConfig.quality?.required.length);
+    } catch { /* Preserve the existing empty-diff shortcut for unchanged invalid configuration. */ }
+  }
+  if (kind==='diff' && paths?.length===0 && !requiredOnEmptyDiff) return reportSchema.parse({schemaVersion:1,
     root:await realpath(await validateRoot(target)),findings:[],inspectionWarnings:[],
     auditSummary:summarizeAudit({schemaVersion:1,root:target,findings:[],inspectionWarnings:[]},{emptyDiff:true}),
     workflow:{kind:'diff',scope:[],baseline:'HEAD',unavailablePaths:[]}});

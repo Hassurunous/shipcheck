@@ -33,7 +33,7 @@ export function collectAnalysisContext(report:Pick<Report,'findings'|'inspection
   }
   // Statuses take priority over diagnostics and excerpts. Absence never implies success.
   for(const check of report.checks ?? [])add('checks','execution',{
-    id:check.id,purpose:check.purpose,status:check.status,exitCode:check.exitCode,reason:check.reason,
+    id:check.id,required:check.required===true,purpose:check.purpose,status:check.status,exitCode:check.exitCode,reason:check.reason,
     scope:check.scope,fileCoverage:'unknown',diagnosticCount:check.diagnostics?.length ?? null});
   for(const stage of ['contracts','sdkContracts'] as const)for(const result of report[stage] ?? [])
     add(stage,'status',{id:result.id,state:result.state,scope:result.scope,issues:result.issues});

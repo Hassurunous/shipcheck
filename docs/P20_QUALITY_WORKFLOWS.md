@@ -157,3 +157,6 @@ groups; a strict NodeNext consumer checked the new configuration/report exports.
 Six real-tool defect/clean cases passed using ESLint 10.11.0, Ruff 0.16.9 and
 TypeScript 7.0.2. Source/configuration preservation was verified, including Ruff
 fix/fix-only settings enabled in its configuration. Paid API spend: $0.
+
+P23 adds the separate `python-types` preset and `quality.required` tool slots;
+see [P23](P23_OFFLINE_CHECKS.md). The original `python` preset remains Ruff-only.

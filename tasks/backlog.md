@@ -371,8 +371,13 @@ plumbing tests do not establish improved live-model accuracy. The [live comparis
 found 3/3 seeded defects in each arm, with one versus zero false positives. This
 small result does not establish general rates.
 
-### P23 — Deeper offline detection (planned)
+### P23 — Deeper offline detection (completed for documented adapter/test scope)
 
-- [ ] Strengthen analyzer integrations and required-check policies
-- [ ] Select bounded source checks with paired defect and clean controls
-- [ ] Demonstrate behavioral test integration without retuning the frozen P21 corpus
+- [x] Opt-in required check policies and Python Pyright integration
+- [x] Qualify Pyright type mismatch and unawaited-coroutine diagnostics with clean controls
+- [x] Demonstrate behavioral test integration without retuning the frozen P21 corpus
+
+See [P23 behavior and scope](../docs/P23_OFFLINE_CHECKS.md). Python static
+checks are delegated to Pyright; behavioral cases use explicit project tests.
+Custom cross-language source analyzers and independent historical-bug accuracy
+qualification remain future work, not claims of this milestone.

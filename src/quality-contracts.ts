@@ -1,8 +1,9 @@
 import {z} from 'zod';
-export const qualitySlotSchema=z.enum(['eslint','typescript','ruff']);
+export const qualitySlotSchema=z.enum(['eslint','typescript','ruff','pyright']);
 export const qualitySchema=z.object({
-  presets:z.array(z.enum(['javascript','typescript','python'])).min(1).max(3)
+  presets:z.array(z.enum(['javascript','typescript','python','python-types'])).min(1).max(4)
     .refine(values=>new Set(values).size===values.length,'Quality presets must be unique.'),
+  required:z.array(qualitySlotSchema).max(4).default([]).refine(values=>new Set(values).size===values.length,'Required tool slots must be unique.'),
   bindings:z.partialRecord(qualitySlotSchema,z.union([z.string().min(1),z.literal(false)])).default({}),
 }).strict();
 export const qualityReportSchema=z.object({

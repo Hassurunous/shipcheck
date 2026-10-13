@@ -40,7 +40,7 @@ export function summarizeAudit(report:Report,options:Options={}):AuditSummary {
   if(!checks.length)stages.push(stage('external-checks','External checks',config?.checks.length?'not-run':'not-configured',
     config?.checks.length?'Configured commands were not run by this entry point.':'No external checks are configured. Linting, typechecking and tests were not automatically performed.',[],'tool-defined'));
   for(const check of checks) {
-    const state:AuditStage['status']=check.status==='skipped'?(options.checksAuthorized===false?'not-authorized':'skipped'):check.status==='error'?'failed':check.status==='failed'?'failed':'completed';
+    const state:AuditStage['status']=check.required && check.status==='skipped'?'failed':check.status==='skipped'?(options.checksAuthorized===false?'not-authorized':'skipped'):check.status==='error'?'failed':check.status==='failed'?'failed':'completed';
     const item=stage('external:'+check.id,'External check: '+check.id,state,check.status.toUpperCase()+': '+check.reason,check.status==='skipped'?[]:null,'tool-defined');
     item.limitations=['Exact checked files are not attested by this command result. Diagnostic paths alone are not a complete coverage list.',
       'A command name does not establish which analyses it performed. Its own configuration and ignores apply.'];stages.push(item);

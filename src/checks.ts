@@ -4,6 +4,7 @@ import {diagnosticSchema,parseDiagnostics,exceedsThreshold} from './check-diagno
 import {terminateCheckTree} from './check-process.js';
 
 export const checkSchema = z.object({
+  required:z.boolean().optional(),
   id:z.string().regex(/^[a-zA-Z0-9][a-zA-Z0-9_-]{0,63}$/),
   purpose:z.enum(['lint','typecheck','test','other']).optional(),
   command:z.string().min(1).max(1024).refine(value=>!value.includes('\0')),
@@ -11,11 +12,11 @@ export const checkSchema = z.object({
   timeoutMs:z.number().int().min(100).max(300000).default(60000),
   maxOutputBytes:z.number().int().min(128).max(1048576).default(65536),
   failureExitCodes:z.array(z.number().int().min(1).max(255)).default([1]),
-  format:z.enum(['text','eslint-json','ruff-json']).default('text'),
+  format:z.enum(['text','eslint-json','ruff-json','pyright-json']).default('text'),
   failOn:z.enum(['error','warning','info','never']).default('error'),
   languages:z.array(z.enum(['JavaScript','TypeScript','Python'])).min(1).optional(),
 }).strict().superRefine((check,context)=>{
-  if(check.args.some(arg=>/^--(?:fix|fix-only|unsafe-fixes|write)(?:=|$)/i.test(arg)))
+  if(check.args.some(arg=>/^--(?:fix|fix-only|unsafe-fixes|write|createstub)(?:=|$)/i.test(arg)))
     context.addIssue({code:'custom',path:['args'],message:'Inspection checks must not use recognized fix/write flags.'});
   if(check.format==='text' && check.failOn!=='error')context.addIssue({code:'custom',path:['failOn'],message:'Severity thresholds require a structured JSON format.'});
 });
@@ -23,6 +24,7 @@ export const checksSchema = z.array(checkSchema).max(20).default([]).refine(
   checks=>new Set(checks.map(check=>check.id)).size===checks.length,'Check IDs must be unique.');
 export const checkResultSchema=z.object({
   purpose:z.enum(['lint','typecheck','test','other']).optional(),
+  required:z.boolean().optional(),
   id:z.string(),status:z.enum(['skipped','passed','failed','error']),
   exitCode:z.number().int().nullable(),reason:z.string(),output:z.string(),
   scope:z.literal('whole-repository'),
@@ -36,7 +38,7 @@ export async function runChecks(root:string, checks:z.infer<typeof checksSchema>
   credentialEnv='SHIPCHECK_API_KEY',detectedLanguages?:readonly string[]):Promise<CheckResult[]> {
   const results:CheckResult[]=[];
   for(const check of checks) {
-    const base={id:check.id,...(check.purpose?{purpose:check.purpose}:{}),exitCode:null,output:'',scope:'whole-repository' as const};
+    const base={id:check.id,...(check.required?{required:true}:{}),...(check.purpose?{purpose:check.purpose}:{}),exitCode:null,output:'',scope:'whole-repository' as const};
     if(!authorized) {results.push({...base,status:'skipped',reason:'Requires --run-checks authorization.'});continue;}
     if(check.languages && (!detectedLanguages || !check.languages.some(language=>detectedLanguages.includes(language)))) {
       results.push({...base,status:'skipped',reason:detectedLanguages?'No configured language detected in the inspected inventory.':'Language selection requires an inspected inventory.'});continue;

@@ -3,13 +3,13 @@ import {isAbsolute,relative,resolve} from 'node:path';
 import {z} from 'zod';
 
 export const diagnosticSchema=z.object({
-  id:z.string(),tool:z.enum(['eslint','ruff']),ruleId:z.string().nullable(),
+  id:z.string(),tool:z.enum(['eslint','ruff','pyright']),ruleId:z.string().nullable(),
   severity:z.enum(['error','warning','info']),message:z.string(),
   path:z.string().nullable(),line:z.number().int().positive().optional(),column:z.number().int().positive().optional(),
   origin:z.literal('external-tool'),
 });
 export type Diagnostic=z.infer<typeof diagnosticSchema>;
-export type DiagnosticFormat='eslint-json'|'ruff-json';
+export type DiagnosticFormat='eslint-json'|'ruff-json'|'pyright-json';
 const location=z.object({row:z.number().int().positive(),column:z.number().int().positive()});
 const eslintSchema=z.array(z.object({filePath:z.string().min(1),messages:z.array(z.object({
   ruleId:z.string().nullable().optional(),severity:z.number().int().min(0).max(2),message:z.string().min(1),
@@ -18,6 +18,17 @@ const eslintSchema=z.array(z.object({filePath:z.string().min(1),messages:z.array
 const ruffSchema=z.array(z.object({filename:z.string().nullable(),code:z.string().nullable(),message:z.string().min(1),
   location:location.nullable(),
 })).max(10000);
+
+const pyrightPosition=z.object({line:z.number().int().nonnegative().max(Number.MAX_SAFE_INTEGER-1),character:z.number().int().nonnegative().max(Number.MAX_SAFE_INTEGER-1)});
+const pyrightSchema=z.object({generalDiagnostics:z.array(z.object({file:z.string().min(1),
+  severity:z.enum(['error','warning','information']),message:z.string().min(1),rule:z.string().optional(),
+  range:z.object({start:pyrightPosition,end:pyrightPosition}).refine(value=>value.end.line>value.start.line ||
+    (value.end.line===value.start.line && value.end.character>=value.start.character),'Invalid diagnostic range'),
+})).max(10000),summary:z.object({filesAnalyzed:z.number().int().nonnegative(),errorCount:z.number().int().nonnegative(),
+  warningCount:z.number().int().nonnegative(),informationCount:z.number().int().nonnegative()})}).superRefine((value,ctx)=>{
+  for(const [severity,key] of [['error','errorCount'],['warning','warningCount'],['information','informationCount']] as const)
+    if(value.generalDiagnostics.filter(item=>item.severity===severity).length!==value.summary[key])ctx.addIssue({code:'custom',message:'Diagnostic counts disagree with summary.'});
+});
 
 function sourcePath(root:string,path:string|null):string|null {
   if(path===null)return null;
@@ -31,7 +42,11 @@ function sourcePath(root:string,path:string|null):string|null {
 /** Normalize tool claims only; no source read, fixes, or citation verification. */
 export function parseDiagnostics(format:DiagnosticFormat,stdout:string,root:string,checkId:string):Diagnostic[] {
   const parsed:unknown=JSON.parse(stdout);
-  const candidates:Omit<Diagnostic,'id'>[]=format==='eslint-json'
+  const candidates:Omit<Diagnostic,'id'>[]=format==='pyright-json'
+    ? pyrightSchema.parse(parsed).generalDiagnostics.map(item=>({tool:'pyright' as const,ruleId:item.rule ?? null,
+      severity:item.severity==='information'?'info' as const:item.severity,message:item.message,path:sourcePath(root,item.file),
+      line:item.range.start.line+1,column:item.range.start.character+1,origin:'external-tool' as const}))
+    : format==='eslint-json'
     ? eslintSchema.parse(parsed).flatMap(file=>file.messages.filter(message=>message.severity!==0).map(message=>({
       tool:'eslint' as const,ruleId:message.ruleId ?? null,severity:message.severity===2?'error' as const:'warning' as const,
       message:message.message,path:sourcePath(root,file.filePath),

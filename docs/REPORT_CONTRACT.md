@@ -158,3 +158,10 @@ its scope is `captured-check-observations-only`. Per-claim reasons preserve the
 original assertion. Contradicted/unknown premises make AI coverage partial.
 Never interpret supported execution premises or matched citations as confirming
 a defect. Contradicted candidates remain visible for review, not automatic repair.
+
+### Required checks and Pyright (P23)
+
+Optional `checks[].required: true` means a skipped check makes a CLI workflow
+incomplete (exit 2), without authorizing execution. Status remains `skipped` to
+preserve the actual execution fact. Diagnostics can now have `tool: "pyright"`.
+`python-types` is a separate opt-in quality preset. See [P23](P23_OFFLINE_CHECKS.md).

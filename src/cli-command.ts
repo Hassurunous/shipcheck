@@ -146,7 +146,7 @@ export async function runCli(args: readonly string[]): Promise<CliResult> {
     const aiError=report.ai?.error ?? (failedBatchIndex>=0 ? report.aiAudit?.batches[failedBatchIndex]?.error : undefined);
     const errorCode=aiError?.code ?? report.aiAudit?.stoppedReason ?? 'unknown';
     const errorDetail=aiError?.message ? ` ${aiError.message.replace(/[\u0000-\u001f\u007f-\u009f\u2028\u2029]/g,' ')}` : '';
-    const checkError=report.checks?.some(check=>check.status==='error');
+    const checkError=report.checks?.some(check=>check.status==='error' || (check.required && check.status==='skipped'));
     const referenceError=report.references?.state==='incomplete';
     const checkFailed=report.checks?.some(check=>check.status==='failed');
     const architectureError=report.architecture?.state==='partial';

@@ -58,6 +58,9 @@ export const configSchema = z.object({
   if(config.quality.presets.some(p=>p==='javascript' || p==='typescript'))slots.add('eslint');
   if(config.quality.presets.includes('typescript'))slots.add('typescript');
   if(config.quality.presets.includes('python'))slots.add('ruff');
+  if(config.quality.presets.includes('python-types'))slots.add('pyright');
+  for(const slot of config.quality.required)if(!slots.has(slot) || config.quality.bindings[slot]===false)
+    ctx.addIssue({code:'custom',path:['quality','required'],message:'Required slots must have an enabled preset and cannot be disabled.'});
   for(const [slot,id] of Object.entries(config.quality.bindings)) {
     if(!slots.has(slot))ctx.addIssue({code:'custom',path:['quality','bindings',slot],message:'Binding requires its corresponding preset.'});
     if(id!==false && !config.checks.some(check=>check.id===id))ctx.addIssue({code:'custom',path:['quality','bindings',slot],message:'Binding must name an existing check ID.'});

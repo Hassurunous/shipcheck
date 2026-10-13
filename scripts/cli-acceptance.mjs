@@ -103,6 +103,17 @@ try {
     assert.equal(ran.checks[0].purpose,'lint');assert.equal(ran.quality.tools[0].source,'project-local');
     await configure({});
   });
+  await check('required Python type checks stay gated and normalize Pyright diagnostics',async()=>{
+    await write('p23.py','value: int = "wrong"\n');
+    const output={generalDiagnostics:[{file:'p23.py',severity:'error',message:'Type mismatch',rule:'reportAssignmentType',range:{start:{line:0,character:0},end:{line:0,character:1}}}],summary:{filesAnalyzed:1,errorCount:1,warningCount:0,informationCount:0}};
+    await write('node_modules/pyright/index.js','console.log('+JSON.stringify(JSON.stringify(output))+');process.exitCode=1;');
+    await configure({quality:{presets:['python-types'],required:['pyright']}});
+    const pending=json(['audit',repo],2);assert.equal(pending.checks[0].status,'skipped');assert.equal(pending.checks[0].required,true);
+    const ran=json(['audit',repo,'--run-checks'],1);assert.equal(ran.checks[0].diagnostics[0].tool,'pyright');assert.equal(ran.checks[0].diagnostics[0].line,1);
+    await write('node_modules/pyright/index.js','console.log('+JSON.stringify(JSON.stringify({generalDiagnostics:[],summary:{filesAnalyzed:1,errorCount:0,warningCount:0,informationCount:0}}))+');');
+    assert.equal(json(['audit',repo,'--run-checks']).checks[0].status,'passed');
+    await rm(join(repo,'p23.py'));await configure({});
+  });
   await check('repository Git ignore fallback, override and combined policy are visible',async()=>{
     await write('.gitignore','generated/\n');await write('generated/package.json','{');
     await configure({ai:{mode:'balanced'}});

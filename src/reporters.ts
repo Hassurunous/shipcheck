@@ -114,7 +114,7 @@ export function renderConsoleReport(input: Report): string {
   if(report.checks?.length) {
     lines.push('', 'Configured checks (whole repository; tool output is not citation-verified):');
     for(const check of report.checks) {
-      lines.push(`  [${check.status.toUpperCase()}] ${text(check.id)}: ${text(check.reason)}`);
+      lines.push(`  [${check.status.toUpperCase()}] ${text(check.id)}${check.required?' (required)':''}: ${text(check.reason)}`);
       for(const diagnostic of check.diagnostics ?? [])lines.push(
         `    [${diagnostic.severity.toUpperCase()}] ${text(diagnostic.tool)}/${text(diagnostic.ruleId ?? 'unclassified')}: ${text(diagnostic.message)}`,
         `      ${text(diagnostic.path ?? '(no file location)')}${diagnostic.line?`:${diagnostic.line}`:''}${diagnostic.column?`:${diagnostic.column}`:''}`);
