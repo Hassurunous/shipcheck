@@ -324,7 +324,7 @@ CLI acceptance; `npm run test:cli` runs only the executable acceptance suite.
 
 Live pricing maintenance remains necessary before its documented expiry. These
 platform, adapter and publication follow-ups remain unscheduled. Quality-audit
-work is organized into P19–P21 below; it does not expand earlier completed scope.
+work is organized into P19–P24 below; it does not expand earlier completed scope.
 
 ## Quality auditing follow-on milestones
 
@@ -381,3 +381,16 @@ See [P23 behavior and scope](../docs/P23_OFFLINE_CHECKS.md). Python static
 checks are delegated to Pyright; behavioral cases use explicit project tests.
 Custom cross-language source analyzers and independent historical-bug accuracy
 qualification remain future work, not claims of this milestone.
+
+### P24 — Real-project accuracy and developer workflow qualification (in progress)
+
+- [x] Define real-project protocol and report-bound human assessment scoring
+- [x] Capture an owner-selected external project's baseline and review its findings
+- [x] Run a bounded developer repair loop against frozen expectations (one supervised icon repair)
+- [x] Run a supervised poison-counter feature pilot with frozen unit/component tests, three seeded defects and three controls ([results](../docs/P24_POISON_PILOT.md))
+- [ ] Evaluate historical buggy/fixed pairs across multiple projects and languages
+- [ ] Publish scoped accuracy, coverage and repair-usefulness measurements
+
+See [P24 protocol](../docs/P24_REAL_PROJECT_QUALIFICATION.md). Initial work is
+offline; live evaluation needs a separately authorized budget. Unanticipated
+findings require review, not automatic false-positive classification.

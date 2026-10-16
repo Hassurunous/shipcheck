@@ -1,0 +1,10 @@
+import {readFile} from 'node:fs/promises';
+import {createHash} from 'node:crypto';
+import {scoreProjectQualification} from '../dist/src/project-qualification.js';
+const [recordPath,reportPath,...extra]=process.argv.slice(2);
+if(!recordPath || !reportPath || extra.length)throw Error('Usage: node scripts/score-project-qualification.mjs <qualification.json> <report.json>');
+const record=JSON.parse(await readFile(recordPath,'utf8'));
+const bytes=await readFile(reportPath);
+JSON.parse(bytes.toString('utf8'));
+if(createHash('sha256').update(bytes).digest('hex')!==record.reportSha256)throw Error('Report bytes changed; assessments must be reviewed again.');
+console.log(JSON.stringify(scoreProjectQualification(record),null,2));

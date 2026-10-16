@@ -1,5 +1,8 @@
 # Developer-agent operating guide
 
+For initial project setup, start with [Shipcheck configuration setup for agents](AGENT_CONFIGURATION.md).
+This guide covers the development loop after configuration is in place.
+
 The developer agent edits code under the user's authorization. Shipcheck supplies
 an independent audit report. Shipcheck's AI reviewers have no code-editing tools.
 Neither a clean CLI exit nor a citation match authorizes merging, publishing,

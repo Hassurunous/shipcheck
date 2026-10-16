@@ -8,7 +8,7 @@ compatibility is not yet verified.
 
 See [P18 qualification evidence and release limitations](docs/P18_QUALIFICATION.md)
 for installed-tool results, the supervised developer-loop exercise and test limits.
-**Status: pre-alpha, local distribution; P1–P21 delivered within documented scope.**
+**Status: pre-alpha, local distribution; P1–P23 delivered within documented scope; P24 qualification in progress.**
 It provides configurable repository checks, audit/diff/task workflows,
 console/JSON/Markdown reports, and optional AI review with citation checks.
 Built-in checks cover Node package manifests, configured HTTP/SDK contracts and
@@ -17,6 +17,9 @@ normalized ESLint/Ruff JSON adapters provide multi-language diagnostics. Live
 whole-repository AI uses a named persistent allowance; see [live audit budgets](docs/P7_LIVE_AUDITS.md).
 
 ## Install from this repository
+
+Agents configuring another project should follow
+[Shipcheck configuration setup for agents](docs/AGENT_CONFIGURATION.md).
 
 Requires Node.js 22+ and npm. Git is required for the diff workflow.
 

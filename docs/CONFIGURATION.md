@@ -1,5 +1,8 @@
 # Configuration
 
+For a step-by-step project setup workflow, see
+[Shipcheck configuration setup for agents](AGENT_CONFIGURATION.md).
+
 For `contracts` mappings from supported HTTP clients to OpenAPI resources, see
 [P14 contract checks](P14_CONTRACT_CHECKS.md). These deterministic checks run in
 audit/diff/task workflows without enabling AI or external commands.
@@ -164,8 +167,9 @@ controls file discovery, read bounds, precedence and reporting.
 
 ## Quality presets (P20)
 
-Optional quality.presets accepts javascript, typescript and python. quality.bindings
-maps eslint/typescript/ruff slots to an existing checks ID or false. Presets discover
+Optional quality.presets accepts javascript, typescript, python and python-types. quality.bindings
+maps eslint/typescript/ruff/pyright slots to an existing checks ID or false. quality.required
+lists enabled slots whose execution is mandatory. Presets discover
 local tools but require --run-checks for execution. Checks can optionally declare
 purpose: lint, typecheck, test or other; purpose is descriptive only.
 See [P20 configuration, commands and limitations](P20_QUALITY_WORKFLOWS.md).
