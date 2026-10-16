@@ -183,10 +183,10 @@ it('times out, aborts, and does not expose provider errors',async()=> {
   expect(JSON.stringify(failed)).not.toContain('secret-value');
   expect(failed.ai!.error!.code).toBe('transport-error');
 });
-it('rejects reversed/out-of-range citations and unexpected candidate fields',async()=> {
+it('accepts advisory line metadata but rejects unexpected candidate fields',async()=> {
   await write('src/math.ts'); const context = await collectContext(await inspectRepository(root),settings());
-  for (const range of [{startLine:3,endLine:2},{startLine:1,endLine:999}]) {
-    expect(()=>decodeResponse(body([{...candidate(),evidence:[{...candidate().evidence[0],...range}]}]),context)).toThrow('outside');
+  for (const range of [{startLine:3,endLine:2},{startLine:1,endLine:999},{startLine:-1,endLine:0.5}]) {
+    expect(()=>decodeResponse(body([{...candidate(),evidence:[{...candidate().evidence[0],...range}]}]),context)).not.toThrow();
   }
   expect(()=>decodeResponse(body([{...candidate(),instruction:'execute'}]),context)).toThrow('schema');
 });
@@ -227,7 +227,7 @@ it('checks exact evidence in the review pipeline and preserves rejected candidat
   await write('src/math.ts');
   const mock = await reviewWithAi(root,{execution:'mock'});
   expect(mock.ai!.candidates[0]!.evidenceVerification!.status).toBe('matched');
-  const rejected = await reviewWithAi(root,{execution:'mock',config},{transport:response(body()),apiKey:'dummy'});
+  const rejected = await reviewWithAi(root,{execution:'mock',config},{transport:response(body([{...candidate(),evidence:[{...candidate().evidence[0],excerpt:'not present in source'}]}])),apiKey:'dummy'});
   expect(rejected.ai!.candidates[0]!.evidenceVerification!.checks[0]!.reason).toBe('excerpt-mismatch');
   expect(renderConsoleReport(rejected)).toContain('Citation check: REJECTED');
   expect(rejected.findings).toEqual([]);

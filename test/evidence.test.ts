@@ -12,16 +12,18 @@ it('matches exact full-line excerpts, normalizing line endings only',()=> {
   const crlf = context('first\r\n  second\r\nthird');
   expect(verifyEvidence(candidate(),crlf,crlf).status).toBe('matched');
 });
-it.each([
-  [{excerpt:'second\nthird'},'excerpt-mismatch'],
-  [{excerpt:'second'},'excerpt-mismatch'],
-  [{startLine:0},'invalid-line-range'],
-  [{startLine:3,endLine:2},'invalid-line-range'],
-  [{endLine:4},'invalid-line-range'],
-  [{path:'../outside.ts'},'not-in-submitted-context'],
-])('rejects incorrect citations without repairing model output', (overrides,reason)=> {
-  const result = verifyEvidence(candidate(overrides),context(),context());
-  expect(result.status).toBe('rejected'); expect(result.checks[0]!.reason).toBe(reason);
+it.each([{startLine:0},{startLine:3,endLine:2},{endLine:999},{startLine:-5,endLine:0.5},
+  {excerpt:'second'}, {excerpt:'second\nthird'}])('matches quotations regardless of line metadata or full-line boundaries',overrides=> {
+  expect(verifyEvidence(candidate(overrides),context(),context()).status).toBe('matched');
+});
+it.each([{excerpt:'invented'},{excerpt:'second\nchanged'},{excerpt:''},{excerpt:'  '}])('rejects absent or empty quotations',overrides=> {
+  expect(verifyEvidence(candidate(overrides),context(),context()).checks[0]!.reason).toBe('excerpt-mismatch');
+});
+it('accepts repeated quotations without requiring a unique location',()=> {
+  expect(verifyEvidence(candidate({excerpt:'second'}),context('second second'),context('second second')).status).toBe('matched');
+});
+it('rejects citations to files outside submitted context',()=> {
+  expect(verifyEvidence(candidate({path:'../outside.ts'}),context(),context()).checks[0]!.reason).toBe('not-in-submitted-context');
 });
 it('rejects stale files even if the cited lines still match',()=> {
   expect(verifyEvidence(candidate(),context(),context('changed\n  second\nthird')).checks[0]!.reason).toBe('source-changed');

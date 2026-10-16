@@ -24,8 +24,8 @@ export type AiSettings = z.infer<typeof aiSettingsSchema>;
 const evidenceSchema = z.object({
   path: z.string().min(1).max(512).refine(path => !/[:\\\u0000-\u001f]/.test(path)
     && path.split('/').every(part => part !== '' && part !== '.' && part !== '..'), 'Expected a relative source path.'),
-  startLine: z.number().int().positive(),
-  endLine: z.number().int().positive(),
+  startLine: z.number(),
+  endLine: z.number(),
   excerpt: z.string().min(1).max(4000),
 }).strict();
 export const executionClaimSchema=z.object({checkId:z.string().min(1).max(64),

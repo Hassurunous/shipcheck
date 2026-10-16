@@ -18,17 +18,14 @@ export function verifyEvidence(candidate: Pick<QaOutput['candidates'][number],'e
     }
     const original = submitted.files.find(file=>file.path===evidence.path);
     const fresh = current.files.find(file=>file.path===evidence.path);
-    let reason = 'exact-line-match';
+    let reason = 'exact-quotation-match';
     if (!original) reason = 'not-in-submitted-context';
     else if (!fresh) reason = 'file-unavailable';
     else if (fresh.content !== original.content) reason = 'source-changed';
     else {
-      const sourceLines = lines(fresh.content);
-      if (!Number.isInteger(evidence.startLine) || !Number.isInteger(evidence.endLine)
-        || evidence.startLine < 1 || evidence.endLine < evidence.startLine || evidence.endLine > sourceLines.length) reason = 'invalid-line-range';
-      else if (sourceLines.slice(evidence.startLine-1,evidence.endLine).join('\n') !== lines(evidence.excerpt).join('\n')) reason = 'excerpt-mismatch';
+      if (!evidence.excerpt.trim() || !lines(fresh.content).join('\n').includes(lines(evidence.excerpt).join('\n'))) reason = 'excerpt-mismatch';
     }
-    return {path:evidence.path,status:reason==='exact-line-match'?'matched':'rejected',reason};
+    return {path:evidence.path,status:reason==='exact-quotation-match'?'matched':'rejected',reason};
   });
   return {status:checks.length > 0 && checks.every(check=>check.status==='matched')?'matched':'rejected',checks};
 }

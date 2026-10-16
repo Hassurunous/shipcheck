@@ -35,4 +35,4 @@ export const referencesSchema=z.object({
   resources:z.array(resourceRecordSchema),
 });
 export const resourceEvidenceSchema=z.object({resourceId:z.string().min(1),snapshotSha256:z.string().regex(/^[a-f0-9]{64}$/),
-  startLine:z.number().int().positive(),endLine:z.number().int().positive(),excerpt:z.string().min(1).max(8000)}).strict();
+  startLine:z.number(),endLine:z.number(),excerpt:z.string().min(1).max(8000)}).strict();

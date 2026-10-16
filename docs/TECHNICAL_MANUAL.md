@@ -373,7 +373,7 @@ The request sets `store:false`, the chosen model, output-token limit, reviewer i
 
 `decodeResponse` enforces a 131,072-byte body cap before parsing. The outer envelope must have `status:'completed'`; incomplete/refusal responses are errors, not partially accepted candidates. Exactly one `output_text` part among message content must contain the structured JSON. Strict candidate/reference/task schemas reject extra action-like fields as well as malformed data.
 
-Every cited path and line range must belong to supplied source/reference context. A conflict must cite at least two distinct supplied reference paths. A task response must contain exactly one assessment for each supplied requirement ID, no invented IDs and only known related IDs. Supporting/violating task claims must cite selected task source, not merely a reference or supporting file.
+Every cited path must belong to supplied source/reference context. Line metadata is advisory and is not checked against the content. A conflict must cite at least two distinct supplied reference paths. A task response must contain exactly one assessment for each supplied requirement ID, no invented IDs and only known related IDs. Supporting/violating task claims must cite selected task source, not merely a reference or supporting file.
 
 These are structural checks. After decoding, the review recollects the submitted source through the same eligibility/bounded-read policy. Every submitted file is checked for unchanged content, even when the model returns no candidates. A no-candidate response can therefore still have partial coverage if the source changed. References are reloaded and compared too.
 
@@ -382,8 +382,8 @@ These are structural checks. After decoding, the review recollects the submitted
 - Missing submitted source: rejected as not in submitted context.
 - Missing fresh source: rejected as unavailable.
 - Any whole-file content change: rejected as source-changed, even if the cited lines happen to remain identical.
-- Invalid one-based range: rejected.
-- Exact range text differing from the excerpt, after newline normalization: rejected.
+- Blank quotations or quotations absent from the cited file after newline normalization: rejected.
+- Line numbers, ranges, counts and uniqueness of the quotation: not validation criteria.
 - Otherwise: matched.
 
 All checks must match and there must be at least one citation. Reference citations delegate to `verifyResourceEvidence`. The comparison preserves whitespace; it does not use fuzzy search to rescue an approximate quote.
@@ -394,7 +394,7 @@ Reference conflicts get separate IDs, verified citations and `needs-clarificatio
 
 Final coverage reports selected paths, valid/failed response paths, skipped paths and matched/rejected/out-of-scope candidate counts. A completed response can be partial because of omitted content, changed snapshots, rejected evidence, uncertain task assessment or conflicts. `validResponsePaths` means a structurally valid response covered supplied context, not that every path was independently proven correct.
 
-`mockTransport` selects the first nonempty line of the first file and creates an explicitly synthetic informational candidate. The excerpt is capped at 4,000 characters; an extremely long line can therefore fail exact-line verification. Mock tasks receive insufficient-evidence outcomes. Mock operation checks integration plumbing, not defect-finding quality.
+`mockTransport` selects the first nonempty line of the first file and creates an explicitly synthetic informational candidate. The excerpt is capped at 4,000 characters; a truncated quotation can still match a substring of the source. Mock tasks receive insufficient-evidence outcomes. Mock operation checks integration plumbing, not defect-finding quality.
 
 ## 12. Task assessment
 

@@ -62,9 +62,10 @@ Limits and failures:
 
 The exported `loadReferenceResources` returns report metadata plus in-memory
 snapshots. `verifyResourceEvidence` accepts a resource ID, snapshot SHA-256, line
-range and exact complete-line excerpt, along with submitted and freshly reloaded
+metadata and an exact quotation, along with submitted and freshly reloaded
 snapshots. It rejects unknown resources, wrong hashes, changed or unavailable
-resources, and mismatched excerpts. Line endings are normalized for comparison.
+resources, and quotations absent from the cited resource. Line endings are normalized
+for comparison; line numbers and counts are not checked.
 Callers must reload snapshots before verification. A match establishes text
 provenance only; it does not validate the diagnosis. P12 integrates this helper
 into AI candidate verification for submitted reference paths.

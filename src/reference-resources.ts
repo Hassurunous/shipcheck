@@ -97,7 +97,7 @@ export function verifyResourceEvidence(evidence:z.infer<typeof resourceEvidenceS
   const item=parsed.data;
   const original=submitted.find(snapshot=>snapshot.record.id===item.resourceId && snapshot.record.status==='loaded');
   const fresh=current.find(snapshot=>snapshot.record.id===item.resourceId && snapshot.record.status==='loaded');
-  let reason='exact-line-match';
+  let reason='exact-quotation-match';
   if(!original)reason='not-in-submitted-resources';
   else if(item.snapshotSha256!==original.record.sha256)reason='wrong-snapshot';
   else if(!fresh)reason='resource-unavailable';
@@ -105,9 +105,7 @@ export function verifyResourceEvidence(evidence:z.infer<typeof resourceEvidenceS
     || fresh.record.version!==original.record.version || fresh.record.authority!==original.record.authority)reason='resource-changed';
   else if(JSON.stringify(fresh.record.origin)!==JSON.stringify(original.record.origin))reason='resource-origin-changed';
   else {
-    const lines=fresh.content.split(/\r\n|\n|\r/);
-    if(item.endLine<item.startLine || item.endLine>lines.length)reason='invalid-line-range';
-    else if(lines.slice(item.startLine-1,item.endLine).join('\n')!==item.excerpt.split(/\r\n|\n|\r/).join('\n'))reason='excerpt-mismatch';
+    if(!item.excerpt.trim() || !fresh.content.split(/\r\n|\n|\r/).join('\n').includes(item.excerpt.split(/\r\n|\n|\r/).join('\n')))reason='excerpt-mismatch';
   }
-  return {status:reason==='exact-line-match'?'matched' as const:'rejected' as const,reason};
+  return {status:reason==='exact-quotation-match'?'matched' as const:'rejected' as const,reason};
 }

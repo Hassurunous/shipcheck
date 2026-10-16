@@ -241,7 +241,7 @@ validates explicit local paths and scope patterns. reference-resources.ts perfor
 bounded reads, rejects links/exclusions/likely secrets, and captures raw-byte hashes
 with in-memory text snapshots. Workflows report metadata and skip AI if a required
 applicable reference fails to load. P12 adds reference bodies to AI context.
-The verifier compares submitted and fresh snapshots and exact line excerpts;
+The verifier compares submitted and fresh snapshots and exact quotations anywhere in the cited file;
 P12 integrates it with AI evidence. See P8_REFERENCE_RESOURCES.md.
 
 ## P9 operation-index foundation

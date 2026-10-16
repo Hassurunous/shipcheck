@@ -108,7 +108,7 @@ execution. It uses native fetch with a fixed endpoint and no SDK.
 
 Responses are limited to 128 KiB at the adapter boundary. Structured candidates
 have bounded text and evidence counts. Citation paths must be relative and
-belong to selected files; line ranges must fit the supplied content. Unexpected
+belong to selected files; line metadata does not gate quotation validation. Unexpected
 fields, malformed citations, or incomplete results reject the AI stage as a
 whole. [Citation verification](P4_VERIFICATION.md) then checks current source and
 exact excerpts. Accepted candidates retain AI origin and `evidenceStatus: unverified`;

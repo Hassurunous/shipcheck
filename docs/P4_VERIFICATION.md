@@ -12,11 +12,14 @@ The report's `ai.preview.files[].freshness` distinguishes `unchanged` from
 leave freshness absent because no post-response check occurred. This check is
 snapshot-relative, not an atomic guarantee against subsequent file changes.
 
-Each citation must refer to a submitted file, use a valid one-based inclusive
-line range, and quote every complete line in that range exactly. Only newline
-conventions are normalized; whitespace, spelling, indentation, and punctuation
-are not repaired. Every citation must pass for the candidate to receive a
-matched result. Failed checks retain a reason and the original candidate.
+Each citation must refer to a submitted file and contain a nonblank exact quotation
+found anywhere in that file. Only newline conventions are normalized; spelling,
+internal whitespace and punctuation are not repaired. Partial-line quotations and
+repeated occurrences are accepted. Line numbers and line counts do not participate
+in validation; reported start/end values remain advisory model-supplied metadata,
+not verified navigation locations. A match uses reason `exact-quotation-match`.
+Every citation must pass for the candidate to receive a matched result. Failed
+checks retain a reason and the original candidate.
 
 Reports add candidate.evidenceVerification with status matched/rejected and
 per-citation checks. Console output displays that status and rejection reasons.

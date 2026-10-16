@@ -1,3 +1,5 @@
+> Historical generated source snapshot: citation validation has since changed. See [current quotation validation](../P4_VERIFICATION.md); line metadata no longer gates evidence.
+
 # src/ai/verify-evidence.ts
 
 [Technical manual](../TECHNICAL_MANUAL.md) · [Module index](README.md)

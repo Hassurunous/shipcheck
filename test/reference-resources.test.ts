@@ -26,7 +26,9 @@ it('checks exact citations against both submitted and fresh snapshots',async()=>
   expect(check({}).status).toBe('matched');expect(check({excerpt:'Return a number.'}).reason).toBe('excerpt-mismatch');
   expect(check({snapshotSha256:'0'.repeat(64)}).reason).toBe('wrong-snapshot');
   expect(check({resourceId:'unknown'}).reason).toBe('not-in-submitted-resources');
-  expect(check({endLine:4}).reason).toBe('invalid-line-range');
+  expect(check({startLine:-1,endLine:400}).status).toBe('matched');
+  expect(check({startLine:9,endLine:0,excerpt:'a list'}).status).toBe('matched');
+  expect(check({excerpt:'  '}).reason).toBe('excerpt-mismatch');
   expect(verifyResourceEvidence(evidence,loaded.snapshots,[]).reason).toBe('resource-unavailable');
   await writeFile(join(root,'contract.md'),'Contract\nReturn a number.');
   expect(verifyResourceEvidence(evidence,loaded.snapshots,(await loadReferenceResources(root,config)).snapshots).reason).toBe('resource-changed');

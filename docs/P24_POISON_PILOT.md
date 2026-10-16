@@ -210,3 +210,17 @@ evidence; define explicit task-violation/uncertainty gating; add regression case
 for the misleading life-update claim; then test new defects with passing project
 tests across additional repositories. Keep this frozen trial unchanged when
 evaluating improvements.
+
+## Quotation-only validation follow-up
+
+At the user's direction, citation validation now searches for the exact nonblank
+quotation anywhere in the cited, unchanged file. It does not validate line
+numbers, line counts, full-line boundaries or uniqueness. Line metadata remains
+advisory. Missing/changed files and fabricated quotations still fail.
+
+An offline verifier replay of the six saved live responses against their frozen
+source accepted all 18 requirement-assessment quotations and both general-candidate
+quotations. The previously downgraded decrement diagnosis now matches. The two
+mixed life-counter claims also match: real quotations do not make their reasoning
+correct. Original trial reports above remain unchanged; this is a verifier replay,
+not a new live model evaluation. No additional API spending occurred.
