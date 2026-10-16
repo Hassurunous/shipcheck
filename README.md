@@ -261,3 +261,10 @@ for measured results and their limitations.
 
 [P23 required checks and Python types](docs/P23_OFFLINE_CHECKS.md) explains
 mandatory quality gates, opt-in Pyright integration, and offline behavioral tests.
+
+## Optional Codex subscription review
+
+Use `--ai codex` with your own ChatGPT-authenticated Codex CLI instead of the
+direct API backend. It never falls back to paid API requests. See [setup and
+limits](docs/CODEX_REVIEWER.md). Local checks still require `--run-checks`; Codex consumes
+your subscription allowance.

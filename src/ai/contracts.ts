@@ -3,6 +3,7 @@ import { z } from 'zod';
 export const modeSchema = z.enum(['low-cost', 'balanced', 'high-quality']);
 export type AiMode = z.infer<typeof modeSchema>;
 export const aiSettingsSchema = z.object({
+  codexTimeoutMs:z.number().int().min(1000).max(300000).default(120000),
   apiKeyEnv:z.string().regex(/^[A-Za-z_][A-Za-z0-9_]*$/).default('SHIPCHECK_API_KEY'),
   scope:z.enum(['bounded','whole-repository']).default('bounded'),
   maxBatches:z.number().int().min(1).max(100).default(20),
@@ -77,7 +78,7 @@ export const contextPreviewSchema = z.object({
     status:z.enum(['included','unresolved','omitted'])})).optional(),
 });
 export const aiResultSchema = z.object({
-  execution: z.enum(['preview', 'mock', 'injected', 'live']),
+  execution: z.enum(['preview', 'mock', 'injected', 'live', 'codex']),
   status: z.enum(['preview', 'completed', 'failed']),
   mode: modeSchema,
   reviewer: z.enum(['qa/reliability-v1','qa/reliability-v2']),

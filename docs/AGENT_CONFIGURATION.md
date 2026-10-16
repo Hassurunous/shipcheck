@@ -228,3 +228,10 @@ Tell the owner whether the configuration is ready, ready with disclosed gaps,
 or blocked. Keep private reports and credentials out of version control. Return
 the changed files and evidence locations. Do not merge, publish or claim the
 project is correct merely because setup validation succeeded.
+
+## Optional Codex subscription review
+
+Use `--ai codex` with your own ChatGPT-authenticated Codex CLI instead of the
+direct API backend. It never falls back to paid API requests. See [setup and
+limits](CODEX_REVIEWER.md). Local checks still require `--run-checks`; Codex consumes
+your subscription allowance.

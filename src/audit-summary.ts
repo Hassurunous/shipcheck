@@ -22,7 +22,7 @@ export function inspectionStages(profile:RepositoryProfile,config:Config):AuditS
     'Per-path rule overrides apply. No linter, typechecker or tests are run by these rules.'];
   return [inspection,rules];
 }
-type Options={config?:Config;aiRequested?:'preview'|'mock'|'live'|undefined;checksAuthorized?:boolean|undefined;workflow?:boolean;emptyDiff?:boolean};
+type Options={config?:Config;aiRequested?:'preview'|'mock'|'live'|'codex'|undefined;checksAuthorized?:boolean|undefined;workflow?:boolean;emptyDiff?:boolean};
 /** Derive stage disclosure from actual results, preserving detailed original report fields. */
 export function summarizeAudit(report:Report,options:Options={}):AuditSummary {
   const config=options.config;
@@ -78,7 +78,7 @@ export function summarizeAudit(report:Report,options:Options={}):AuditSummary {
   const ai=stage('ai','AI code review',status,
     status==='preview'?'Input selection only. No model was consulted.':status==='mock'?'Synthetic offline responses exercised the pipeline; no AI diagnosis was performed.':status==='injected'?'Caller-supplied transport; no live-provider execution is established.':
     status==='not-requested'?'AI review was not requested.':status==='blocked'?'Required reference failures prevented AI review.':status==='skipped'?'No AI batches ran; no eligible source was assessed.':'See AI results for completed responses, failures and coverage gaps.',
-    unique(batches.filter(b=>b.execution==='live' && b.status==='completed').flatMap(b=>b.coverage?.validResponsePaths ?? [])),report.aiAudit?'repository':'selected-paths');
+    unique(batches.filter(b=>(b.execution==='live' || b.execution==='codex') && b.status==='completed').flatMap(b=>b.coverage?.validResponsePaths ?? [])),report.aiAudit?'repository':'selected-paths');
   ai.selectedFiles=unique(report.aiAudit?.selectedPaths ?? batches.flatMap(b=>b.preview.files.map(f=>f.path)));
   ai.omitted=report.aiAudit?.skipped ?? batches.flatMap(b=>b.preview.skipped);
   ai.limitations=['A valid response or matched citation does not prove a diagnosis or whole-repository correctness.',
@@ -90,7 +90,7 @@ export function summarizeAudit(report:Report,options:Options={}):AuditSummary {
     taskState?'Requirement outcomes are reported separately; supporting evidence is not proof of task completion.':'No current-task assessment was requested.',null,'selected-paths'));
   const issues=report.findings.length>0 || checks.some(c=>c.status==='failed') || (report.contracts ?? []).some(r=>r.calls.some(c=>c.status==='mismatch'))
     || (report.sdkContracts ?? []).some(r=>r.calls.some(c=>c.status==='mismatch')) || architecture?.boundaries.some(b=>b.status==='violation') || architecture?.conventions.some(c=>c.status==='violation')
-    || batches.some(b=>b.execution==='live' && b.candidates.length>0) || task?.requirements.some(r=>r.status==='potential-violation') || taskReview?.assessments.some(r=>r.status==='potential-violation')
+    || batches.some(b=>(b.execution==='live' || b.execution==='codex') && b.candidates.length>0) || task?.requirements.some(r=>r.status==='potential-violation') || taskReview?.assessments.some(r=>r.status==='potential-violation')
     || (report.contracts ?? []).some(r=>r.state==='version-mismatch') || (report.sdkContracts ?? []).some(r=>r.state==='version-mismatch');
   const incomplete=stages.some(s=>['partial','failed','blocked'].includes(s.status));
   const outcome=issues?'issues-reported':incomplete?'incomplete':stages.some(s=>s.status==='completed')?'no-issues-in-executed-checks':'not-assessed';

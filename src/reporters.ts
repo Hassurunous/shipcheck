@@ -154,11 +154,11 @@ export function renderConsoleReport(input: Report): string {
     for (const dependency of ai.preview.dependencies ?? []) if(dependency.status!=='included')
       lines.push(`  Missing dependency context: ${text(dependency.from)} -> ${text(dependency.specifier)} (${dependency.status})`);
     lines.push(`Request size: ${ai.requestBytes} bytes; approximate input tokens: ${ai.estimatedInputTokens} (heuristic)`,
-      `Output limit: ${ai.maxOutputTokens} tokens; retries: 0`,
+      ai.execution === 'codex' ? 'Codex output capped at 128 KiB; subscription limits apply; no Shipcheck retries.' : `Output limit: ${ai.maxOutputTokens} tokens; retries: 0`,
       ai.execution === 'live' ? ai.budget ? `Live budget: ${text(ai.budget.name)}; persistent reservations; no retries.`
         : ai.trial ? 'Live trial: $0.50 allowance; one attempt per mode; no retries. See shipcheck trial status.'
         : 'Live request failed; inspect the selected allowance for any retained reservation.'
-        : 'Live cost estimate: unavailable in offline mode.');
+        : ai.execution === 'codex' ? 'Codex subscription review; no direct API spend or fallback. Uses your Codex allowance.' : 'Live cost estimate: unavailable in offline mode.');
     if (ai.execution === 'preview' || ai.execution === 'mock') lines.push('AI offline: no model ran; no AI API request; $0 AI API spend. Explicitly authorized HTTPS references may be fetched.');
     if (ai.trial) lines.push(`Counted input: ${ai.trial.countedInputTokens}; usage: ${ai.trial.usage.input_tokens} input / ${ai.trial.usage.output_tokens} output tokens`,
       `Reserved: $${ai.trial.reservedUsd.toFixed(6)}; priced usage upper bound: $${ai.trial.pricedUsageUpperBoundUsd.toFixed(6)} (not an invoice).`);

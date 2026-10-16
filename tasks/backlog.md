@@ -56,7 +56,7 @@ completion does not imply exhaustive detection or support for every platform.
 
 ## P4 — Verification
 - [x] Validate evidence files
-- [x] Validate line ranges
+- [x] Validate quotations anywhere in cited files; line metadata is advisory (P24 follow-up)
 - [x] Validate excerpts
 
 Citation verification does not establish semantic correctness; general semantic
@@ -394,3 +394,13 @@ qualification remain future work, not claims of this milestone.
 See [P24 protocol](../docs/P24_REAL_PROJECT_QUALIFICATION.md). Initial work is
 offline; live evaluation needs a separately authorized budget. Unanticipated
 findings require review, not automatic false-positive classification.
+
+### P24 follow-up — optional Codex reviewer
+
+- [x] Explicit subscription-backed CLI reviewer, preserving API and offline options
+- [x] ChatGPT-only authentication and no paid fallback
+- [x] Shared context, structured output, evidence and task verification
+- [x] Bounded read-only process and Windows subscription smoke test
+
+See [Codex reviewer](../docs/CODEX_REVIEWER.md). P24 broader historical-project
+qualification and a machine-enforced developer-loop gate remain unfinished.

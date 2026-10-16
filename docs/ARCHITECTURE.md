@@ -420,3 +420,12 @@ an opt-in Pyright Node entry point; `check-diagnostics.ts` normalizes its bounde
 JSON diagnostics, validates summary counts and keeps fatal failures separate.
 P22 receives requirement flags with captured checks. No new runtime dependency
 or automatic source editing was introduced. See [P23](P23_OFFLINE_CHECKS.md).
+
+## Optional Codex reviewer
+
+`src/ai/codex.ts` adapts the shared QA request/schema to an isolated read-only
+Codex CLI subprocess. Explicit `--ai codex` selects this path; `--ai live` retains
+API budgets and transport. Codex checks ChatGPT authentication, strips API
+credentials, bounds subprocess/output and returns through existing evidence/task
+validation. It never invokes API transport or falls back. Reports distinguish
+execution=codex. See [backend controls](CODEX_REVIEWER.md).

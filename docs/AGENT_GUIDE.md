@@ -167,3 +167,13 @@ TypeScript or Ruff. Run shipcheck audit . --run-checks to authorize execution.
 Tests and alternative tools stay explicitly configured. Discovery readiness is
 not a passed check; inspect execution results and coverage gaps.
 See [P20 setup and examples](P20_QUALITY_WORKFLOWS.md).
+
+## Subscription reviewer alternative
+
+With explicit user authorization to use their Codex subscription, substitute
+`shipcheck task --run-checks --ai codex --json` for the paid API task-review
+command. Codex must be installed and signed in with ChatGPT. Do not pass API
+budget/trial flags; never switch to API review after a subscription failure.
+Keep the same iteration, no-progress, coverage and semantic-review criteria.
+Record subscription execution separately from API spending. See
+[Codex backend setup and limits](CODEX_REVIEWER.md).

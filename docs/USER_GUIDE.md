@@ -172,3 +172,10 @@ TypeScript or Ruff. Run shipcheck audit . --run-checks to authorize execution.
 Tests and alternative tools stay explicitly configured. Discovery readiness is
 not a passed check; inspect execution results and coverage gaps.
 See [P20 setup and examples](P20_QUALITY_WORKFLOWS.md).
+
+## Optional Codex subscription review
+
+Use `--ai codex` with your own ChatGPT-authenticated Codex CLI instead of the
+direct API backend. It never falls back to paid API requests. See [setup and
+limits](CODEX_REVIEWER.md). Local checks still require `--run-checks`; Codex consumes
+your subscription allowance.

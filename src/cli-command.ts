@@ -29,8 +29,9 @@ Audit, diff, and task options:
   --run-checks     Execute trusted configured checks and quality presets (whole repository)
   --reference-root <id=path> Authorize one external resource root (repeatable)
   --allow-reference-origin <https://host> Authorize pinned HTTPS references (repeatable)
-  --whole-repository Batch all eligible source for audit --ai preview/mock/live
+  --whole-repository Batch all eligible source for audit --ai preview/mock/live/codex
   --ai preview     Preview bounded AI input metadata without contacting a model
+  --ai codex       Review using local Codex ChatGPT login; no API fallback
   --ai mock        Exercise the QA reviewer with a synthetic offline response
   --ai live --trial Run one approved trial attempt for the selected mode
   --ai live --budget <name> Use an existing allowance for live auditing
@@ -88,7 +89,7 @@ export async function runCli(args: readonly string[]): Promise<CliResult> {
   let markdown = false;
   let literal = false;
   let wantsHelp = false;
-  let ai: 'preview' | 'mock' | 'live' | undefined;
+  let ai: 'preview' | 'mock' | 'live' | 'codex' | undefined;
   let trial = false;
   let budget:string|undefined;
   let runChecks = false;
@@ -120,7 +121,7 @@ export async function runCli(args: readonly string[]): Promise<CliResult> {
     if (!literal && arg === '--whole-repository') { wholeRepository = true; continue; }
     if (!literal && arg === '--ai') {
       const value = args[++index];
-      if (value !== 'preview' && value !== 'mock' && value !== 'live') return fail('Use --ai preview, --ai mock, or --ai live with --budget/--trial.');
+      if (value !== 'preview' && value !== 'mock' && value !== 'live' && value !== 'codex') return fail('Use --ai preview, --ai mock, --ai codex (ChatGPT login), or --ai live with --budget/--trial.');
       ai = value; continue;
     }
     if (!literal && arg === '--mode') {

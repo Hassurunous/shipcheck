@@ -71,3 +71,7 @@ broad autonomous-agent effectiveness.
 - IDE plugin or pull request integration
 - Automated code modification or an autonomous developer agent
 - Payment system
+
+An optional [Codex subscription reviewer](CODEX_REVIEWER.md) now complements
+direct API review. Users explicitly select their backend; no automatic fallback
+is permitted. Offline workflows remain available without Codex or API access.

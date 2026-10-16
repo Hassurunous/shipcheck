@@ -53,6 +53,13 @@ In diff/task, a mapping outside selected files may be absent. External checks re
 whole-repository. Console text and Markdown headings may change; parse JSON only.
 
 AI status `completed` means a response was processed. Its coverage can be partial.
+`execution: codex` is a real subscription-backed Codex CLI review, distinct from
+the direct API `live` backend. It has no API budget/trial receipt; `actualCostUsd: 0`
+denotes no direct API spending, not unlimited/free subscription usage. Its output
+is byte-bounded; `maxOutputTokens` is not enforced by this backend. Consumers must
+accept the new execution enum or reject it explicitly rather than mislabel it as
+offline. See [Codex reviewer](CODEX_REVIEWER.md).
+
 `execution: mock` is synthetic; `preview` is not an assessment. Candidates retain
 `evidenceStatus: unverified` because diagnosis semantics are not proved; a separate
 `evidenceVerification.status: matched` verifies cited text, not the conclusion.
@@ -127,7 +134,7 @@ check. An external check that reports failure has status failed.
 `files: null` means unknown, not zero. Inspection/built-in file lists describe
 successful bounded reads, not semantic analysis of every file. External command
 coverage is unknown even when diagnostics name files. AI files list paths in
-completed live responses; preview/mock/injected selections stay in
+completed API or Codex responses; preview/mock/injected selections stay in
 `selectedFiles` and do not establish live assessment. `omitted` lists recorded
 gaps, not every excluded descendant; use `ignorePolicy` and detailed stage
 results too. See [P19 scope](P19_AUDIT_SCOPE.md).

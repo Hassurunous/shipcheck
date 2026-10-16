@@ -1,3 +1,4 @@
+import {requestCodexQa} from './codex.js';
 import {verifyExecutionClaims} from './verify-execution.js';
 import {planAnalysisContext,type AnalysisResults} from './analysis-context.js';
 import {summarizeAudit} from '../audit-summary.js';
@@ -22,7 +23,7 @@ import {sensitiveContent} from '../sensitive-content.js';
 import type {ReferenceAccess} from '../reference-access.js';
 
 export type AiReviewOptions = {
-  execution: 'preview' | 'mock' | 'live';
+  execution: 'preview' | 'mock' | 'live' | 'codex';
   trial?: boolean;
   budget?: string;
   paths?: string[];
@@ -37,7 +38,8 @@ export type AiReviewOptions = {
 export type InjectedClient = {transport:ResponseTransport; apiKey?:string};
 
 export async function reviewWithAi(target = '.', options: AiReviewOptions = {execution:'preview'}, injected?: InjectedClient): Promise<Report> {
-  if (!['preview','mock','live'].includes(options.execution) || (options.execution === 'live' && (!(options.trial || options.budget) || injected))) throw new Error('Live AI is disabled without explicit --trial or --budget activation.');
+  if (!['preview','mock','live','codex'].includes(options.execution) || (options.execution === 'live' && (!(options.trial || options.budget) || injected))) throw new Error('Live AI is disabled without explicit --trial or --budget activation.');
+  if(options.execution==='codex' && injected)throw new Error('Codex does not accept an API transport.');
   if(options.budget)budgetNameSchema.parse(options.budget);
   if(options.trial && options.budget)throw new Error('Choose --trial or --budget, not both.');
   if(options.execution!=='live' && (options.trial || options.budget))throw new Error('Spending authorization requires live AI.');
@@ -45,8 +47,8 @@ export async function reviewWithAi(target = '.', options: AiReviewOptions = {exe
   const mode = modeSchema.parse(options.mode ?? config.ai.mode);
   const profile = await inspectRepository(target,{respectGitignore:config.respectGitignore,exclude:config.exclude});
   const report = createReport(profile,config);
-  const plannedModel = options.execution === 'live' ? (config.ai.models[mode] ?? (options.budget?AUDIT_MODELS:TRIAL_MODELS)[mode].model) : config.ai.models[mode];
-  const execution = options.execution === 'live' ? 'live' : options.execution === 'preview' ? 'preview' : injected ? 'injected' : 'mock';
+  const plannedModel = options.execution === 'codex' ? (config.ai.models[mode] ?? AUDIT_MODELS[mode].model) : options.execution === 'live' ? (config.ai.models[mode] ?? (options.budget?AUDIT_MODELS:TRIAL_MODELS)[mode].model) : config.ai.models[mode];
+  const execution = options.execution === 'codex' ? 'codex' : options.execution === 'live' ? 'live' : options.execution === 'preview' ? 'preview' : injected ? 'injected' : 'mock';
   const model = execution === 'mock' ? `mock-${mode}` : plannedModel;
   const result: AiResult = {
     execution, status:options.execution === 'preview' ? 'preview' : 'completed', mode,
@@ -86,7 +88,9 @@ export async function reviewWithAi(target = '.', options: AiReviewOptions = {exe
       if (context.files.length === 0) throw new AiFailure('empty-context','No eligible source files were selected.');
       if (injected && !plannedModel) throw new AiFailure('missing-model','Select a model mapping before using an injected client.');
       let output;
-      if (execution === 'live') {
+      if (execution === 'codex') {
+        output = await requestCodexQa(request,context,config.ai.codexTimeoutMs);
+      } else if (execution === 'live') {
         if(!process.env[config.ai.apiKeyEnv]?.trim()) throw new AiFailure('missing-credentials',`Set ${config.ai.apiKeyEnv} in this process before live review.`);
         const live = options.budget ? await requestBudgetQa(request,context,mode,config.ai.timeoutMs,process.env[config.ai.apiKeyEnv],options.budget)
           : await requestLiveQa(request,context,mode,config.ai.timeoutMs,process.env[config.ai.apiKeyEnv]);
