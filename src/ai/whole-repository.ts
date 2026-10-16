@@ -1,9 +1,10 @@
+import {referenceCoverage} from './context-coverage.js';
 import {planAnalysisContext} from './analysis-context.js';
 import {summarizeAudit} from '../audit-summary.js';
 import { configSchema, loadConfig } from '../config.js';
 import { inspectRepository } from '../inspect-repository.js';
 import { createReport, reportSchema, type Report } from '../findings.js';
-import { collectContext } from './context.js';
+import { collectContext, isEligibleSourcePath } from './context.js';
 import { reviewWithAi, type AiReviewOptions } from './review.js';
 
 /** Bounded batching; live requests share a durable, explicitly named allowance. */
@@ -34,7 +35,10 @@ export async function reviewWholeRepository(target:string,options:AiReviewOption
       for(const path of remaining)skipped.set(path,'cannot-fit-context');
       remaining.clear();break;
     }
-    const batch=(await reviewWithAi(target,{...options,config,paths})).ai!;
+    // Explicit local references outside automatic source eligibility still belong
+    // to the whole-repository context, including resources scoped to themselves.
+    const referenceTargets=config.resources.filter(resource=>!resource.rootId && !resource.url && !isEligibleSourcePath(resource.path)).map(resource=>resource.path);
+    const batch=(await reviewWithAi(target,{...options,config,paths:[...new Set([...paths,...referenceTargets])]})).ai!;
     batches.push(batch);
     for(const path of paths) {
       remaining.delete(path);
@@ -45,11 +49,20 @@ export async function reviewWholeRepository(target:string,options:AiReviewOption
     if(batch.status==='failed') {stoppedReason=batch.error?.code ?? 'batch-failure';break;}
   }
   for(const path of remaining)skipped.set(path,stoppedReason?`stopped:${stoppedReason}`:'batch-count-limit');
+  const referencePaths=[...new Set(batches.flatMap(batch=>referenceCoverage(batch.preview)))].sort();
+  const validReferencePaths=referencePaths.filter(path=>batches.some(batch=>batch.coverage?.validReferencePaths?.includes(path))
+    && !batches.some(batch=>batch.preview.references?.some(ref=>ref.path===path && ref.freshness==='changed-or-unavailable')));
+  for(const path of referencePaths)selected.add(path);
+  for(const path of options.execution==='preview'?referencePaths:validReferencePaths)skipped.delete(path);
+  for(const path of referencePaths)if(!validReferencePaths.includes(path))valid.delete(path);
+  const eligibleSourcePaths=profile.files.map(file=>file.path).filter(isEligibleSourcePath);
   const failed=batches.some(batch=>batch.status==='failed');
   const partial=skipped.size>0 || batches.some(batch=>batch.coverage?.state==='partial');
   const completed=reportSchema.parse({...report,aiAudit:{scope:'whole-repository',batches,...(options.budget?{budgetName:options.budget}:{}),
     ...(stoppedReason?{stoppedReason}:{}),
-    selectedPaths:[...selected].sort(),validResponsePaths:[...valid].sort(),
+    selectedPaths:[...selected].sort(),validResponsePaths:[...valid].sort(),referencePaths,validReferencePaths,
+    eligibleSourcePaths,eligibleSourceState:options.execution==='preview'?'preview':eligibleSourcePaths.every(path=>valid.has(path))?'complete':'partial',
+    repositoryFileCoverage:'not-established',
     skipped:[...skipped].map(([path,reason])=>({path,reason})),
     state:failed?'failed':options.execution==='preview'?'preview':partial?'partial':'complete'}});
   completed.auditSummary=summarizeAudit(completed,{config,aiRequested:options.execution});

@@ -16,7 +16,7 @@ export type SourceFile = {path: string; content: string};
 export type AiContext = {analysis?:AnalysisContext; files: SourceFile[]; preview: AiResult['preview']; references?:ResourceSnapshot[]; task?:CurrentTask};
 const extensions = new Set(['.ts','.tsx','.mts','.cts','.js','.jsx','.mjs','.cjs','.py','.go','.rs','.java','.cs','.c','.cpp','.h','.rb','.php','.swift']);
 
-function allowed(path: string) {
+export function isEligibleSourcePath(path: string) {
   const parts = path.split('/');
   return parts.every(p => p && p !== '..' && !p.startsWith('.') && !deniedNames.test(p)
     && !['node_modules','dist','build','coverage','vendor'].includes(p.toLowerCase()))
@@ -73,7 +73,7 @@ export async function collectContext(profile: RepositoryProfile, settings: AiSet
     visited.add(path);
     let reason: string | undefined;
     if (!inventory.has(path)) reason = 'not-in-inventory';
-    else if (!allowed(path) || isExcluded(path, profile.excluded)) reason = 'excluded-or-not-source';
+    else if (!isEligibleSourcePath(path) || isExcluded(path, profile.excluded)) reason = 'excluded-or-not-source';
     else if (files.length >= settings.maxFiles) { reason = 'file-count-limit'; preview.limited = true; }
     if (reason) { preview.skipped.push({path, reason}); continue; }
     let content: string;

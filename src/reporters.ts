@@ -126,6 +126,7 @@ export function renderConsoleReport(input: Report): string {
     : 'Scope: configured deterministic repository rules only. No scripts or tests were executed.');
   if(report.aiAudit) {
     const audit=report.aiAudit;
+    if(audit.eligibleSourceState)lines.push(`Eligible-source response coverage: ${audit.eligibleSourceState}; every repository file reviewed: NOT ESTABLISHED. Local reference context: ${audit.validReferencePaths?.length ?? 0} fresh files with valid responses.`);
     lines.push('',`Whole-repository AI: ${audit.state.toUpperCase()}; ${audit.batches.length} batches; ${audit.selectedPaths.length} selected files; ${audit.validResponsePaths.length} files with valid responses; ${audit.skipped.length} skipped.`,
       'Whole-repository scope does not guarantee complete context or defect detection. Preview/mock results are not real diagnoses.');
     if(audit.budgetName)lines.push(`Persistent allowance: ${text(audit.budgetName)}; use shipcheck budget status to inspect reservations.`);

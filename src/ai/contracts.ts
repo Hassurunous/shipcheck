@@ -107,7 +107,7 @@ export const aiResultSchema = z.object({
     status:z.literal('needs-clarification'),evidenceVerification:verificationSchema})).max(10).optional(),
   error: z.object({code: z.string(), message: z.string()}).nullable(),
   taskReview:taskReviewSchema.optional(),
-  coverage:z.object({state:z.enum(['preview','complete','partial','failed']),selectedPaths:z.array(z.string()),
+  coverage:z.object({referencePaths:z.array(z.string()).optional(),validReferencePaths:z.array(z.string()).optional(),state:z.enum(['preview','complete','partial','failed']),selectedPaths:z.array(z.string()),
     validResponsePaths:z.array(z.string()),failedResponsePaths:z.array(z.string()),
     skippedPaths:z.array(z.string()),matchedCandidates:z.number().int(),rejectedCandidates:z.number().int(),
     outOfScopeCandidates:z.number().int()}).optional(),

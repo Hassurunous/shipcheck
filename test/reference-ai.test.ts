@@ -1,5 +1,5 @@
 import {beforeEach,afterEach,expect,it,vi} from 'vitest';
-import {mkdtemp,writeFile,rm} from 'node:fs/promises';
+import {mkdtemp,writeFile,rm,mkdir} from 'node:fs/promises';
 import {tmpdir} from 'node:os';
 import {join} from 'node:path';
 import {reviewWithAi} from '../src/ai/review.js';
@@ -93,3 +93,42 @@ it('rejects fabricated conflict excerpts rather than accepting their locations a
 });
 
 
+
+it('accounts for fresh reference context without claiming every repository file was reviewed',async()=>{
+  const report=await reviewWholeRepository(root,{execution:'mock',config});
+  expect(report.aiAudit?.referencePaths).toEqual(['spec.md']);
+  expect(report.aiAudit?.validReferencePaths).toEqual(['spec.md']);
+  expect(report.aiAudit?.skipped).not.toContainEqual(expect.objectContaining({path:'spec.md'}));
+  expect(report.aiAudit?.eligibleSourceState).toBe('complete');
+  expect(report.aiAudit?.repositoryFileCoverage).toBe('not-established');
+  expect(renderConsoleReport(report)).toContain('every repository file reviewed: NOT ESTABLISHED');
+  await writeFile(join(root,'image.png'),Buffer.from([0,1,2]));
+  const partial=await reviewWholeRepository(root,{execution:'mock',config});
+  expect(partial.aiAudit?.eligibleSourceState).toBe('complete');
+  expect(partial.aiAudit?.state).toBe('partial');
+  expect(partial.aiAudit?.skipped).toContainEqual(expect.objectContaining({path:'image.png'}));
+});
+it('keeps source selection omissions as provenance but removes fresh references from effective omissions',async()=>{
+  const report=await reviewWithAi(root,{execution:'mock',config},{apiKey:'fixture',transport:async()=>response([])});
+  expect(report.ai?.preview.skipped).toContainEqual({path:'spec.md',reason:'excluded-or-not-source'});
+  expect(report.ai?.coverage).toMatchObject({state:'complete',skippedPaths:[],validReferencePaths:['spec.md']});
+  expect(report.auditSummary?.stages.find(s=>s.id==='ai')?.omitted).toEqual([]);
+});
+
+it('accounts for explicitly supplied hidden-folder files without automatically selecting them',async()=>{
+  await mkdir(join(root,'.storybook'));
+  await writeFile(join(root,'.storybook/main.ts'),'export default {};');
+  const configured={...config,resources:[...config.resources,{id:'storybook',path:'.storybook/main.ts',appliesTo:['.storybook/main.ts']}]};
+  const report=await reviewWholeRepository(root,{execution:'mock',config:configured});
+  expect(report.aiAudit?.validReferencePaths).toContain('.storybook/main.ts');
+  expect(report.aiAudit?.skipped.some(file=>file.path==='.storybook/main.ts')).toBe(false);
+  expect(report.aiAudit?.batches[0]?.preview.files.some(file=>file.path==='.storybook/main.ts')).toBe(false);
+});
+it('excludes changed references from valid response coverage even without citations',async()=>{
+  const report=await reviewWithAi(root,{execution:'mock',config},{apiKey:'fixture',transport:async()=>{
+    await writeFile(join(root,'spec.md'),'changed');return response([]);
+  }});
+  expect(report.ai?.coverage?.validReferencePaths).toEqual([]);
+  expect(report.ai?.coverage?.validResponsePaths).not.toContain('spec.md');
+  expect(report.ai?.coverage?.skippedPaths).toContain('spec.md');
+});

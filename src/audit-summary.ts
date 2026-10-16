@@ -79,9 +79,10 @@ export function summarizeAudit(report:Report,options:Options={}):AuditSummary {
     status==='preview'?'Input selection only. No model was consulted.':status==='mock'?'Synthetic offline responses exercised the pipeline; no AI diagnosis was performed.':status==='injected'?'Caller-supplied transport; no live-provider execution is established.':
     status==='not-requested'?'AI review was not requested.':status==='blocked'?'Required reference failures prevented AI review.':status==='skipped'?'No AI batches ran; no eligible source was assessed.':'See AI results for completed responses, failures and coverage gaps.',
     unique(batches.filter(b=>(b.execution==='live' || b.execution==='codex') && b.status==='completed').flatMap(b=>b.coverage?.validResponsePaths ?? [])),report.aiAudit?'repository':'selected-paths');
-  ai.selectedFiles=unique(report.aiAudit?.selectedPaths ?? batches.flatMap(b=>b.preview.files.map(f=>f.path)));
-  ai.omitted=report.aiAudit?.skipped ?? batches.flatMap(b=>b.preview.skipped);
-  ai.limitations=['A valid response or matched citation does not prove a diagnosis or whole-repository correctness.',
+  ai.selectedFiles=unique(report.aiAudit?.selectedPaths ?? batches.flatMap(b=>b.coverage?.selectedPaths ?? b.preview.files.map(f=>f.path)));
+  ai.omitted=report.aiAudit?.skipped ?? batches.flatMap(b=>b.preview.skipped.filter(file=>b.coverage?.skippedPaths.includes(file.path) ?? true));
+  ai.limitations=['Source eligibility is bounded by extensions, paths and ignore policies. References are additional supplied context; not every repository file was reviewed.',
+    'A valid response or matched citation does not prove a diagnosis or whole-repository correctness.',
     ...batches.flatMap(b=>[...(b.error?[b.error.code+': '+b.error.message]:[]),...(b.coverage?.state==='partial'?['A batch has partial coverage; inspect detailed AI evidence and freshness results.']:[])])];stages.push(ai);
   const task=report.currentTask;
   const taskReview=report.ai?.taskReview;

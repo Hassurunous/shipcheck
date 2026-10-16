@@ -1,3 +1,4 @@
+import {referenceCoverage,suppliedLocalPaths} from './context-coverage.js';
 import {requestCodexQa} from './codex.js';
 import {verifyExecutionClaims} from './verify-execution.js';
 import {planAnalysisContext,type AnalysisResults} from './analysis-context.js';
@@ -85,7 +86,7 @@ export async function reviewWithAi(target = '.', options: AiReviewOptions = {exe
     // Heuristic only, not a billing quote or token cap. Includes prompt/schema overhead.
     result.estimatedInputTokens = Math.ceil(result.requestBytes / 3);
     if (options.execution !== 'preview') {
-      if (context.files.length === 0) throw new AiFailure('empty-context','No eligible source files were selected.');
+      if (context.files.length === 0 && !task?.files.some(path=>suppliedLocalPaths(context).includes(path))) throw new AiFailure('empty-context','No eligible source files were selected.');
       if (injected && !plannedModel) throw new AiFailure('missing-model','Select a model mapping before using an injected client.');
       let output;
       if (execution === 'codex') {
@@ -114,11 +115,13 @@ export async function reviewWithAi(target = '.', options: AiReviewOptions = {exe
         if(!unchanged)result.preview.limited=true;
       }
       if(context.references) {
-        try { current.references=(await loadReferenceResources(profile.root,config,context.files.map(file=>file.path),options.referenceAccess)).snapshots; }
+        try { current.references=(await loadReferenceResources(profile.root,config,[...context.files.map(file=>file.path),...(context.preview.requestedPaths ?? [])],options.referenceAccess)).snapshots; }
         catch { current.references=[]; }
         for(const reference of context.references) {
           const fresh=current.references.find(item=>item.record.id===reference.record.id);
-          const unchanged=fresh?.record.sha256===reference.record.sha256 && fresh?.content===reference.content;
+          const unchanged=fresh?.record.status==='loaded' && fresh.record.sha256===reference.record.sha256 && fresh.content===reference.content
+            && fresh.record.path===reference.record.path && fresh.record.version===reference.record.version
+            && fresh.record.authority===reference.record.authority && JSON.stringify(fresh.record.origin)===JSON.stringify(reference.record.origin);
           const metadata=result.preview.references?.find(item=>item.id===reference.record.id);
           if(metadata)metadata.freshness=unchanged?'unchanged':'changed-or-unavailable';
           if(!unchanged)result.preview.limited=true;
@@ -153,12 +156,16 @@ export async function reviewWithAi(target = '.', options: AiReviewOptions = {exe
     result.error = error instanceof AiFailure ? {code:error.code,message:error.message}
       : {code:'context-error',message:'AI context could not be prepared. Deterministic results are preserved.'};
   }
-  const selectedPaths=result.preview.files.map(file=>file.path);
+  const referencePaths=referenceCoverage(result.preview);
+  const validReferencePaths=result.status==='completed'?referenceCoverage(result.preview,true):[];
+  const selectedPaths=[...new Set([...result.preview.files.map(file=>file.path),...referencePaths])];
+  const coveredReferences=new Set(result.status==='preview'?referencePaths:validReferencePaths);
+  const skippedPaths=result.preview.skipped.filter(file=>!coveredReferences.has(file.path)).map(file=>file.path);
   const rejectedCandidates=result.candidates.filter(candidate=>candidate.evidenceVerification?.status!=='matched').length;
   result.coverage={state:result.status==='failed'?'failed':result.status==='preview'?'preview':
-    result.candidates.some(candidate=>['contradicted','unknown'].includes(candidate.executionVerification?.status ?? '')) || result.preview.limited || result.preview.skipped.length>0 || rejectedCandidates>0 || (result.taskReview && result.taskReview.state!=='assessed') || (result.referenceConflicts?.length ?? 0)>0 || (result.coverage?.outOfScopeCandidates ?? 0)>0?'partial':'complete',
-    selectedPaths,validResponsePaths:result.status==='completed'?selectedPaths:[],
-    failedResponsePaths:result.status==='failed'?selectedPaths:[],skippedPaths:result.preview.skipped.map(file=>file.path),
+    result.candidates.some(candidate=>['contradicted','unknown'].includes(candidate.executionVerification?.status ?? '')) || result.preview.limited || skippedPaths.length>0 || rejectedCandidates>0 || (result.taskReview && result.taskReview.state!=='assessed') || (result.referenceConflicts?.length ?? 0)>0 || (result.coverage?.outOfScopeCandidates ?? 0)>0?'partial':'complete',
+    selectedPaths,referencePaths,validReferencePaths,validResponsePaths:result.status==='completed'?[...result.preview.files.filter(file=>file.freshness==='unchanged').map(file=>file.path),...validReferencePaths]:[],
+    failedResponsePaths:result.status==='failed'?selectedPaths:[],skippedPaths,
     matchedCandidates:result.candidates.length-rejectedCandidates,rejectedCandidates,
     outOfScopeCandidates:result.coverage?.outOfScopeCandidates ?? 0};
   const completed=reportSchema.parse({...report,ai:aiResultSchema.parse(result)});

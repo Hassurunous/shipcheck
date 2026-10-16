@@ -172,3 +172,32 @@ Optional `checks[].required: true` means a skipped check makes a CLI workflow
 incomplete (exit 2), without authorizing execution. Status remains `skipped` to
 preserve the actual execution fact. Diagnostics can now have `tool: "pyright"`.
 `python-types` is a separate opt-in quality preset. See [P23](P23_OFFLINE_CHECKS.md).
+
+## Reference-aware AI coverage
+
+Local reference snapshots can supply explicitly named task files, including CSS
+and hidden-folder configuration, without expanding automatic source eligibility.
+Supporting task assessments require all task files to be supplied and unchanged
+through either source selection or local reference snapshots. Citations still
+require exact quotations; coverage is not a judgment of semantic correctness.
+Missing, excluded, oversized, context-limited or changed references do not satisfy
+this requirement. References are never silently truncated. External references
+retain virtual identities and cannot stand in for same-named local task files.
+
+`ai.coverage.referencePaths` records supplied local reference paths;
+`validReferencePaths` records those included in completed responses and verified
+unchanged afterward. `selectedPaths` and `validResponsePaths` include their union
+with source paths. `preview.skipped` remains source-selection provenance;
+`coverage.skippedPaths` is the effective omission list after reference accounting.
+Reference-only general defect candidates still require affected selected-source
+evidence; task assessments can cite supplied local task references directly.
+
+Whole-repository reports expose these reference fields plus `eligibleSourcePaths`
+and `eligibleSourceState`: response coverage for automatically eligible source
+files in the inspected inventory. `repositoryFileCoverage` is always
+`not-established`: ignored trees are not fully enumerated, and binary or other
+unsupported files can remain unreviewed. Preview/mock/injected execution labels
+still apply; synthetic or supplied responses do not establish actual AI review.
+Complete response coverage never establishes dependency security, physical-device
+behavior, accessibility, or general correctness. Existing inspection warnings
+remain visible. CSS/HTML automatic source selection remains a separate follow-up.

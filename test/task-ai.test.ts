@@ -84,3 +84,30 @@ it('exercises legacy task-file assessments without changing the original format'
   expect(report.currentTask).toMatchObject({source:'task-file',assessment:'not-assessed',requirements:[{id:'criterion-1',status:'insufficient-evidence'}]});
   expect(report.ai?.taskReview?.freshness).toBe('unchanged');
 });
+
+it('accepts fresh local reference task files, including reference-only stylesheet tasks',async()=>{
+  await writeFile(join(root,'style.css'),'.counter { color: red; }');
+  for(const files of [['fee.ts','style.css'],['style.css']]) {
+    const selected={...task,files};
+    const report=await run(async request=>{
+      expect(JSON.parse(request.input[0]!.content).referenceFiles[0].path).toBe('style.css');
+      return response([{...assessment,status:'supporting-evidence',evidence:[{path:'style.css',startLine:1,endLine:1,excerpt:'color: red;'}]}],{referenceConflicts:[]});
+    },{task:selected,reloadTask:async()=>selected,config:{resources:[{id:'css',path:'style.css',appliesTo:['style.css']}],ai:{models:{'low-cost':'fixture'}}}});
+    expect(report.ai?.status).toBe('completed');
+    expect(report.ai?.taskReview?.assessments[0]).toMatchObject({status:'supporting-evidence',evidenceVerification:{status:'matched'}});
+    expect(report.ai?.coverage).toMatchObject({state:'complete',referencePaths:['style.css'],validReferencePaths:['style.css'],skippedPaths:[]});
+  }
+});
+it.each(['missing','excluded','oversized','changed','context-limit'])('does not count %s reference task content as complete',async condition=>{
+  await writeFile(join(root,'style.css'),condition==='oversized'?'x'.repeat(65537):condition==='context-limit'?'x'.repeat(1000):'.counter { color: red; }');
+  if(condition==='missing')await rm(join(root,'style.css'));
+  const selected={...task,files:['fee.ts','style.css']};
+  const report=await run(async()=>{
+    if(condition==='changed')await writeFile(join(root,'style.css'),'changed');
+    return response([{...assessment,status:'supporting-evidence'}],{referenceConflicts:[]});
+  },{task:selected,reloadTask:async()=>selected,config:{exclude:condition==='excluded'?['style.css']:[],
+    resources:[{id:'css',path:'style.css',required:false}],ai:{models:{'low-cost':'fixture'},...(condition==='context-limit'?{maxContextBytes:800}:{})}}});
+  expect(report.ai?.coverage?.state).not.toBe('complete');
+  expect(report.ai?.coverage?.validReferencePaths).not.toContain('style.css');
+  expect(report.ai?.taskReview?.assessments[0]?.status).toBe('insufficient-evidence');
+});

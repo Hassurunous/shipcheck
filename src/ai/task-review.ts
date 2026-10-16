@@ -1,3 +1,4 @@
+import {freshLocalPath} from './context-coverage.js';
 import {describeCurrentTask,type CurrentTask} from '../task-file.js';
 import {taskReviewSchema,type AiResult,type QaOutput} from './contracts.js';
 import type {AiContext} from './context.js';
@@ -27,9 +28,8 @@ export function finishTaskReview(task:CurrentTask,output:QaOutput,submitted:AiCo
       status='insufficient-evidence';explanation=(synthetic?'Synthetic mock; no real assessment. ':'Evidence could not be verified. ')+explanation;
     } else if(assessment.evidence.some(item=>conflictedPaths.has(item.path))) {
       status='needs-clarification';explanation='Cites a disputed reference. '+explanation;
-    } else if(status==='supporting-evidence' && (task.files.some(path=>!submitted.files.some(file=>file.path===path))
-      || task.files.some(path=>current.files.find(file=>file.path===path)?.content!==submitted.files.find(file=>file.path===path)?.content)
-      || submitted.preview.dependencies?.some(item=>item.status!=='included')
+    } else if(status==='supporting-evidence' && (task.files.some(path=>!freshLocalPath(path,submitted,current))
+      || submitted.preview.dependencies?.some(item=>item.status!=='included' && (!item.path || !freshLocalPath(item.path,submitted,current)))
       || submitted.preview.references?.some(item=>!['included','not-applicable'].includes(item.status) || item.freshness==='changed-or-unavailable'))) {
       status='insufficient-evidence';explanation='Selected task files or applicable reference context are incomplete or changed. '+explanation;
     }

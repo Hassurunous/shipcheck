@@ -6,7 +6,7 @@ import type {ReferenceAccess} from '../reference-access.js';
 /** Fill remaining context space with complete references, never silently truncate. */
 export async function attachReferences(root:string,config:Config,context:AiContext,access:ReferenceAccess={}) {
   if(!config.resources.length)return;
-  const loaded=await loadReferenceResources(root,config,context.files.map(file=>file.path),access);
+  const loaded=await loadReferenceResources(root,config,[...context.files.map(file=>file.path),...(context.preview.requestedPaths ?? [])],access);
   context.references=[];
   context.preview.references=[];
   let blocked=false;

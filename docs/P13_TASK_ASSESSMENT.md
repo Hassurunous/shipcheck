@@ -94,3 +94,12 @@ post-check mutation and legacy compatibility. [P13 evaluation](P13_EVALUATION.md
 records five live fixtures and reproducible scoring. [P18 qualification](P18_QUALIFICATION.md)
 adds a supervised developer loop and adversarial fixtures. Neither evaluation
 establishes broad diagnosis accuracy or autonomous-agent effectiveness.
+
+## Reference-aware AI coverage
+
+`ai/context-coverage.ts` shares local source/reference task completeness checks.
+Fresh local reference snapshots can satisfy explicitly named task files, including
+CSS and hidden-folder configuration. Missing or changed context still prevents
+supporting assessments. Source selection remains bounded and unchanged.
+See [reference coverage fields and limits](REPORT_CONTRACT.md#reference-aware-ai-coverage)
+for source-selection provenance, effective omissions, and repository coverage.
