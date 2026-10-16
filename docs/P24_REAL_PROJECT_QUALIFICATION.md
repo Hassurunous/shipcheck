@@ -82,8 +82,10 @@ Qualification record validation and scoring are implemented. The owner-selected
 One supervised icon-repair trial is complete: baseline failed, a separate
 developer task repaired the public assets, and its audit plus the supervisor's
 independent rerun passed. Historical corpus evaluation remains pending. Unit
-tests of scoring establish bookkeeping behavior, not audit accuracy. No P24
-live calls or API spending have occurred.
+tests of scoring establish bookkeeping behavior, not audit accuracy. The subsequent
+[poison discovery comparison](P24_POISON_PILOT.md) used six authorized live calls
+without project-test context: two of three seeded defects retained citation-matched
+task violations, while citation failures and mixed claims limit the result.
 
 ## Agent-led configuration follow-up
 

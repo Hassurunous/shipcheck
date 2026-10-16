@@ -144,3 +144,69 @@ the frozen external oracle and exact code, including findings on controls.
 Count a defect as detected only when a finding correctly identifies its behavioral
 failure, not merely because the process returns nonzero. Report misses, false
 claims and incomplete executions separately. The supervisor remains unblinded.
+
+## Discovery experiment results — October 16, 2026
+
+The follow-up was executed after the user authorized up to $1. The offline arm
+disabled all external checks equally and retained the same source variants.
+Built-in rules reported no findings in all six cases: 0/3 seeded bugs detected.
+All reports retained the four binary warnings. An initial sandbox subprocess
+failure was preserved as `offline-1`; `offline-2` completed with execution
+permission. No detector or source was tuned between attempts.
+
+The live arm used the real `task --ai live` CLI, low-cost `gpt-6-luna`, with one
+call per variant and no retries. Neutral case names were used; the model received
+only `src/LifeTracker.tsx`, `src/poison.ts`, and identical requirements. Tests were
+excluded, no project checks ran, no test failures were supplied, and the external
+oracle and variant labels were withheld. Previews confirmed both implementation
+files fit without omissions and source hashes remained unchanged after each call.
+This is requirements-assisted task review, not an unassisted whole-repository
+audit. The defect class was known to the supervisor; the evaluation is non-blind.
+
+| Case | Variant | Seeded-defect assessment |
+| --- | --- | --- |
+| 1 | Comment control | No poison defect claim; additional life claim rejected |
+| 2 | Wrong player | Correct potential violations of updates/isolation, citations matched |
+| 3 | Baseline control | No poison defect claim; additional life claim rejected |
+| 4 | Suppressed decrement | Correct diagnosis proposed; citation rejected, downgraded to insufficient evidence |
+| 5 | Equivalent floor | No violation proposed; supporting assessments had rejected citations |
+| 6 | Removed floor | Correct updates violation with matched citation; separate floor assessment citation rejected |
+
+The model described all three seeded failures correctly without project-test
+diagnostics. Only 2/3 retained at least one citation-matched potential violation.
+The remaining diagnosis quoted through a closing brace on line 13 while declaring
+lines 7–12. Multiple supporting assessments also had line-range/excerpt mismatches.
+These are real evidence-quality failures; rejected output is not promoted to a
+verified detection. Exact citation matching is not semantic proof.
+
+All six runs returned **review completed — exit 0**, despite two reports retaining
+potential task violations. The CLI currently gates deterministic errors and
+execution failures, not task assessments. Top-level `findings` was empty in every
+case; the defects appear in `ai.taskReview.assessments`. Agents must inspect that
+field and coverage, not infer approval from exit 0 or an empty findings list.
+This is a practical integration gap for a future explicit task-gating policy.
+
+Cases 1 and 3 proposed a general life-counter warning and an isolation violation.
+Both cited mismatching ranges and were rejected. The claim combines a real
+existing state-mutation problem with an unsupported lost-update explanation.
+A supervisor probe extracted the actual life-handler body and invoked it twice
+against the same captured state: both increments accumulated to 42, while the
+prior snapshot was indeed mutated. That contradicts the stated lost-update
+mechanism in this scenario; it is not a full React concurrency proof. Treat these
+as mixed/partly incorrect claims, not confirmed bugs or clean control passes.
+No accepted false poison-violation claim appeared, but these controls do not
+establish a general false-positive rate. All control task reviews remained partial.
+
+Raw previews, frozen configuration/mapping, exact reports, captures and the
+life-claim probe are retained under `.release-check/p24/poison-discovery/`.
+The budget `p24-poison-discovery-20261016` completed six requests with no unresolved
+attempts: $0.037500 permanently reserved; $0.004754 priced usage upper bound (not
+an invoice); $0.962500 allowance remaining. Rates were checked against the
+[official model documentation](https://developers.openai.com/api/docs/models/gpt-6-luna).
+No further spending was needed for this comparison.
+
+Recommended follow-ups: improve citation reliability without accepting ambiguous
+evidence; define explicit task-violation/uncertainty gating; add regression cases
+for the misleading life-update claim; then test new defects with passing project
+tests across additional repositories. Keep this frozen trial unchanged when
+evaluating improvements.
