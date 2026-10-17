@@ -1,4 +1,4 @@
-import {referenceCoverage,suppliedLocalPaths} from './context-coverage.js';
+import {referenceCoverage,suppliedLocalPaths,reconcileContextCoverage} from './context-coverage.js';
 import {requestCodexQa} from './codex.js';
 import {verifyExecutionClaims} from './verify-execution.js';
 import {planAnalysisContext,type AnalysisResults} from './analysis-context.js';
@@ -81,6 +81,7 @@ export async function reviewWithAi(target = '.', options: AiReviewOptions = {exe
     const referencesBlocked=await attachReferences(profile.root,{...config,ai:sourceSettings},context,options.referenceAccess);
     context.preview.serializedBytes+=taskBytes+analysisBytes;
     if(referencesBlocked)throw new AiFailure('reference-context','A required applicable reference is unavailable, ambiguous, or exceeds remaining context space. No request was sent.');
+    reconcileContextCoverage(context.preview,false);
     const request = buildRequest(context,config.ai,model ?? 'MODEL_NOT_SELECTED');
     result.requestBytes = Buffer.byteLength(JSON.stringify(request));
     // Heuristic only, not a billing quote or token cap. Includes prompt/schema overhead.
@@ -156,6 +157,7 @@ export async function reviewWithAi(target = '.', options: AiReviewOptions = {exe
     result.error = error instanceof AiFailure ? {code:error.code,message:error.message}
       : {code:'context-error',message:'AI context could not be prepared. Deterministic results are preserved.'};
   }
+  reconcileContextCoverage(result.preview,result.status!=='preview');
   const referencePaths=referenceCoverage(result.preview);
   const validReferencePaths=result.status==='completed'?referenceCoverage(result.preview,true):[];
   const selectedPaths=[...new Set([...result.preview.files.map(file=>file.path),...referencePaths])];

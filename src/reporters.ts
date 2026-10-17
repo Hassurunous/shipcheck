@@ -152,8 +152,9 @@ export function renderConsoleReport(input: Report): string {
     for(const reference of ai.preview.references ?? [])lines.push(`  Reference [${text(reference.status)}]: ${text(reference.id)} — ${text(reference.path)}; SHA256: ${reference.sha256 ?? 'unavailable'}; freshness: ${reference.freshness ?? 'not-rechecked'}`);
     for (const skipped of ai.preview.skipped) lines.push(`  Skipped: ${text(skipped.path)} — ${text(skipped.reason)}`);
     for (const path of ai.preview.supportingPaths ?? []) lines.push(`  Supporting context: ${text(path)}`);
-    for (const dependency of ai.preview.dependencies ?? []) if(dependency.status!=='included')
-      lines.push(`  Missing dependency context: ${text(dependency.from)} -> ${text(dependency.specifier)} (${dependency.status})`);
+    for (const dependency of ai.preview.dependencies ?? []) if((dependency.effectiveStatus ?? dependency.status)!=='included')
+      lines.push(`  Missing dependency context: ${text(dependency.from)} -> ${text(dependency.specifier)} (${dependency.effectiveStatus ?? dependency.status})`);
+    for(const limitation of ai.preview.limitations ?? [])lines.push(`  Context limitation [${limitation.kind}]: ${text(limitation.path ?? '(context)')} � ${text(limitation.reason)}`);
     lines.push(`Request size: ${ai.requestBytes} bytes; approximate input tokens: ${ai.estimatedInputTokens} (heuristic)`,
       ai.execution === 'codex' ? 'Codex output capped at 128 KiB; subscription limits apply; no Shipcheck retries.' : `Output limit: ${ai.maxOutputTokens} tokens; retries: 0`,
       ai.execution === 'live' ? ai.budget ? `Live budget: ${text(ai.budget.name)}; persistent reservations; no retries.`

@@ -20,7 +20,7 @@ export function buildRequest(context: AiContext, settings: AiSettings, model: st
         numberedLines:content.split(/\r\n|\n|\r/).map((text,index)=>({line:index+1,text}))})),referenceCoverage:context.preview.references}:{}),
       ...(context.analysis?{analysisResults:context.analysis}:{}),
       ...(context.task?{currentTask:context.task}:{}),
-      lineNumbering:'explicit-one-based', focusPaths:context.preview.requestedPaths ?? context.files.map(file=>file.path), missingDependencies:(context.preview.dependencies ?? []).filter(dependency=>dependency.status!=='included')})}],
+      lineNumbering:'explicit-one-based', focusPaths:context.preview.requestedPaths ?? context.files.map(file=>file.path), missingDependencies:(context.preview.dependencies ?? []).filter(dependency=>(dependency.effectiveStatus ?? dependency.status)!=='included')})}],
     text:{format:{type:'json_schema' as const, name:'shipcheck_qa_candidates', strict:true, schema:responseSchema}},
   };
 }

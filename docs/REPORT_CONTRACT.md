@@ -201,3 +201,21 @@ still apply; synthetic or supplied responses do not establish actual AI review.
 Complete response coverage never establishes dependency security, physical-device
 behavior, accessibility, or general correctness. Existing inspection warnings
 remain visible. CSS/HTML automatic source selection remains a separate follow-up.
+
+### Effective dependency context
+
+Dependency `status` and `preview.skipped` preserve original source-collection
+history. Additive `effectiveStatus` and `suppliedVia` (`source` or
+`local-reference`) describe reconciled context. Before a request, included
+references resolve matching dependency omissions in the prompt; after a response,
+only unchanged local snapshots can do so. External reference identities cannot
+substitute for local dependencies. Console missing-dependency messages use the
+effective status, with the original omission retained in JSON and source history.
+
+`preview.limitations` lists remaining source, dependency, reference and analysis
+context gaps; `preview.limited` is derived from that list. References only resolve
+omissions for their own exact path. Unrelated omitted/filtered analysis, missing
+imports, size limits and changed content remain limitations. This is context
+accounting: conflicts, rejected evidence, uncertain task assessments and response
+failures independently keep aggregate coverage partial or failed, even when the
+context limitation list is empty. Preview does not establish response freshness.

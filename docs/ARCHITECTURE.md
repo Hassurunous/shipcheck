@@ -438,3 +438,9 @@ CSS and hidden-folder configuration. Missing or changed context still prevents
 supporting assessments. Source selection remains bounded and unchanged.
 See [reference coverage fields and limits](REPORT_CONTRACT.md#reference-aware-ai-coverage)
 for source-selection provenance, effective omissions, and repository coverage.
+
+Context coverage is reconciled before request construction and after freshness
+verification. Explicit remaining context limitations derive the final limited
+flag; dependency collection history is retained separately from effective source
+or local-reference inclusion. Response/evidence failures remain independent
+aggregate coverage gates.

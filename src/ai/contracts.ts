@@ -67,6 +67,7 @@ export const contextPreviewSchema = z.object({
   skipped: z.array(z.object({path: z.string(), reason: z.string()})),
   serializedBytes: z.number().int().nonnegative(),
   limited: z.boolean(),
+  limitations:z.array(z.object({kind:z.enum(['source','dependency','reference','analysis']),path:z.string().optional(),reason:z.string()})).optional(),
   analysis:z.object({bytes:z.number().int().nonnegative(),sha256:z.string(),records:z.number().int().nonnegative(),
     omittedRecords:z.number().int().nonnegative(),filtered:z.boolean(),freshness:z.literal('not-revalidated')}).optional(),
   task:z.object({id:z.string(),sha256:z.string(),bytes:z.number().int(),requirementIds:z.array(z.string())}).optional(),
@@ -75,6 +76,7 @@ export const contextPreviewSchema = z.object({
   requestedPaths:z.array(z.string()).optional(),
   supportingPaths:z.array(z.string()).optional(),
   dependencies:z.array(z.object({from:z.string(),specifier:z.string(),path:z.string().nullable(),
+    effectiveStatus:z.enum(['included','unresolved','omitted']).optional(),suppliedVia:z.enum(['source','local-reference']).optional(),
     status:z.enum(['included','unresolved','omitted'])})).optional(),
 });
 export const aiResultSchema = z.object({

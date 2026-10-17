@@ -18,3 +18,32 @@ export function referenceCoverage(preview:AiResult['preview'],freshOnly=false):s
   return [...new Set((preview.references ?? []).filter(ref=>ref.status==='included'
     && !ref.path.startsWith('@references/') && (!freshOnly || ref.freshness==='unchanged')).map(ref=>ref.path))];
 }
+
+/** Reconcile effective context without erasing source-collection provenance. */
+export function reconcileContextCoverage(preview:AiResult['preview'],freshOnly:boolean) {
+  const references=new Set(referenceCoverage(preview,freshOnly));
+  const sources=new Set(preview.files.filter(file=>!freshOnly || file.freshness==='unchanged').map(file=>file.path));
+  const limitations:NonNullable<AiResult['preview']['limitations']>=[];
+  for(const dependency of preview.dependencies ?? []) {
+    const via=dependency.path && sources.has(dependency.path)?'source':dependency.path && references.has(dependency.path)?'local-reference':undefined;
+    dependency.effectiveStatus=via?'included':dependency.status==='unresolved'?'unresolved':'omitted';
+    if(via)dependency.suppliedVia=via;
+    else {
+      delete dependency.suppliedVia;
+      limitations.push({kind:'dependency',path:dependency.path ?? dependency.from,reason:dependency.specifier+': '+dependency.effectiveStatus});
+    }
+  }
+  for(const file of preview.skipped)if(!references.has(file.path))
+    limitations.push({kind:'source',path:file.path,reason:file.reason});
+  for(const file of preview.files)if(file.freshness==='changed-or-unavailable')
+    limitations.push({kind:'source',path:file.path,reason:'changed-or-unavailable'});
+  for(const ref of preview.references ?? []) {
+    if(!['included','not-applicable'].includes(ref.status))limitations.push({kind:'reference',path:ref.path,reason:ref.status});
+    else if(ref.freshness==='changed-or-unavailable')limitations.push({kind:'reference',path:ref.path,reason:'changed-or-unavailable'});
+  }
+  const analysis=preview.analysis;
+  if(analysis && (analysis.omittedRecords>0 || analysis.filtered || analysis.bytes===0))
+    limitations.push({kind:'analysis',reason:'Analysis context was omitted or filtered.'});
+  preview.limitations=limitations;
+  preview.limited=limitations.length>0;
+}
