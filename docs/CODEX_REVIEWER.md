@@ -87,3 +87,15 @@ These are integration smoke tests, not general accuracy measurements.
 
 Official references: [authentication](https://learn.chatgpt.com/docs/auth) and
 [non-interactive Codex](https://learn.chatgpt.com/docs/non-interactive-mode).
+
+## Quotation transport
+
+Codex receives the serialized source/reference context directly, without an
+additional JSON-string wrapper around the message array. Shared reviewer
+instructions distinguish original text from JSON escaping and ask for response
+escaping exactly once. Response parsing and exact-quotation validation are
+unchanged: an extra or missing literal backslash is still rejected, for both
+source and reference evidence. No automatic unescaping, citation repair, or retry
+is performed. This removes an avoidable prompt ambiguity; it cannot guarantee
+that a model will quote correctly. Invalid evidence remains a review limitation,
+not evidence that application code needs to change.

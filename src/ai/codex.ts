@@ -62,10 +62,12 @@ export async function requestCodexQa(request:QaRequest,context:AiContext,timeout
       throw new AiFailure('codex-auth','Codex requires ChatGPT subscription login. Run codex login yourself; API-key login is not accepted.');
     const schema=join(scratch,'response-schema.json'),output=join(scratch,'response.json');
     await writeFile(schema,JSON.stringify(request.text.format.schema),{flag:'wx',mode:0o600});
+    // content already contains serialized context. Re-encoding the message array
+    // adds another escape layer that the reviewer can mistake for source text.
     const result=await run(binary,['exec','--ignore-user-config','--ignore-rules','--ephemeral',
       '--skip-git-repo-check','--sandbox','read-only',...codexRestrictions,
       '--model',request.model,'--output-schema',schema,'--output-last-message',output,'-'],
-      scratch,env,timeoutMs,request.instructions+'\nUse only the supplied context. Do not use tools.\n'+JSON.stringify(request.input));
+      scratch,env,timeoutMs,request.instructions+'\nUse only the supplied context. Do not use tools.\n'+request.input.map(message=>message.content).join('\n'));
     if(result.code!==0)throw new AiFailure('codex-failed','Codex review failed or subscription access was unavailable. No retry or API fallback was attempted.');
     let body:string;
     try {

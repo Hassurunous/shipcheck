@@ -6,6 +6,7 @@ import {join} from 'node:path';
 import {tmpdir} from 'node:os';
 import {spawn} from 'node:child_process';
 import {requestCodexQa,codexEnvironment} from '../src/ai/codex.js';
+import {currentTaskSchema} from '../src/task-file.js';
 import {buildRequest} from '../src/ai/client.js';
 import {aiSettingsSchema} from '../src/ai/contracts.js';
 import {runCli} from '../src/cli-command.js';
@@ -88,3 +89,35 @@ it('stops whole-repository batches at subscription failure and preserves determi
   expect(calls).toHaveLength(2);expect(fetch).not.toHaveBeenCalled();
 });
 
+
+it.each([
+  String.raw`text.replace(/Life: \d+/g, '')`,
+  String.raw`const path = "C:\\temp\\file";`,
+  String.raw`const message = "say \"hello\"";`,
+])('sends a single JSON context layer and preserves exact quotation: %s',async source=>{
+  await writeFile(join(root,'a.ts'),source);
+  response=JSON.stringify({candidates:[{title:'Example',severity:'warning',explanation:'Fixture',suggestedAction:'Inspect',
+    evidence:[{path:'a.ts',startLine:1,endLine:1,excerpt:source}]}]});
+  const report=await reviewWithAi(root,{execution:'codex'});
+  const separator='Use only the supplied context. Do not use tools.\n';
+  const payload=calls[1]!.input.split(separator)[1]!;
+  const submitted=JSON.parse(payload);
+  expect(submitted.sourceFiles[0].numberedLines[0].text).toBe(source);
+  expect(Array.isArray(submitted)).toBe(false);
+  expect(calls[1]!.input).toContain('Escape it exactly once');
+  expect(report.ai?.candidates[0]?.evidence[0]?.excerpt).toBe(source);
+  expect(report.ai?.candidates[0]?.evidenceVerification?.status).toBe('matched');
+});
+it.each([false,true])('preserves exact task quotation checks for doubled-backslash response: %s',async doubled=>{
+  const source=String.raw`text.replace(/Life: \d+/g, '')`;
+  const excerpt=doubled?String.raw`text.replace(/Life: \\d+/g, '')`:source;
+  await writeFile(join(root,'a.ts'),source);
+  const task=currentTaskSchema.parse({id:'regex',title:'Check tests',files:['a.ts'],requirements:[{id:'library-tests',text:'Strip life digits.'}]});
+  response=JSON.stringify({candidates:[],taskAssessments:[{requirementId:'library-tests',status:'supporting-evidence',explanation:'Fixture',relatedRequirementIds:[],
+    evidence:[{path:'a.ts',startLine:1,endLine:1,excerpt}]}]});
+  const report=await reviewWithAi(root,{execution:'codex',task,reloadTask:async()=>task});
+  const assessment=report.ai?.taskReview?.assessments[0];
+  expect(assessment?.evidence[0]?.excerpt).toBe(excerpt);
+  expect(assessment?.status).toBe(doubled?'insufficient-evidence':'supporting-evidence');
+  expect(assessment?.evidenceVerification?.checks[0]?.reason).toBe(doubled?'excerpt-mismatch':'exact-quotation-match');
+});

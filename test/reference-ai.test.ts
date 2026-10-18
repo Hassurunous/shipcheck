@@ -132,3 +132,16 @@ it('excludes changed references from valid response coverage even without citati
   expect(report.ai?.coverage?.validResponsePaths).not.toContain('spec.md');
   expect(report.ai?.coverage?.skippedPaths).toContain('spec.md');
 });
+
+it.each([false,true])('keeps reference quotation backslashes exact through API decoding (altered: %s)',async altered=>{
+  const source=String.raw`/Life: \d+/g`;
+  const excerpt=altered?String.raw`/Life: \\d+/g`:source;
+  await writeFile(join(root,'spec.md'),source);
+  const report=await reviewWithAi(root,{execution:'mock',config},{apiKey:'offline-fixture',transport:async request=>{
+    expect(JSON.parse(request.input[0]!.content).referenceFiles[0].numberedLines[0].text).toBe(source);
+    expect(request.instructions).toContain('Escape it exactly once');
+    return response([{...candidate,evidence:[candidate.evidence[0],{path:'spec.md',startLine:1,endLine:1,excerpt}]}]);
+  }});
+  expect(report.ai?.candidates[0]?.evidence[1]?.excerpt).toBe(excerpt);
+  expect(report.ai?.candidates[0]?.evidenceVerification?.checks[1]?.reason).toBe(altered?'excerpt-mismatch':'exact-quotation-match');
+});
